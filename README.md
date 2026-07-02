@@ -47,8 +47,10 @@ npm test          # engine unit + property tests
 npm run build     # type-check + production build to dist/
 ```
 
-Deploys to GitHub Pages automatically on push to `main` (Settings → Pages →
-Source = "GitHub Actions", one-time).
+Hosting: Cloudflare Workers static assets — `npm run deploy` ships the app to
+https://cyberfit.dev, `npm run deploy:relay` ships the optional push relay to
+https://relay.cyberfit.dev. CI (GitHub Actions) runs tests + build on every
+push. See SELF-HOSTING.md to run your own relay.
 
 ## License
 

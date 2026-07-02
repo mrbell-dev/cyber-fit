@@ -1,0 +1,14 @@
+# The app itself: a Worker serving only static assets (the built PWA).
+# Asset requests are free on the Workers plan and don't count toward the
+# 100k/day request quota. Custom domains below are provisioned automatically
+# at deploy — DNS records and certs included.
+name = "cyber-fit"
+compatibility_date = "2026-06-01"
+
+[assets]
+directory = "./dist"
+
+routes = [
+  { pattern = "cyberfit.dev", custom_domain = true },
+  { pattern = "www.cyberfit.dev", custom_domain = true },
+]

@@ -1,21 +1,16 @@
-# Auto-deploy cyber-fit to GitHub Pages on every push to main.
-# One-time setup in the repo: Settings → Pages → Build and deployment → Source = "GitHub Actions".
-name: Deploy to GitHub Pages
+# CI: test + build on every push. Hosting is Cloudflare Workers static assets
+# (`npm run deploy`), not GitHub Pages.
+#
+# To let CI deploy too: create a Cloudflare API token (Workers Scripts: Edit),
+# add repo secrets CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID, and uncomment
+# the deploy step.
+name: CI
 
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-# Let a newer run cancel an in-progress one.
-concurrency:
-  group: pages
-  cancel-in-progress: true
 
 jobs:
   build:
@@ -24,25 +19,15 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
       - run: npm ci
       - run: npm test
       - run: npm run build
-        env:
-          # Public values (the VAPID *public* key is meant to be public).
-          VITE_RELAY_URL: https://relay.cyberfit.dev
-          VITE_VAPID_PUBLIC_KEY: BBqhDPwWBb2FDHxyQfoRjQG09vrMb0-HejQ48MNqSAkpsbJZprStfQIadXFw6BRVX_C81Rg00T4tpEb5NKNiVPc
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
+      - run: cd worker && npm ci --omit=dev && node test.mjs
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      # - name: Deploy to Cloudflare
+      #   run: npx wrangler deploy
+      #   env:
+      #     CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      #     CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
