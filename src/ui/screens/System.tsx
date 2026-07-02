@@ -1,9 +1,59 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../../db/db.ts";
 import type { Schedule } from "../../engine/index.ts";
 import { addHabit, archiveHabit, deleteHabit, saveSettings } from "../../db/repo.ts";
+import { downloadExport, exportJson, importJson } from "../../db/export.ts";
 import { useSettings } from "../hooks.ts";
+
+function DataVault() {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [message, setMessage] = useState<string | null>(null);
+
+  const doExport = async () => {
+    downloadExport(await exportJson());
+    setMessage("Backup exported.");
+  };
+
+  const doImport = async (file: File) => {
+    try {
+      await importJson(await file.text());
+      setMessage("Backup restored — player state rebuilt from logs.");
+    } catch (err) {
+      setMessage(`Import failed: ${err instanceof Error ? err.message : "unknown error"}`);
+    }
+  };
+
+  return (
+    <div className="card">
+      <h2 className="card-title">Data Vault</h2>
+      <div className="form-row">
+        <button className="btn" onClick={doExport}>
+          Export backup
+        </button>
+        <button className="btn ghost" onClick={() => fileRef.current?.click()}>
+          Import backup
+        </button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="application/json"
+          style={{ display: "none" }}
+          aria-label="Import backup file"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) doImport(f);
+            e.target.value = "";
+          }}
+        />
+      </div>
+      {message && <p className="placeholder">// {message}</p>}
+      <p className="placeholder">
+        // your entire vault as one JSON file — move devices, keep your own backups
+      </p>
+    </div>
+  );
+}
 
 const WEEKDAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 
@@ -176,6 +226,8 @@ export function System() {
           // logs before the rollover hour count as the previous day — night owls stay safe
         </p>
       </div>
+
+      <DataVault />
 
       <div className="card">
         <h2 className="card-title">Data Policy</h2>

@@ -9,9 +9,12 @@ import {
   type HabitLog,
   type MoodLog,
   type PlayerState,
+  type ReadingItem,
+  type ReadingLog,
   type Schedule,
   type Settings,
   type WaterLog,
+  type WorkoutLog,
 } from "../engine/index.ts";
 import { emitGrants } from "../ui/toast.ts";
 import { db } from "./db.ts";
@@ -24,16 +27,21 @@ const PLAYER_KEY = "player";
  * never drift), persist it, and announce any newly earned grants.
  */
 export async function refreshPlayer(): Promise<PlayerState> {
-  const [habits, habitLogs, waterLogs, moodLogs, settings, today, prevRow] = await Promise.all([
-    db.habits.toArray(),
-    db.habitLogs.toArray(),
-    db.waterLogs.toArray(),
-    db.moodLogs.toArray(),
-    getSettings(),
-    currentDayKey(),
-    db.kv.get(PLAYER_KEY),
-  ]);
-  const { state, grants } = rebuild({ habits, habitLogs, waterLogs, moodLogs, settings, today });
+  const [habits, habitLogs, waterLogs, moodLogs, workoutLogs, readingLogs, settings, today, prevRow] =
+    await Promise.all([
+      db.habits.toArray(),
+      db.habitLogs.toArray(),
+      db.waterLogs.toArray(),
+      db.moodLogs.toArray(),
+      db.workoutLogs.toArray(),
+      db.readingLogs.toArray(),
+      getSettings(),
+      currentDayKey(),
+      db.kv.get(PLAYER_KEY),
+    ]);
+  const { state, grants } = rebuild({
+    habits, habitLogs, waterLogs, moodLogs, workoutLogs, readingLogs, settings, today,
+  });
   await db.kv.put({ key: PLAYER_KEY, value: state });
 
   const prevKeys = new Set(((prevRow?.value as PlayerState | undefined)?.grantKeys) ?? []);
@@ -132,6 +140,68 @@ export async function logWater(ml: number, dayKey?: DayKey): Promise<WaterLog> {
     ml,
   };
   await db.waterLogs.add(entry);
+  await refreshPlayer();
+  return entry;
+}
+
+export async function logWorkout(input: {
+  name: string;
+  durationMin?: number;
+  note?: string;
+}): Promise<WorkoutLog> {
+  const entry: WorkoutLog = {
+    id: crypto.randomUUID(),
+    dayKey: await currentDayKey(),
+    ts: Date.now(),
+    name: input.name.trim(),
+    ...(input.durationMin ? { durationMin: input.durationMin } : {}),
+    ...(input.note?.trim() ? { note: input.note.trim() } : {}),
+  };
+  await db.workoutLogs.add(entry);
+  await refreshPlayer();
+  return entry;
+}
+
+export async function addReadingItem(input: {
+  title: string;
+  author?: string;
+  type: ReadingItem["type"];
+}): Promise<ReadingItem> {
+  const item: ReadingItem = {
+    id: crypto.randomUUID(),
+    title: input.title.trim(),
+    ...(input.author?.trim() ? { author: input.author.trim() } : {}),
+    type: input.type,
+    status: "reading",
+    createdAt: Date.now(),
+  };
+  await db.readingItems.add(item);
+  return item;
+}
+
+export async function setReadingStatus(id: string, status: ReadingItem["status"]): Promise<void> {
+  await db.readingItems.update(id, {
+    status,
+    ...(status === "finished" ? { finishedAt: Date.now() } : {}),
+  });
+}
+
+export async function logReading(input: {
+  itemId?: string;
+  minutes?: number;
+  note?: string;
+  feeling?: ReadingLog["feeling"];
+}): Promise<ReadingLog> {
+  const entry: ReadingLog = {
+    id: crypto.randomUUID(),
+    dayKey: await currentDayKey(),
+    ts: Date.now(),
+    ...(input.itemId ? { itemId: input.itemId } : {}),
+    ...(input.minutes ? { minutes: input.minutes } : {}),
+    ...(input.note?.trim() ? { note: input.note.trim() } : {}),
+    ...(input.feeling ? { feeling: input.feeling } : {}),
+  };
+  await db.readingLogs.add(entry);
   await refreshPlayer();
   return entry;
 }

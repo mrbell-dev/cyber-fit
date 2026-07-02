@@ -703,3 +703,126 @@ button {
     transition: none;
   }
 }
+
+/* ---------- log screen ---------- */
+.recent-list {
+  margin-top: 12px;
+  border-top: 1px dashed var(--border);
+  padding-top: 4px;
+}
+
+.session-form {
+  padding: 10px;
+  margin: 6px 0 10px;
+  background: var(--bg-sunken);
+  border: 1px dashed var(--neon-green);
+  border-radius: var(--radius);
+}
+
+.feeling-row {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+
+.feeling-row .mood-btn {
+  min-height: var(--tap-min);
+}
+
+.note-input {
+  width: 100%;
+  padding: 10px 12px;
+  resize: vertical;
+  margin-bottom: 10px;
+  font-family: var(--font-body);
+}
+
+.type-select {
+  flex: 0 0 110px;
+}
+
+/* ---------- stats ---------- */
+.stat-tiles {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.stat-tile {
+  background: var(--bg-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.stat-num {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--text-accent);
+}
+
+.stat-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.day-grid {
+  display: grid;
+  grid-template-columns: repeat(14, 1fr);
+  gap: 6px;
+}
+
+.day-dot {
+  aspect-ratio: 1;
+  border-radius: 4px;
+  background: var(--bg-sunken);
+  border: 1px solid var(--border);
+}
+
+.day-dot.on {
+  background: var(--neon-green);
+  border-color: var(--neon-green);
+  box-shadow: 0 0 4px rgba(0, 255, 179, 0.5);
+}
+
+.water-week {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 96px;
+}
+
+.water-day {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  height: 100%;
+}
+
+.water-col {
+  width: 100%;
+  background: rgba(0, 255, 179, 0.3);
+  border-top: 2px solid var(--neon-green);
+  border-radius: 3px 3px 0 0;
+}
+
+.water-col.met {
+  background: rgba(0, 255, 179, 0.55);
+  border-top-color: var(--neon-yellow);
+}
+
+.water-day-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dim);
+}

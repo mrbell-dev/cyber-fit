@@ -14,7 +14,16 @@ import {
   type XpSource,
 } from "./rewards.ts";
 import { addDays, diffDays, type DayKey } from "./time.ts";
-import type { Habit, HabitLog, MoodLog, PlayerState, Settings, WaterLog } from "./types.ts";
+import type {
+  Habit,
+  HabitLog,
+  MoodLog,
+  PlayerState,
+  ReadingLog,
+  Settings,
+  WaterLog,
+  WorkoutLog,
+} from "./types.ts";
 import { waterTotal } from "./water.ts";
 
 export interface LogBundle {
@@ -22,6 +31,8 @@ export interface LogBundle {
   habitLogs: HabitLog[];
   waterLogs: WaterLog[];
   moodLogs: MoodLog[];
+  workoutLogs: WorkoutLog[];
+  readingLogs: ReadingLog[];
   settings: Settings;
   today: DayKey;
 }
@@ -141,6 +152,20 @@ function deriveMoments(bundle: LogBundle): Moment[] {
     moments.push({ eventId: log.id, ts: log.ts, dayKey: log.dayKey, source: "mood" });
   }
 
+  // Workout XP: every logged workout (daily cap applies downstream).
+  for (const log of bundle.workoutLogs) {
+    moments.push({ eventId: log.id, ts: log.ts, dayKey: log.dayKey, source: "workout" });
+  }
+
+  // Reading XP: each session; a post-reading note earns a bonus grant
+  // (both count against the same daily reading cap).
+  for (const log of bundle.readingLogs) {
+    moments.push({ eventId: log.id, ts: log.ts, dayKey: log.dayKey, source: "reading" });
+    if (log.note) {
+      moments.push({ eventId: `note-${log.id}`, ts: log.ts + 1, dayKey: log.dayKey, source: "reading" });
+    }
+  }
+
   // First-of-day bonus: piggybacks the earliest moment of each day.
   const firstOfDay = new Map<DayKey, Moment>();
   for (const m of moments) {
@@ -177,6 +202,8 @@ function activeDays(bundle: LogBundle): Set<DayKey> {
   for (const l of bundle.habitLogs) if (l.kind === "done" && l.amount > 0) days.add(l.dayKey);
   for (const l of bundle.waterLogs) if (l.ml > 0) days.add(l.dayKey);
   for (const l of bundle.moodLogs) days.add(l.dayKey);
+  for (const l of bundle.workoutLogs) days.add(l.dayKey);
+  for (const l of bundle.readingLogs) days.add(l.dayKey);
   return days;
 }
 

@@ -14,7 +14,8 @@
     "icons": "node scripts/icons.mjs",
     "shots": "node scripts/shoot.mjs",
     "check:offline": "node scripts/offline-check.mjs",
-    "check:persist": "node scripts/persist-check.mjs"
+    "check:persist": "node scripts/persist-check.mjs",
+    "check:vault": "node scripts/vault-check.mjs"
   },
   "dependencies": {
     "@fontsource/chakra-petch": "^5.2.5",

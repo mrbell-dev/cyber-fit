@@ -18,6 +18,8 @@ function bundle(partial: Partial<LogBundle>): LogBundle {
     habitLogs: [],
     waterLogs: [],
     moodLogs: [],
+    workoutLogs: [],
+    readingLogs: [],
     settings: DEFAULT_SETTINGS,
     today: TODAY,
     ...partial,

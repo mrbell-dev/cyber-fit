@@ -1,5 +1,13 @@
 import Dexie, { type EntityTable } from "dexie";
-import type { Habit, HabitLog, MoodLog, WaterLog } from "../engine/index.ts";
+import type {
+  Habit,
+  HabitLog,
+  MoodLog,
+  ReadingItem,
+  ReadingLog,
+  WaterLog,
+  WorkoutLog,
+} from "../engine/index.ts";
 
 // Discipline: NEVER edit a shipped version(n) — append version(n+1) with an
 // upgrade function instead. engine/rebuild.ts is the repair escape hatch.
@@ -14,6 +22,9 @@ export const db = new Dexie("cyber-fit") as Dexie & {
   habitLogs: EntityTable<HabitLog, "id">;
   waterLogs: EntityTable<WaterLog, "id">;
   moodLogs: EntityTable<MoodLog, "id">;
+  workoutLogs: EntityTable<WorkoutLog, "id">;
+  readingItems: EntityTable<ReadingItem, "id">;
+  readingLogs: EntityTable<ReadingLog, "id">;
   kv: EntityTable<KvRow, "key">;
 };
 
@@ -26,4 +37,10 @@ db.version(1).stores({
 
 db.version(2).stores({
   moodLogs: "id, dayKey",
+});
+
+db.version(3).stores({
+  workoutLogs: "id, dayKey",
+  readingItems: "id, status",
+  readingLogs: "id, dayKey, itemId",
 });

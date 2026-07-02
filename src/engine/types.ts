@@ -43,6 +43,40 @@ export interface WaterLog {
   ml: number;
 }
 
+export interface WorkoutLog {
+  id: string;
+  dayKey: DayKey;
+  ts: number;
+  /** fast path: just a name ("Lift", "5k walk") */
+  name: string;
+  durationMin?: number;
+  note?: string;
+  exercises?: { name: string; sets?: { reps?: number; weightKg?: number }[] }[];
+}
+
+export type ReadingType = "book" | "article" | "audiobook" | "other";
+
+export interface ReadingItem {
+  id: string;
+  title: string;
+  author?: string;
+  type: ReadingType;
+  status: "reading" | "finished" | "abandoned";
+  createdAt: number;
+  finishedAt?: number;
+}
+
+export interface ReadingLog {
+  id: string;
+  dayKey: DayKey;
+  ts: number;
+  itemId?: string;
+  minutes?: number;
+  /** post-reading reflection — what it said, how it landed */
+  note?: string;
+  feeling?: 1 | 2 | 3 | 4 | 5;
+}
+
 export interface MoodLog {
   id: string;
   dayKey: DayKey;

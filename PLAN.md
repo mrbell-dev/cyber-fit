@@ -10,7 +10,7 @@ Pure-core engine pattern (see CLAUDE.md).
       icons, deploy workflow, LICENSE/README/CLAUDE.md/PLAN.md
 - [x] **Phase 1 — Habits + water** (usable daily driver)
 - [x] **Phase 2 — Gamification + mood**
-- [ ] **Phase 3 — Workouts + reading/learning + stats + export/import**
+- [x] **Phase 3 — Workouts + reading/learning + stats + export/import**
 - [ ] **Phase 4 — Push reminders (opt-in) + self-host docs**
 - [ ] **Phase 5 — Augment catalog + fx + v1.0**
 
