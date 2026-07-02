@@ -8,7 +8,7 @@ Pure-core engine pattern (see CLAUDE.md).
 
 - [x] **Phase 0 — Shell:** scaffold, Electric City theme, bottom nav, Install prompt,
       icons, deploy workflow, LICENSE/README/CLAUDE.md/PLAN.md
-- [ ] **Phase 1 — Habits + water** (usable daily driver)
+- [x] **Phase 1 — Habits + water** (usable daily driver)
 - [ ] **Phase 2 — Gamification + mood**
 - [ ] **Phase 3 — Workouts + reading/learning + stats + export/import**
 - [ ] **Phase 4 — Push reminders (opt-in) + self-host docs**

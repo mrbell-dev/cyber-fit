@@ -281,3 +281,274 @@ button {
   justify-content: flex-end;
   margin-top: 12px;
 }
+
+/* ---------- habit cards ---------- */
+.habit-card {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  background: var(--bg-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  overflow: visible;
+}
+
+.habit-card.done {
+  border-color: var(--neon-green);
+  box-shadow: var(--glow-green);
+}
+
+.habit-card.skipped {
+  opacity: 0.7;
+}
+
+.habit-card.off-day {
+  opacity: 0.55;
+}
+
+.habit-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--tap-min);
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.habit-icon {
+  font-size: 20px;
+}
+
+.habit-name {
+  flex: 1;
+  font-weight: 600;
+}
+
+.off-day-tag {
+  color: var(--text-dim);
+  font-weight: 400;
+  font-size: 12px;
+  font-family: var(--font-mono);
+}
+
+.habit-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.streak-chip {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--neon-yellow);
+}
+
+.habit-count {
+  font-family: var(--font-mono);
+  color: var(--text-accent);
+}
+
+.checkbox {
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bg);
+  font-weight: 700;
+}
+
+.checkbox.on {
+  background: var(--neon-green);
+  border-color: var(--neon-green);
+}
+
+.habit-menu-btn {
+  width: 44px;
+  min-height: var(--tap-min);
+  color: var(--text-dim);
+  font-size: 18px;
+  border-left: 1px solid var(--border);
+}
+
+.habit-menu {
+  position: absolute;
+  right: 8px;
+  top: calc(100% - 4px);
+  z-index: 20;
+  background: var(--bg-raised);
+  border: 1px solid var(--neon-purple);
+  box-shadow: var(--glow-purple);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  min-width: 220px;
+}
+
+.habit-menu button {
+  min-height: var(--tap-min);
+  padding: 0 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+
+.habit-menu button:last-child {
+  border-bottom: none;
+  color: var(--text-dim);
+}
+
+/* ---------- water gauge ---------- */
+.water-bar {
+  position: relative;
+  height: 34px;
+  background: var(--bg-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.water-fill {
+  height: 100%;
+  background: linear-gradient(90deg, rgba(0, 255, 179, 0.25), rgba(0, 255, 179, 0.5));
+  border-right: 2px solid var(--neon-green);
+  transition: width 0.3s ease;
+}
+
+.water-fill.met {
+  background: linear-gradient(90deg, rgba(0, 255, 179, 0.4), rgba(255, 234, 0, 0.4));
+  border-right-color: var(--neon-yellow);
+}
+
+.water-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text);
+}
+
+.water-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.water-btn {
+  flex: 1;
+  font-family: var(--font-mono);
+}
+
+/* ---------- forms ---------- */
+.form-block {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+}
+
+.form-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.input {
+  min-height: var(--tap-min);
+  padding: 0 12px;
+  background: var(--bg-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  flex: 1;
+  min-width: 0;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--neon-green);
+}
+
+.icon-input {
+  flex: 0 0 64px;
+  text-align: center;
+  font-size: 18px;
+}
+
+.num-input {
+  flex: 0 0 90px;
+}
+
+.check-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-dim);
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.weekday-row {
+  gap: 6px;
+}
+
+.day-toggle {
+  flex: 1;
+  min-height: var(--tap-min);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  color: var(--text-dim);
+}
+
+.day-toggle.on {
+  border-color: var(--neon-magenta);
+  color: var(--text);
+  background: rgba(255, 0, 122, 0.12);
+}
+
+/* ---------- rows / lists ---------- */
+.row-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: var(--tap-min);
+  border-bottom: 1px solid var(--border);
+  gap: 8px;
+}
+
+.row-item:last-of-type {
+  border-bottom: none;
+}
+
+.row-actions {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.link-btn {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  text-decoration: underline;
+  min-height: var(--tap-min);
+}
+
+.link-btn.danger {
+  color: var(--neon-magenta);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}

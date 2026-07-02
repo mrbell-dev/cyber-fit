@@ -3,3 +3,6 @@
 // no Math.random() (clock and RNG are injected via ctx).
 
 export * from "./time.ts";
+export * from "./types.ts";
+export * from "./habits.ts";
+export * from "./water.ts";
