@@ -11,6 +11,8 @@ import {
 import { useDayKey, useSettings } from "../hooks.ts";
 import { HabitCard } from "../components/HabitCard.tsx";
 import { WaterGauge } from "../components/WaterGauge.tsx";
+import { XpBar } from "../components/XpBar.tsx";
+import { MoodRow } from "../components/MoodRow.tsx";
 
 function habitView(habit: Habit, logs: HabitLog[], today: DayKey) {
   const byDay = new Map<DayKey, HabitLog[]>();
@@ -54,6 +56,7 @@ export function Today() {
 
   return (
     <section aria-label="Today">
+      <XpBar />
       <div className="card">
         <h2 className="card-title">Directives — {today}</h2>
         {habits.length === 0 ? (
@@ -79,10 +82,7 @@ export function Today() {
 
       <WaterGauge logs={waterLogs} goalMl={settings.waterGoalMl} />
 
-      <div className="card">
-        <h2 className="card-title">Vitals</h2>
-        <p className="placeholder">// mood check-in boots in Phase 2</p>
-      </div>
+      <MoodRow today={today} />
     </section>
   );
 }

@@ -43,6 +43,28 @@ export interface WaterLog {
   ml: number;
 }
 
+export interface MoodLog {
+  id: string;
+  dayKey: DayKey;
+  ts: number;
+  rating: 1 | 2 | 3 | 4 | 5;
+  energy?: 1 | 2 | 3 | 4 | 5;
+  note?: string;
+}
+
+// ---------- derived player state (rebuildable from logs; never hand-edited) ----------
+
+export interface PlayerState {
+  xp: number;
+  level: number;
+  freezeTokens: number;
+  /** consecutive days with any positive log; shields auto-absorb gaps */
+  globalStreak: { current: number; best: number };
+  unlockedAugments: string[];
+  /** grant keys already awarded (idempotence for incremental updates) */
+  grantKeys: string[];
+}
+
 // ---------- settings ----------
 
 export interface Settings {

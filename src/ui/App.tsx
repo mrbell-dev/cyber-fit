@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Nav, type Tab } from "./Nav.tsx";
 import { InstallPrompt } from "./Install.tsx";
+import { RewardToast } from "./components/RewardToast.tsx";
 import { Today } from "./screens/Today.tsx";
 import { Log } from "./screens/Log.tsx";
 import { Stats } from "./screens/Stats.tsx";
@@ -46,6 +47,7 @@ export function App() {
         {tab === "system" && <System />}
       </main>
 
+      <RewardToast />
       <Nav tab={tab} onChange={setTab} />
     </>
   );

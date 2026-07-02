@@ -552,3 +552,154 @@ button {
   opacity: 0.4;
   cursor: default;
 }
+
+/* ---------- XP panel ---------- */
+.xp-panel {
+  margin-bottom: 12px;
+}
+
+.xp-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.xp-level {
+  font-family: var(--font-display);
+  font-size: 15px;
+  letter-spacing: 0.06em;
+}
+
+.xp-firmware {
+  color: var(--text-dim);
+  font-size: 12px;
+  font-family: var(--font-mono);
+}
+
+.xp-badges {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.shield-chip {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--neon-green);
+}
+
+.xp-bar {
+  height: 10px;
+  background: var(--bg-sunken);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.xp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--neon-magenta), var(--neon-purple));
+  transition: width 0.4s ease;
+}
+
+/* ---------- mood row ---------- */
+.mood-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.mood-btn {
+  flex: 1;
+  min-height: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-dim);
+}
+
+.mood-btn .mood-glyph {
+  font-size: 18px;
+  font-family: var(--font-mono);
+  color: var(--neon-green);
+  opacity: 0.5;
+}
+
+.mood-btn .mood-label {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.mood-btn.on {
+  border-color: var(--neon-green);
+  box-shadow: var(--glow-green);
+  color: var(--text);
+}
+
+.mood-btn.on .mood-glyph {
+  opacity: 1;
+}
+
+/* ---------- reward toasts ---------- */
+.toast-stack {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(var(--nav-height) + env(safe-area-inset-bottom) + 12px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 50;
+  width: min(92vw, 420px);
+  pointer-events: none;
+}
+
+.toast {
+  background: var(--bg-raised);
+  border: 1px solid var(--neon-green);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text);
+  text-align: center;
+  animation: toast-in 0.25s ease;
+}
+
+.toast.crit {
+  border-color: var(--neon-yellow);
+  box-shadow: 0 0 12px rgba(255, 234, 0, 0.35);
+}
+
+.toast.drop {
+  border-color: var(--neon-purple);
+  box-shadow: var(--glow-purple);
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+  }
+  .xp-fill,
+  .water-fill {
+    transition: none;
+  }
+}

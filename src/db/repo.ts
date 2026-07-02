@@ -3,16 +3,43 @@
 import {
   DEFAULT_SETTINGS,
   dayKeyFor,
+  rebuild,
   type DayKey,
   type Habit,
   type HabitLog,
+  type MoodLog,
+  type PlayerState,
   type Schedule,
   type Settings,
   type WaterLog,
 } from "../engine/index.ts";
+import { emitGrants } from "../ui/toast.ts";
 import { db } from "./db.ts";
 
 const SETTINGS_KEY = "settings";
+const PLAYER_KEY = "player";
+
+/**
+ * Recompute PlayerState from ALL logs (deterministic full fold — snapshot can
+ * never drift), persist it, and announce any newly earned grants.
+ */
+export async function refreshPlayer(): Promise<PlayerState> {
+  const [habits, habitLogs, waterLogs, moodLogs, settings, today, prevRow] = await Promise.all([
+    db.habits.toArray(),
+    db.habitLogs.toArray(),
+    db.waterLogs.toArray(),
+    db.moodLogs.toArray(),
+    getSettings(),
+    currentDayKey(),
+    db.kv.get(PLAYER_KEY),
+  ]);
+  const { state, grants } = rebuild({ habits, habitLogs, waterLogs, moodLogs, settings, today });
+  await db.kv.put({ key: PLAYER_KEY, value: state });
+
+  const prevKeys = new Set(((prevRow?.value as PlayerState | undefined)?.grantKeys) ?? []);
+  emitGrants(grants.filter((g) => !prevKeys.has(g.key)));
+  return state;
+}
 
 // ---------- time context (the one place the UI's clock enters the system) ----------
 
@@ -88,6 +115,7 @@ export async function logHabit(
     kind: opts.kind ?? "done",
   };
   await db.habitLogs.add(entry);
+  await refreshPlayer();
   return entry;
 }
 
@@ -104,5 +132,23 @@ export async function logWater(ml: number, dayKey?: DayKey): Promise<WaterLog> {
     ml,
   };
   await db.waterLogs.add(entry);
+  await refreshPlayer();
+  return entry;
+}
+
+export async function logMood(
+  rating: MoodLog["rating"],
+  opts: { energy?: MoodLog["energy"]; note?: string } = {},
+): Promise<MoodLog> {
+  const entry: MoodLog = {
+    id: crypto.randomUUID(),
+    dayKey: await currentDayKey(),
+    ts: Date.now(),
+    rating,
+    ...(opts.energy ? { energy: opts.energy } : {}),
+    ...(opts.note?.trim() ? { note: opts.note.trim() } : {}),
+  };
+  await db.moodLogs.add(entry);
+  await refreshPlayer();
   return entry;
 }
