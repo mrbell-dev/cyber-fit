@@ -5,10 +5,12 @@
 name = "cyber-fit"
 compatibility_date = "2026-06-01"
 
-[assets]
-directory = "./dist"
-
+# NOTE: routes must sit ABOVE any [section] header — TOML scoping puts
+# everything after a header inside that section.
 routes = [
   { pattern = "cyberfit.dev", custom_domain = true },
   { pattern = "www.cyberfit.dev", custom_domain = true },
 ]
+
+[assets]
+directory = "./dist"
