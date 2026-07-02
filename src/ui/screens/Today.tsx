@@ -14,6 +14,7 @@ import { HabitCard } from "../components/HabitCard.tsx";
 import { WaterGauge } from "../components/WaterGauge.tsx";
 import { XpBar } from "../components/XpBar.tsx";
 import { MoodRow } from "../components/MoodRow.tsx";
+import { MissedPing } from "../components/MissedPing.tsx";
 
 function habitView(habit: Habit, logs: HabitLog[], today: DayKey) {
   const byDay = new Map<DayKey, HabitLog[]>();
@@ -57,6 +58,7 @@ export function Today() {
 
   return (
     <section aria-label="Today">
+      <MissedPing today={today} />
       <XpBar />
       <div className="card">
         <h2 className="card-title">Directives — {today}</h2>

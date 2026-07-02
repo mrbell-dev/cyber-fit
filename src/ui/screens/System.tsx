@@ -5,6 +5,7 @@ import type { PlayerState, Schedule } from "../../engine/index.ts";
 import { addHabit, archiveHabit, deleteHabit, saveSettings } from "../../db/repo.ts";
 import { downloadExport, exportJson, importJson } from "../../db/export.ts";
 import { THEMES } from "../theme/themes.ts";
+import { ReminderUplink } from "../components/ReminderUplink.tsx";
 import { useSettings } from "../hooks.ts";
 
 const REPO_URL = "https://github.com/michaelbell/cyber-fit"; // update after first push
@@ -293,6 +294,8 @@ export function System() {
           // logs before the rollover hour count as the previous day — night owls stay safe
         </p>
       </div>
+
+      <ReminderUplink />
 
       <Augments />
 

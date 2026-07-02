@@ -947,3 +947,53 @@ html.theme-ice {
   font-family: var(--font-mono);
   font-size: 13px;
 }
+
+/* ---------- reminder uplink ---------- */
+.time-input {
+  flex: 0 0 auto;
+  min-height: 40px;
+  padding: 0 8px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.num-input-sm {
+  flex: 0 0 60px;
+  min-height: 40px;
+  padding: 0 8px;
+}
+
+.check-label {
+  flex-wrap: wrap;
+}
+
+.weekday-row.inline {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.day-toggle.sm {
+  flex: 0 0 32px;
+  min-height: 36px;
+  font-size: 11px;
+}
+
+/* ---------- missed ping banner ---------- */
+.missed-ping {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  border: 1px solid var(--neon-yellow);
+  border-radius: var(--radius);
+  background: rgba(255, 234, 0, 0.06);
+  font-size: 14px;
+}
+
+.missed-ping-title {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--neon-yellow);
+}

@@ -108,6 +108,9 @@ export interface Settings {
   waterGoalMl: number;
   /** theme id from the theme registry (unlocked via augments) */
   activeTheme: string;
+  /** self-hosted push relay overrides (optional; empty = use build defaults) */
+  relayUrl?: string;
+  relayVapidKey?: string;
 }
 
 export const DEFAULT_SETTINGS: Settings = {

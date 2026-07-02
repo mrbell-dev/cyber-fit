@@ -9,11 +9,15 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      // injectManifest = our own src/sw.ts (precache + web-push handlers).
+      strategies: "injectManifest",
+      srcDir: "src",
+      filename: "sw.ts",
       registerType: "autoUpdate",
       injectRegister: "auto",
       includeAssets: ["favicon.svg", "apple-touch-icon.png"],
       // Precache fonts too (not in Workbox's default globs) so offline looks identical.
-      workbox: {
+      injectManifest: {
         globPatterns: ["**/*.{js,css,html,svg,png,ico,woff2,woff}"],
       },
       manifest: {

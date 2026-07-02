@@ -11,7 +11,10 @@ Pure-core engine pattern (see CLAUDE.md).
 - [x] **Phase 1 — Habits + water** (usable daily driver)
 - [x] **Phase 2 — Gamification + mood**
 - [x] **Phase 3 — Workouts + reading/learning + stats + export/import**
-- [ ] **Phase 4 — Push reminders (opt-in) + self-host docs**
+- [x] **Phase 4 — Push reminders (opt-in) + self-host docs** — code complete; remaining:
+      deploy the relay to a Cloudflare account (`worker/`, see SELF-HOSTING.md), bake
+      `VITE_RELAY_URL` + `VITE_VAPID_PUBLIC_KEY` into the Pages build, test on real
+      iPhone (A2HS) + Android
 - [ ] **Phase 5 — Augment catalog + fx + v1.0**
 
 ## Why this app exists
@@ -85,6 +88,18 @@ subscription + slots INTO the box: LAN URL while on home Wi-Fi, paste-the-JSON, 
 Tailscale/WireGuard. Document all this in the repo wiki (linked from About →
 "self-host the notification relay") and ship `worker/` so it runs on both Cloudflare
 and plain Node.
+
+## Cyber-trainer SMS companion (backlog — Michael-only, NOT part of the OSS app)
+
+Personal sidecar: text a "cyber-trainer" that runs on Michael's own hardware.
+Architecture: Twilio number → webhook → small server on the home box (needs ONE
+public HTTPS endpoint for Twilio: Tailscale Funnel or Cloudflare Tunnel, both free)
+→ Ollama (qwen3.5-35b for quality or gemma4-26b for speed) with a trainer system
+prompt → reply via Twilio API. Context: the cyber-fit Data Vault JSON exported to a
+folder the server watches, so the trainer can say "you're at 750ml, two pings behind."
+Costs: ~$1.15/mo for the number + ~$0.0079/SMS. Twilio requires A2P registration for
+US traffic (one-time hassle, fine for personal low volume). Kept out of the app repo —
+it would violate the zero-PII/zero-server design pillar; lives as its own private repo.
 
 ## Cross-device sync idea (backlog)
 

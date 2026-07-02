@@ -1,0 +1,73 @@
+import { describe, expect, it } from "vitest";
+import { DEFAULT_REMINDERS, duePingsToday, localPings, slotsFor } from "./reminders.ts";
+
+describe("localPings", () => {
+  it("water spreads count evenly across the window", () => {
+    const pings = localPings({
+      ...DEFAULT_REMINDERS,
+      morning: { on: false, time: "08:00" },
+      workout: { on: false, days: [], time: "17:30" },
+      catchup: { on: false, time: "21:30" },
+      water: { on: true, count: 5, start: "09:00", end: "21:00" },
+    });
+    expect(pings.map((p) => p.minutes)).toEqual([540, 720, 900, 1080, 1260]); // 9,12,15,18,21
+  });
+
+  it("workout only on chosen days", () => {
+    const pings = localPings(DEFAULT_REMINDERS).filter((p) => p.kind === "workout");
+    expect(pings).toHaveLength(1);
+    expect(pings[0].days).toEqual([2, 3, 4]);
+  });
+});
+
+describe("slotsFor", () => {
+  it("UTC zone maps directly onto the grid", () => {
+    const slots = slotsFor(DEFAULT_REMINDERS, 0);
+    // morning 08:00 daily → slot 480 on all 7 days
+    for (let d = 0; d < 7; d++) expect(slots).toContain(d * 1440 + 480);
+    // workout 17:30 only Tue(2)/Wed(3)/Thu(4)
+    expect(slots).toContain(2 * 1440 + 1050);
+    expect(slots).not.toContain(1 * 1440 + 1050);
+  });
+
+  it("timezone shift can wrap across the week boundary", () => {
+    // 23:30 local Saturday, UTC-(-60) i.e. offset -60 → 22:30 UTC? No:
+    // offset +300 (UTC-5): Sat 23:30 local = Sun 04:30 UTC → wraps to day 0.
+    const r = {
+      ...DEFAULT_REMINDERS,
+      morning: { on: false, time: "08:00" },
+      water: { on: false, count: 0, start: "09:00", end: "21:00" },
+      workout: { on: true, days: [6], time: "23:30" },
+      catchup: { on: false, time: "21:30" },
+    };
+    const slots = slotsFor(r, 300);
+    expect(slots).toEqual([270]); // Sunday 04:30 UTC
+  });
+
+  it("slots are on-grid, in-range, deduped", () => {
+    const slots = slotsFor(DEFAULT_REMINDERS, -330); // UTC+5:30 (off-grid tz)
+    expect(new Set(slots).size).toBe(slots.length);
+    for (const s of slots) {
+      expect(s % 15).toBe(0);
+      expect(s).toBeGreaterThanOrEqual(0);
+      expect(s).toBeLessThan(10080);
+    }
+  });
+});
+
+describe("duePingsToday", () => {
+  it("returns only pings already past on a matching weekday", () => {
+    // Thursday (4), 12:00 local.
+    const due = duePingsToday(DEFAULT_REMINDERS, 4, 720);
+    const kinds = due.map((d) => d.kind);
+    expect(kinds).toContain("morning"); // 08:00 passed
+    expect(kinds).not.toContain("catchup"); // 21:30 not yet
+    expect(kinds).not.toContain("workout"); // 17:30 not yet
+    expect(due.filter((d) => d.kind === "water")).toHaveLength(2); // 09:00 + 12:00
+  });
+
+  it("weekday mismatch excludes workout", () => {
+    const due = duePingsToday(DEFAULT_REMINDERS, 5, 1200); // Friday 20:00
+    expect(due.map((d) => d.kind)).not.toContain("workout");
+  });
+});

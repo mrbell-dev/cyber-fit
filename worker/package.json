@@ -1,0 +1,19 @@
+{
+  "name": "cyber-fit-relay",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Anonymous push-reminder relay for cyber-fit. Stores ONLY {push subscription, slot numbers}. No IDs, no IPs, no logging.",
+  "scripts": {
+    "dev": "wrangler dev --test-scheduled",
+    "deploy": "wrangler deploy",
+    "vapid": "npx @pushforge/builder vapid",
+    "test": "node test.mjs"
+  },
+  "dependencies": {
+    "@pushforge/builder": "^2.0.5"
+  },
+  "devDependencies": {
+    "wrangler": "^3.100.0"
+  }
+}
