@@ -2,18 +2,19 @@ name = "cyber-fit-relay"
 main = "src/index.mjs"
 compatibility_date = "2026-06-01"
 
+# Stable HTTPS address on the app's own zone (provisioned automatically at deploy).
+routes = [{ pattern = "relay.cyberfit.dev", custom_domain = true }]
+
 # Fires every 15 minutes; the client snaps reminder times to this grid.
 [triggers]
 crons = ["*/15 * * * *"]
 
 [[kv_namespaces]]
 binding = "SUBS"
-# One-time setup: `wrangler kv namespace create SUBS`, paste the id here.
-id = "REPLACE_WITH_KV_NAMESPACE_ID"
+id = "d5240c791a53455cb191c504ef243112"
 
 [vars]
-# CORS: set to your Pages origin, e.g. "https://yourname.github.io"
-ALLOWED_ORIGIN = "*"
+ALLOWED_ORIGIN = "https://cyberfit.dev"
 ADMIN_CONTACT = "mailto:michael.bell1990@gmail.com"
 
 # Secret (never in this file): wrangler secret put VAPID_PRIVATE_JWK

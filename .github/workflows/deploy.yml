@@ -29,6 +29,10 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+        env:
+          # Public values (the VAPID *public* key is meant to be public).
+          VITE_RELAY_URL: https://relay.cyberfit.dev
+          VITE_VAPID_PUBLIC_KEY: BBqhDPwWBb2FDHxyQfoRjQG09vrMb0-HejQ48MNqSAkpsbJZprStfQIadXFw6BRVX_C81Rg00T4tpEb5NKNiVPc
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
