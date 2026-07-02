@@ -9,6 +9,7 @@ import {
   type HabitLog,
 } from "../../engine/index.ts";
 import { useDayKey, useSettings } from "../hooks.ts";
+import { addHabit } from "../../db/repo.ts";
 import { HabitCard } from "../components/HabitCard.tsx";
 import { WaterGauge } from "../components/WaterGauge.tsx";
 import { XpBar } from "../components/XpBar.tsx";
@@ -60,9 +61,24 @@ export function Today() {
       <div className="card">
         <h2 className="card-title">Directives — {today}</h2>
         {habits.length === 0 ? (
-          <p className="placeholder">
-            // no directives installed — add habits in the SYSTEM tab
-          </p>
+          <>
+            <p className="lore">
+              Too much chrome, not enough ground truth — that's how you end up cyberpsycho.
+              The protocol is simple: <strong>small daily syncs with your own wetware</strong>.
+              Water. Movement. Reading. Knowing how you actually feel.
+            </p>
+            <button
+              className="btn"
+              onClick={async () => {
+                await addHabit({ name: "Grounding ritual — 10 min offline", icon: "🧘", schedule: { kind: "daily" } });
+                await addHabit({ name: "Move your chrome — stretch", icon: "🦾", schedule: { kind: "daily" } });
+                await addHabit({ name: "Feed the wetware — read", icon: "📖", schedule: { kind: "timesPerWeek", target: 3 }, domain: "learning" });
+              }}
+            >
+              Install grounding protocol
+            </button>
+            <p className="placeholder">// or build your own directives in the SYSTEM tab</p>
+          </>
         ) : (
           habits.map((h) => {
             const { status, streak } = habitView(h, logsByHabit.get(h.id) ?? [], today);

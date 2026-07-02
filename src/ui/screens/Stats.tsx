@@ -11,7 +11,15 @@ import {
 } from "../../engine/index.ts";
 import { useDayKey, useSettings } from "../hooks.ts";
 
-const GRID_DAYS = 28;
+const GRID_DAYS = 70; // 14-wide rows, GitHub-style intensity
+
+function intensityLevel(count: number): 0 | 1 | 2 | 3 | 4 {
+  if (count <= 0) return 0;
+  if (count === 1) return 1;
+  if (count <= 3) return 2;
+  if (count <= 6) return 3;
+  return 4;
+}
 
 export function Stats() {
   const today = useDayKey();
@@ -35,13 +43,14 @@ export function Stats() {
   if (!data) return null;
   const { player } = data;
 
-  // Activity grid: any positive log on that day.
-  const active = new Set<string>();
-  for (const l of data.habitLogs) if (l.kind === "done" && l.amount > 0) active.add(l.dayKey);
-  for (const l of data.waterLogs) if (l.ml > 0) active.add(l.dayKey);
-  for (const l of data.moodLogs) active.add(l.dayKey);
-  for (const l of data.workoutLogs) active.add(l.dayKey);
-  for (const l of data.readingLogs) active.add(l.dayKey);
+  // Activity intensity per day: every positive log is one "sync".
+  const countByDay = new Map<string, number>();
+  const bump = (day: string) => countByDay.set(day, (countByDay.get(day) ?? 0) + 1);
+  for (const l of data.habitLogs) if (l.kind === "done" && l.amount > 0) bump(l.dayKey);
+  for (const l of data.waterLogs) if (l.ml > 0) bump(l.dayKey);
+  for (const l of data.moodLogs) bump(l.dayKey);
+  for (const l of data.workoutLogs) bump(l.dayKey);
+  for (const l of data.readingLogs) bump(l.dayKey);
 
   const gridDays = Array.from({ length: GRID_DAYS }, (_, i) => addDays(today, i - (GRID_DAYS - 1)));
 
@@ -108,13 +117,26 @@ export function Stats() {
       <div className="card">
         <h2 className="card-title">Uptime — last {GRID_DAYS} days</h2>
         <div className="day-grid" role="img" aria-label={`Activity for the last ${GRID_DAYS} days`}>
-          {gridDays.map((day) => (
-            <span
-              key={day}
-              className={active.has(day) ? "day-dot on" : "day-dot"}
-              title={day}
-            />
-          ))}
+          {gridDays.map((day) => {
+            const n = countByDay.get(day) ?? 0;
+            const lvl = intensityLevel(n);
+            return (
+              <span
+                key={day}
+                className={lvl === 0 ? "day-dot" : `day-dot l${lvl}`}
+                title={`${day}: ${n} sync${n === 1 ? "" : "s"}`}
+              />
+            );
+          })}
+        </div>
+        <div className="grid-legend" aria-hidden="true">
+          less
+          <span className="day-dot" />
+          <span className="day-dot l1" />
+          <span className="day-dot l2" />
+          <span className="day-dot l3" />
+          <span className="day-dot l4" />
+          more
         </div>
       </div>
 

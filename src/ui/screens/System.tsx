@@ -1,10 +1,77 @@
 import { useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../../db/db.ts";
-import type { Schedule } from "../../engine/index.ts";
+import type { PlayerState, Schedule } from "../../engine/index.ts";
 import { addHabit, archiveHabit, deleteHabit, saveSettings } from "../../db/repo.ts";
 import { downloadExport, exportJson, importJson } from "../../db/export.ts";
+import { THEMES } from "../theme/themes.ts";
 import { useSettings } from "../hooks.ts";
+
+const REPO_URL = "https://github.com/michaelbell/cyber-fit"; // update after first push
+
+function Augments() {
+  const settings = useSettings();
+  const player = useLiveQuery(
+    async () => (await db.kv.get("player"))?.value as PlayerState | undefined,
+    [],
+  );
+  const unlocked = new Set(player?.unlockedAugments ?? []);
+
+  return (
+    <div className="card">
+      <h2 className="card-title">Augments — Visual Cortex</h2>
+      <div className="theme-row">
+        {THEMES.map((t) => {
+          const isUnlocked = t.augment === null || unlocked.has(t.augment);
+          const active = settings.activeTheme === t.id;
+          return (
+            <button
+              key={t.id}
+              className={`theme-swatch${active ? " on" : ""}${isUnlocked ? "" : " locked"}`}
+              disabled={!isUnlocked}
+              aria-pressed={active}
+              title={isUnlocked ? t.name : `${t.name} — locked (level up or find a data shard)`}
+              onClick={() => saveSettings({ activeTheme: t.id })}
+            >
+              {isUnlocked ? t.name : `🔒 ${t.name}`}
+            </button>
+          );
+        })}
+      </div>
+      <p className="placeholder">
+        // themes are pluggable CSS packs — a medieval or minimal pack is one PR away
+      </p>
+    </div>
+  );
+}
+
+function About() {
+  return (
+    <div className="card">
+      <h2 className="card-title">About</h2>
+      <p className="lore">
+        <strong>Stay grounded. Avoid cyberpsychosis.</strong> Too many augments and not enough
+        humanity is a known failure mode — this app is the counter-protocol: daily syncs with
+        your body and brain, tracked on your own hardware.
+      </p>
+      <p>
+        Free forever, open source (MIT), zero tracking. Everything you log lives on this device —
+        no accounts, no analytics, no server holding your data.
+      </p>
+      <div className="about-links">
+        <a href={REPO_URL} target="_blank" rel="noreferrer">
+          ⌥ contribute on GitHub
+        </a>
+        <a href={`${REPO_URL}#support`} target="_blank" rel="noreferrer">
+          ◈ chip in $1 for server costs
+        </a>
+        <a href={`${REPO_URL}/wiki/Self-hosting-notifications`} target="_blank" rel="noreferrer">
+          ⚙ self-host the notification relay
+        </a>
+      </div>
+    </div>
+  );
+}
 
 function DataVault() {
   const fileRef = useRef<HTMLInputElement>(null);
@@ -227,15 +294,11 @@ export function System() {
         </p>
       </div>
 
+      <Augments />
+
       <DataVault />
 
-      <div className="card">
-        <h2 className="card-title">Data Policy</h2>
-        <p>
-          Everything you log lives on this device. Nothing is sent anywhere — no accounts, no
-          analytics, no tracking. Off-grid by design.
-        </p>
-      </div>
+      <About />
     </section>
   );
 }

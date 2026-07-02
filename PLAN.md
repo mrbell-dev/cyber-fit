@@ -63,6 +63,38 @@ drop → random augment. Level curve `xpToNext = 100 + 50*level`, styled
 "LVL 7 // FIRMWARE v0.7". Freeze tokens: +1 per 5-day global streak, cap 3, auto-spend
 ("shield absorbed the hit"). Weekly SYSTEM REPORT card, positively framed.
 
+## Reminder calendar spec (Phase 4 — user requirements)
+
+A recurring-notification editor in SYSTEM, not just fixed times:
+- **Per-reminder recurrence:** N times/day between a wake window (e.g. water ×5,
+  09:00–21:00, evenly spaced), specific weekdays (workout Tue/Wed/Thu), daily at a
+  time (end-of-day "catch up the logs"), morning greeting.
+- **Themed copy per reminder type**, e.g. morning: "Rise and shine, Night City.";
+  water: "Hydrate the wetware."; workout: "Chrome needs maintenance."; catch-up:
+  "Sync your logs before lights out." Copy lives client-side; the push payload stays
+  generic when using a shared relay (privacy), but self-hosters can enable themed
+  payloads since it's their own server.
+- Client converts the schedule to 15-min UTC slots for the worker; the full schedule
+  never leaves the device — only the slot numbers.
+
+**Self-hosting the relay — including from a home network:** sending web push only
+needs OUTBOUND https to the browser vendors' push endpoints — no open ports, no
+static IP, no domain. Any always-on box (Raspberry Pi, NAS, old laptop) running the
+same worker code under Node + node-cron works. The only wrinkle is getting the push
+subscription + slots INTO the box: LAN URL while on home Wi-Fi, paste-the-JSON, or
+Tailscale/WireGuard. Document all this in the repo wiki (linked from About →
+"self-host the notification relay") and ship `worker/` so it runs on both Cloudflare
+and plain Node.
+
+## Cross-device sync idea (backlog)
+
+The Data Vault JSON can already be dropped in any cloud drive manually. Optional
+future: File System Access API "link backup file" (pick a file inside the Google
+Drive/Syncthing/Nextcloud sync folder; app re-exports to it on change) — gets
+cross-device backup with zero OAuth, zero Google API dependency, zero new servers.
+Full Drive API integration is deliberately avoided (OAuth client + Google dependency
+contradicts the off-grid ethos).
+
 ## Push worker (Phase 4)
 
 `worker/` — Cloudflare Worker, KV store, `pushforge` VAPID, cron `*/15`. Client snaps

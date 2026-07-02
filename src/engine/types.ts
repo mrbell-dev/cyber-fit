@@ -106,10 +106,13 @@ export interface Settings {
   /** hour (0-23) the day rolls over; default 3 */
   dayStartHour: number;
   waterGoalMl: number;
+  /** theme id from the theme registry (unlocked via augments) */
+  activeTheme: string;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
   schemaVersion: 1,
   dayStartHour: 3,
   waterGoalMl: 2000,
+  activeTheme: "electric-city",
 };

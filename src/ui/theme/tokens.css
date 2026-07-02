@@ -826,3 +826,124 @@ button {
   font-size: 10px;
   color: var(--text-dim);
 }
+
+/* ============================================================
+   Alt theme palettes (augment unlocks). A future pack — medieval,
+   pastel, whatever — is just another block like these.
+   ============================================================ */
+
+html.theme-acid {
+  --bg: #141a12;
+  --bg-raised: #1c2419;
+  --bg-sunken: #0e120c;
+  --neon-magenta: #aaff00;
+  --neon-green: #d8ff4a;
+  --neon-purple: #4dff88;
+  --neon-yellow: #f4ff5e;
+  --border: #2e3d28;
+  --glow-magenta: 0 0 6px rgba(170, 255, 0, 0.6), 0 0 18px rgba(170, 255, 0, 0.3);
+  --glow-green: 0 0 6px rgba(216, 255, 74, 0.5), 0 0 18px rgba(216, 255, 74, 0.25);
+  --glow-purple: 0 0 8px rgba(77, 255, 136, 0.5);
+}
+
+html.theme-ember {
+  --bg: #201014;
+  --bg-raised: #2b161b;
+  --bg-sunken: #170a0d;
+  --neon-magenta: #ff3d00;
+  --neon-green: #ffb347;
+  --neon-purple: #ff0055;
+  --neon-yellow: #ffd166;
+  --border: #45232b;
+  --glow-magenta: 0 0 6px rgba(255, 61, 0, 0.6), 0 0 18px rgba(255, 61, 0, 0.3);
+  --glow-green: 0 0 6px rgba(255, 179, 71, 0.5), 0 0 18px rgba(255, 179, 71, 0.25);
+  --glow-purple: 0 0 8px rgba(255, 0, 85, 0.5);
+}
+
+html.theme-ice {
+  --bg: #101722;
+  --bg-raised: #16202e;
+  --bg-sunken: #0a0f17;
+  --neon-magenta: #4dc3ff;
+  --neon-green: #9bf0ff;
+  --neon-purple: #7a8cff;
+  --neon-yellow: #d6faff;
+  --border: #24344a;
+  --glow-magenta: 0 0 6px rgba(77, 195, 255, 0.6), 0 0 18px rgba(77, 195, 255, 0.3);
+  --glow-green: 0 0 6px rgba(155, 240, 255, 0.5), 0 0 18px rgba(155, 240, 255, 0.25);
+  --glow-purple: 0 0 8px rgba(122, 140, 255, 0.5);
+}
+
+/* ---------- uptime intensity grid (GitHub-style) ---------- */
+.day-dot.l1 { background: rgba(0, 255, 179, 0.25); border-color: rgba(0, 255, 179, 0.35); }
+.day-dot.l2 { background: rgba(0, 255, 179, 0.5); border-color: rgba(0, 255, 179, 0.55); }
+.day-dot.l3 { background: rgba(0, 255, 179, 0.75); border-color: rgba(0, 255, 179, 0.8); }
+.day-dot.l4 { background: var(--neon-green); border-color: var(--neon-green); box-shadow: 0 0 5px rgba(0, 255, 179, 0.6); }
+
+.grid-legend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: flex-end;
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+.grid-legend .day-dot {
+  width: 12px;
+  height: 12px;
+  aspect-ratio: auto;
+}
+
+/* ---------- grounding / lore ---------- */
+.lore {
+  border-left: 3px solid var(--neon-purple);
+  padding-left: 12px;
+  color: var(--text-dim);
+  font-size: 14px;
+}
+
+.lore strong {
+  color: var(--text);
+}
+
+/* ---------- theme picker ---------- */
+.theme-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.theme-swatch {
+  min-height: var(--tap-min);
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.theme-swatch.on {
+  border-color: var(--neon-green);
+  color: var(--text);
+  box-shadow: var(--glow-green);
+}
+
+.theme-swatch.locked {
+  opacity: 0.4;
+}
+
+.about-links {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.about-links a {
+  color: var(--neon-green);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
