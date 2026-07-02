@@ -1,14 +1,14 @@
 import { useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../../db/db.ts";
-import type { PlayerState, Schedule } from "../../engine/index.ts";
+import { AUGMENTS, type PlayerState, type Schedule } from "../../engine/index.ts";
 import { addHabit, archiveHabit, deleteHabit, saveSettings } from "../../db/repo.ts";
 import { downloadExport, exportJson, importJson } from "../../db/export.ts";
 import { THEMES } from "../theme/themes.ts";
 import { ReminderUplink } from "../components/ReminderUplink.tsx";
 import { useSettings } from "../hooks.ts";
 
-const REPO_URL = "https://github.com/michaelbell/cyber-fit"; // update after first push
+const REPO_URL = "https://github.com/mrbell-dev/cyber-fit";
 
 function Augments() {
   const settings = useSettings();
@@ -42,6 +42,50 @@ function Augments() {
       <p className="placeholder">
         // themes are pluggable CSS packs — a medieval or minimal pack is one PR away
       </p>
+
+      <h3 className="card-title" style={{ marginTop: 14 }}>
+        FX Modules
+      </h3>
+      <div className="theme-row">
+        {AUGMENTS.filter((a) => a.kind === "fx").map((a) => {
+          const isUnlocked = unlocked.has(a.id);
+          const on = (settings.activeFx ?? []).includes(a.id);
+          return (
+            <button
+              key={a.id}
+              className={`theme-swatch${on ? " on" : ""}${isUnlocked ? "" : " locked"}`}
+              disabled={!isUnlocked}
+              aria-pressed={on}
+              title={isUnlocked ? a.desc : `${a.name} — shard-drop only`}
+              onClick={() =>
+                saveSettings({
+                  activeFx: on
+                    ? (settings.activeFx ?? []).filter((id) => id !== a.id)
+                    : [...(settings.activeFx ?? []), a.id],
+                })
+              }
+            >
+              {isUnlocked ? a.name : `🔒 ${a.name}`}
+            </button>
+          );
+        })}
+      </div>
+      <p className="placeholder">// motion fx auto-disable if your OS asks for reduced motion</p>
+
+      <h3 className="card-title" style={{ marginTop: 14 }}>
+        Catalog
+      </h3>
+      {AUGMENTS.map((a) => (
+        <div className="row-item" key={a.id}>
+          <span>
+            {unlocked.has(a.id) ? "◈" : "🔒"} {a.name}
+            <span className="off-day-tag"> · {a.desc}</span>
+          </span>
+          <span className="off-day-tag">
+            {unlocked.has(a.id) ? "installed" : a.level !== undefined ? `LVL ${a.level}` : "shard drop"}
+          </span>
+        </div>
+      ))}
     </div>
   );
 }

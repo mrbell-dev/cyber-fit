@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSettings } from "./hooks.ts";
-import { applyTheme } from "./theme/themes.ts";
+import { applyFx, applyTheme } from "./theme/themes.ts";
 import { syncPush } from "./notify.ts";
 import { Nav, type Tab } from "./Nav.tsx";
 import { InstallPrompt } from "./Install.tsx";
@@ -32,8 +32,9 @@ function OffGridChip() {
 
 export function App() {
   const [tab, setTab] = useState<Tab>("today");
-  const { activeTheme } = useSettings();
+  const { activeTheme, activeFx } = useSettings();
   useEffect(() => applyTheme(activeTheme), [activeTheme]);
+  useEffect(() => applyFx(activeFx ?? []), [activeFx]);
   // Re-upload reminder slots on every open (handles DST drift; harmless no-op
   // when push was never enabled).
   useEffect(() => {

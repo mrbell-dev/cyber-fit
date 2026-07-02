@@ -15,7 +15,7 @@ Pure-core engine pattern (see CLAUDE.md).
       deploy the relay to a Cloudflare account (`worker/`, see SELF-HOSTING.md), bake
       `VITE_RELAY_URL` + `VITE_VAPID_PUBLIC_KEY` into the Pages build, test on real
       iPhone (A2HS) + Android
-- [ ] **Phase 5 — Augment catalog + fx + v1.0**
+- [x] **Phase 5 — Augment catalog + fx + polish** (v1.0 tag after real-device push test)
 
 ## Why this app exists
 

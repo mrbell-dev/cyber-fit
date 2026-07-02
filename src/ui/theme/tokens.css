@@ -997,3 +997,14 @@ html.theme-ice {
   letter-spacing: 0.08em;
   color: var(--neon-yellow);
 }
+
+/* ---------- system report ---------- */
+.report-line {
+  margin: 0 0 6px;
+  font-size: 14px;
+}
+
+.report-line span {
+  color: var(--neon-green);
+  font-family: var(--font-mono);
+}

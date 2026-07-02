@@ -111,6 +111,8 @@ export interface Settings {
   /** self-hosted push relay overrides (optional; empty = use build defaults) */
   relayUrl?: string;
   relayVapidKey?: string;
+  /** enabled fx augment ids (opt-in; motion fx also respect prefers-reduced-motion) */
+  activeFx?: string[];
 }
 
 export const DEFAULT_SETTINGS: Settings = {

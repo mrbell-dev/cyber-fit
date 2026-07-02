@@ -7,6 +7,7 @@ import "@fontsource/ibm-plex-sans/400.css";
 import "@fontsource/ibm-plex-sans/600.css";
 import "@fontsource/ibm-plex-mono/400.css";
 import "./ui/theme/tokens.css";
+import "./ui/theme/fx.css";
 import { App } from "./ui/App.tsx";
 
 createRoot(document.getElementById("root")!).render(

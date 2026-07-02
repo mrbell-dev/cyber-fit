@@ -1,0 +1,48 @@
+/* Cosmetic fx augments. Every effect is opt-in via a settings toggle AND all
+   motion respects prefers-reduced-motion — flavor never costs accessibility. */
+
+/* ---------- scanlines (static overlay, safe for reduced motion) ---------- */
+html.fx-scanlines body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 200;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2px,
+    rgba(0, 0, 0, 0.12) 3px,
+    transparent 4px
+  );
+}
+
+/* ---------- glitch title ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  html.fx-glitch-title .app-title {
+    animation: title-glitch 6s infinite steps(1);
+  }
+
+  @keyframes title-glitch {
+    0%, 93%, 100% { text-shadow: none; transform: none; }
+    94% { text-shadow: -2px 0 var(--neon-magenta), 2px 0 var(--neon-green); transform: translateX(1px); }
+    95% { text-shadow: 2px 0 var(--neon-purple), -2px 0 var(--neon-yellow); transform: translateX(-1px); }
+    96% { text-shadow: -1px 0 var(--neon-green), 1px 0 var(--neon-magenta); transform: none; }
+    97% { text-shadow: none; transform: none; }
+  }
+}
+
+/* ---------- CRT flicker ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  html.fx-crt-flicker #root {
+    animation: crt-flicker 4s infinite;
+  }
+
+  @keyframes crt-flicker {
+    0%, 100% { opacity: 1; }
+    97% { opacity: 1; }
+    97.5% { opacity: 0.96; }
+    98% { opacity: 1; }
+    99% { opacity: 0.98; }
+  }
+}

@@ -22,3 +22,10 @@ export function applyTheme(id: string): void {
   for (const t of THEMES) html.classList.remove(`theme-${t.id}`);
   html.classList.add(`theme-${id}`);
 }
+
+export const FX_IDS = ["fx-scanlines", "fx-glitch-title", "fx-crt-flicker"];
+
+export function applyFx(active: string[]): void {
+  const html = document.documentElement;
+  for (const id of FX_IDS) html.classList.toggle(id, active.includes(id));
+}
