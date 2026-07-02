@@ -1,0 +1,283 @@
+/* ============================================================
+   cyber-fit design tokens — default theme: "Electric City"
+   Contrast rules: --neon-green / --neon-yellow are text-safe on
+   the navy bg; --neon-magenta / --neon-purple are ACCENT-ONLY
+   (glows, borders, large display type, fills) — never body text.
+   ============================================================ */
+
+:root,
+html.theme-electric-city {
+  /* palette */
+  --bg: #1b1b2a;
+  --bg-raised: #23233a;
+  --bg-sunken: #14141f;
+  --neon-magenta: #ff007a;
+  --neon-green: #00ffb3;
+  --neon-purple: #a700ff;
+  --neon-yellow: #ffea00;
+
+  /* text */
+  --text: #e8e8f2;
+  --text-dim: #9a9ab0;
+  --text-accent: var(--neon-green);
+
+  /* semantic */
+  --accent: var(--neon-magenta);
+  --accent-2: var(--neon-green);
+  --warn: var(--neon-yellow);
+  --border: #34344e;
+
+  /* glows (accent-only usage) */
+  --glow-magenta: 0 0 6px rgba(255, 0, 122, 0.7), 0 0 18px rgba(255, 0, 122, 0.35);
+  --glow-green: 0 0 6px rgba(0, 255, 179, 0.6), 0 0 18px rgba(0, 255, 179, 0.3);
+  --glow-purple: 0 0 8px rgba(167, 0, 255, 0.6);
+
+  /* type */
+  --font-display: "Chakra Petch", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  /* layout */
+  --nav-height: 64px;
+  --radius: 10px;
+  --tap-min: 48px;
+}
+
+/* ---------- base ---------- */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+
+#root {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 0 0 0.5em;
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---------- app shell ---------- */
+.screen {
+  flex: 1;
+  padding: 16px 16px calc(var(--nav-height) + env(safe-area-inset-bottom) + 16px);
+  max-width: 640px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.app-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: calc(env(safe-area-inset-top) + 12px) 16px 4px;
+  max-width: 640px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.app-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text);
+  margin: 0;
+}
+
+.app-title .slash {
+  color: var(--neon-magenta);
+  text-shadow: var(--glow-magenta);
+}
+
+/* off-grid / online status chip */
+.status-chip {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+
+.status-chip.offgrid {
+  color: var(--neon-green);
+  border-color: var(--neon-green);
+  box-shadow: var(--glow-green);
+}
+
+/* ---------- bottom nav ---------- */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(var(--nav-height) + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  display: flex;
+  background: var(--bg-sunken);
+  border-top: 1px solid var(--border);
+  z-index: 10;
+}
+
+.bottom-nav button {
+  flex: 1;
+  min-height: var(--tap-min);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  border-top: 2px solid transparent;
+}
+
+.bottom-nav button[aria-current="page"] {
+  color: var(--neon-green);
+  border-top-color: var(--neon-magenta);
+  text-shadow: var(--glow-green);
+}
+
+.bottom-nav .glyph {
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* ---------- cards & common bits ---------- */
+.card {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 12px;
+}
+
+.card .card-title {
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin: 0 0 8px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tap-min);
+  padding: 0 20px;
+  border-radius: var(--radius);
+  border: 1px solid var(--neon-magenta);
+  color: var(--text);
+  font-family: var(--font-display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: rgba(255, 0, 122, 0.08);
+}
+
+.btn:active {
+  box-shadow: var(--glow-magenta);
+}
+
+.btn.ghost {
+  border-color: var(--border);
+  background: none;
+  color: var(--text-dim);
+}
+
+.placeholder {
+  font-family: var(--font-mono);
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+/* ---------- install prompt ---------- */
+.install-banner {
+  display: block;
+  width: 100%;
+  min-height: var(--tap-min);
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  border: 1px dashed var(--neon-purple);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 14px;
+  text-align: left;
+  background: rgba(167, 0, 255, 0.06);
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 18, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100;
+}
+
+.modal {
+  background: var(--bg-raised);
+  border: 1px solid var(--neon-magenta);
+  box-shadow: var(--glow-magenta);
+  border-radius: var(--radius);
+  padding: 20px;
+  max-width: 420px;
+  width: 100%;
+}
+
+.install-steps {
+  padding-left: 20px;
+  margin: 12px 0;
+}
+
+.install-steps li {
+  margin-bottom: 8px;
+}
+
+.install-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}

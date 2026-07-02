@@ -1,0 +1,5 @@
+// The ONLY public surface of the engine. UI and db import from here — never from
+// individual engine modules. Keep the engine pure: no DOM, no IO, no Date.now(),
+// no Math.random() (clock and RNG are injected via ctx).
+
+export * from "./time.ts";
