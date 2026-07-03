@@ -83,6 +83,10 @@ push verified on Michael's iPhone.
       second device pulls + decrypts. Server sees only ciphertext. No accounts
       (accounts-first was rejected: privacy, liability, migration gravity).
       Plus scheduled auto-export via File System Access into any synced folder.
+      SHIPPED addendum: auto-push on every app open (opt-in) via a stored
+      NON-EXTRACTABLE derived key — "scheduled" on the web means on-open, since
+      PWAs can't run closed (no reliable background cron; none at all on iOS).
+      Native ports (Tier LT) would unlock true background sync.
 - [x] **Notification deep links:** tapping a workout ping opens straight into
       a record-workout popup (SW notificationclick → URL param → modal);
       client-side slot→kind map; relay stays schedule-blind.
