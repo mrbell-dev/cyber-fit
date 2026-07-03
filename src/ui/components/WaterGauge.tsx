@@ -1,11 +1,20 @@
 import type { WaterLog } from "../../engine/index.ts";
-import { waterTotal } from "../../engine/index.ts";
+import { formatWater, waterQuickSizes, waterTotal } from "../../engine/index.ts";
 import { logWater } from "../../db/repo.ts";
 
-export function WaterGauge({ logs, goalMl }: { logs: WaterLog[]; goalMl: number }) {
+export function WaterGauge({
+  logs,
+  goalMl,
+  unit,
+}: {
+  logs: WaterLog[];
+  goalMl: number;
+  unit: "ml" | "oz";
+}) {
   const total = waterTotal(logs);
   const pct = Math.min(100, Math.round((total / goalMl) * 100));
   const met = total >= goalMl;
+  const sizes = waterQuickSizes(unit);
 
   return (
     <div className="card">
@@ -20,22 +29,22 @@ export function WaterGauge({ logs, goalMl }: { logs: WaterLog[]; goalMl: number 
       >
         <div className={met ? "water-fill met" : "water-fill"} style={{ width: `${pct}%` }} />
         <span className="water-label">
-          {total} / {goalMl} ml{met ? " — GOAL SYNCED" : ""}
+          {formatWater(total, unit)} / {formatWater(goalMl, unit)}
+          {met ? " — GOAL SYNCED" : ""}
         </span>
       </div>
       <div className="water-actions">
-        <button className="btn water-btn" onClick={() => logWater(250)}>
-          +250
-        </button>
-        <button className="btn water-btn" onClick={() => logWater(500)}>
-          +500
-        </button>
+        {sizes.map((s) => (
+          <button key={s.label} className="btn water-btn" onClick={() => logWater(s.ml)}>
+            {s.label}
+          </button>
+        ))}
         <button
           className="btn ghost water-btn"
-          onClick={() => total > 0 && logWater(-250)}
-          aria-label="Undo 250 ml"
+          onClick={() => total > 0 && logWater(-sizes[0].ml)}
+          aria-label={`Undo ${sizes[0].label.slice(1)}`}
         >
-          −250
+          −{sizes[0].label.slice(1)}
         </button>
       </div>
     </div>

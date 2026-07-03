@@ -176,6 +176,8 @@ export interface Settings {
   activeFx?: string[];
   weightUnit?: "lbs" | "kg";
   distanceUnit?: "mi" | "km";
+  /** display/input unit for water — storage stays canonical ml */
+  waterUnit?: "ml" | "oz";
   /** how often the user wants to weigh in; XP spacing scales with it */
   weighinCadence?: WeighinCadence;
 }

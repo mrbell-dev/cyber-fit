@@ -16,3 +16,14 @@ describe("water", () => {
     expect(waterGoalMet([ml(1999)], 2000)).toBe(false);
   });
 });
+
+describe("units", () => {
+  it("oz conversions round-trip within rounding", async () => {
+    const { mlToOz, ozToMl, formatWater, waterQuickSizes } = await import("./water.ts");
+    expect(ozToMl(128)).toBe(3785); // Michael's daily goal
+    expect(mlToOz(3785)).toBe(128);
+    expect(formatWater(3785, "oz")).toBe("128 oz");
+    expect(formatWater(500, "ml")).toBe("500 ml");
+    expect(waterQuickSizes("oz").map((s) => s.label)).toEqual(["+8 oz", "+16 oz"]);
+  });
+});

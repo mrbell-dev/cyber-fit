@@ -1198,3 +1198,38 @@ html.theme-ice {
   color: var(--text-dim);
   border: 1px dashed var(--border);
 }
+
+/* ---------- card header with quick-add ---------- */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-add {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--neon-magenta);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 20px;
+  line-height: 1;
+  background: rgba(255, 0, 122, 0.08);
+  margin-bottom: 8px;
+}
+
+.card-add:active {
+  box-shadow: var(--glow-magenta);
+}
+
+/* ---------- boot modal ---------- */
+.modal.boot-modal {
+  text-align: center;
+  border-color: var(--neon-green);
+  box-shadow: var(--glow-green);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  padding: 28px 20px;
+}

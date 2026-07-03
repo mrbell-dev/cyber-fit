@@ -57,14 +57,10 @@ export function MissedPing({ today }: { today: DayKey }) {
   const latestTs = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, latest.minutes).getTime();
   if (info.lastLogTs >= latestTs) return null;
 
-  const missed = due.filter((p) => {
-    const ts = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, p.minutes).getTime();
-    return ts > info.lastLogTs;
-  });
-
+  // Doctrine: never show a count. One gentle line, the most recent thing due.
   return (
     <div className="missed-ping" role="status">
-      <span className="missed-ping-title">⚠ MISSED PING ×{missed.length}</span>
+      <span className="missed-ping-title">▸ PING WAITING</span>
       <span>
         {latest.kind === "habit" && latest.label
           ? `Directive window open: ${latest.label}`

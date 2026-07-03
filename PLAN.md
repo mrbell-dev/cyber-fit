@@ -24,17 +24,17 @@ push verified on Michael's iPhone.
 
 ### TIER S — now (tone, trust, Michael's daily loop)
 
-- [ ] **Welcome-back, not missed-ping.** Delete the MISSED PING ×N banner.
+- [x] **Welcome-back, not missed-ping.** Delete the MISSED PING ×N banner.
       Gap ≥ 2 days → warm full-screen popup ("Good to see you, choom. Ready
       for a new gig?") — no counts, no backlog, ever. Same-day nudge keeps
       current gentle copy. (Doctrine: CLAUDE.md rule 6.)
-- [ ] **Boot popups, gravedigger-style.** Morning + afternoon first-open
+- [x] **Boot popups, gravedigger-style.** Morning + afternoon first-open
       greetings become one-tap full-screen modals; evening/late stay inline.
-- [ ] **Hydration units + goal:** ml/oz with US quick sizes (8/16 oz), fully
+- [x] **Hydration units + goal:** ml/oz with US quick sizes (8/16 oz), fully
       user-defined goal (Michael: 128 oz). Gauge, config, XP, stats all honor it.
-- [ ] **+ quick-add on Directives header** (opens editor); remove the Suggested
+- [x] **+ quick-add on Directives header** (opens editor); remove the Suggested
       Protocols card (suggestions fold into the + flow / library).
-- [ ] **About: Buy Me a Coffee** → https://buymeacoffee.com/mrbell.dev (also
+- [x] **About: Buy Me a Coffee** → https://buymeacoffee.com/mrbell.dev (also
       fix README #support anchor).
 
 ### TIER A — daily-driver depth

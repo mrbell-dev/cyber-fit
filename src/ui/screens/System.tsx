@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../../db/db.ts";
-import { AREAS, AUGMENTS, PRESETS, type PlayerState } from "../../engine/index.ts";
+import { AREAS, AUGMENTS, mlToOz, ozToMl, PRESETS, type PlayerState } from "../../engine/index.ts";
 import { archiveHabit, deleteHabit, saveSettings } from "../../db/repo.ts";
 import { downloadExport, exportJson, importJson } from "../../db/export.ts";
 import { THEMES } from "../theme/themes.ts";
@@ -260,8 +260,8 @@ function About() {
         <a href={REPO_URL} target="_blank" rel="noreferrer">
           ⌥ contribute on GitHub
         </a>
-        <a href={`${REPO_URL}#support`} target="_blank" rel="noreferrer">
-          ◈ chip in $1 for server costs
+        <a href="https://buymeacoffee.com/mrbell.dev" target="_blank" rel="noreferrer">
+          ◈ buy me a coffee — keeps the relay lit
         </a>
         <a href={`${REPO_URL}/blob/main/SELF-HOSTING.md`} target="_blank" rel="noreferrer">
           ⚙ self-host the notification relay
@@ -281,15 +281,29 @@ export function System() {
       <div className="card">
         <h2 className="card-title">Config</h2>
         <label className="check-label">
-          Daily water goal (ml)
+          Daily water goal
           <input
             type="number"
             className="input num-input"
-            min={250}
-            step={250}
-            value={settings.waterGoalMl}
-            onChange={(e) => saveSettings({ waterGoalMl: Math.max(250, Number(e.target.value) || 2000) })}
+            min={settings.waterUnit === "oz" ? 8 : 250}
+            step={settings.waterUnit === "oz" ? 8 : 250}
+            value={settings.waterUnit === "oz" ? mlToOz(settings.waterGoalMl) : settings.waterGoalMl}
+            onChange={(e) => {
+              const v = Number(e.target.value) || 0;
+              const ml = settings.waterUnit === "oz" ? ozToMl(v) : v;
+              saveSettings({ waterGoalMl: Math.max(237, ml || 2000) });
+            }}
+            aria-label="Daily water goal"
           />
+          <select
+            className="input"
+            value={settings.waterUnit ?? "ml"}
+            onChange={(e) => saveSettings({ waterUnit: e.target.value as "ml" | "oz" })}
+            aria-label="Water unit"
+          >
+            <option value="ml">ml</option>
+            <option value="oz">oz</option>
+          </select>
         </label>
         <label className="check-label">
           Day rolls over at

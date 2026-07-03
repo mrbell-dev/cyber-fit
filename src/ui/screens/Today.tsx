@@ -18,7 +18,8 @@ import { MoodRow } from "../components/MoodRow.tsx";
 import { MissedPing } from "../components/MissedPing.tsx";
 import { Highlight } from "../components/Highlight.tsx";
 import { DailyBoot } from "../components/DailyBoot.tsx";
-import { Suggestions } from "../components/Suggestions.tsx";
+import { HabitEditor, type EditorSeed } from "../components/HabitEditor.tsx";
+import { useState } from "react";
 
 function habitView(habit: Habit, logs: HabitLog[], today: DayKey) {
   const byDay = new Map<DayKey, HabitLog[]>();
@@ -43,6 +44,7 @@ function habitView(habit: Habit, logs: HabitLog[], today: DayKey) {
 export function Today() {
   const today = useDayKey();
   const settings = useSettings();
+  const [editorSeed, setEditorSeed] = useState<EditorSeed | null>(null);
 
   const TIME_RANK: Record<string, number> = { morning: 0, day: 1, evening: 2, anytime: 3 };
   const habits = useLiveQuery(async () => {
@@ -68,8 +70,15 @@ export function Today() {
       <DailyBoot today={today} />
       <MissedPing today={today} />
       <XpBar />
+      {editorSeed && <HabitEditor seed={editorSeed} onClose={() => setEditorSeed(null)} />}
+
       <div className="card">
-        <h2 className="card-title">Directives — {today}</h2>
+        <div className="card-header">
+          <h2 className="card-title">Directives — {today}</h2>
+          <button className="card-add" aria-label="New directive" onClick={() => setEditorSeed({})}>
+            +
+          </button>
+        </div>
         {habits.length === 0 ? (
           <>
             <p className="lore">
@@ -110,13 +119,11 @@ export function Today() {
         )}
       </div>
 
-      <WaterGauge logs={waterLogs} goalMl={settings.waterGoalMl} />
+      <WaterGauge logs={waterLogs} goalMl={settings.waterGoalMl} unit={settings.waterUnit ?? "ml"} />
 
       <MoodRow today={today} />
 
       <Highlight today={today} />
-
-      <Suggestions />
     </section>
   );
 }

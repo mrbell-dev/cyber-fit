@@ -52,6 +52,12 @@ https://cyberfit.dev, `npm run deploy:relay` ships the optional push relay to
 https://relay.cyberfit.dev. CI (GitHub Actions) runs tests + build on every
 push. See SELF-HOSTING.md to run your own relay.
 
+## Support
+
+The app is free forever and the infrastructure costs ~$12/year (the domain).
+If you want to chip in anyway: [Buy Me a Coffee](https://buymeacoffee.com/mrbell.dev)
+— it keeps the notification relay lit.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
