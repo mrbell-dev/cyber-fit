@@ -13,3 +13,4 @@ export * from "./reading.ts";
 export * from "./reminders.ts";
 export * from "./presets.ts";
 export * from "./exercises.ts";
+export * from "./tags.ts";

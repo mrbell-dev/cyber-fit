@@ -106,6 +106,18 @@ export async function disablePush(): Promise<void> {
   await sub.unsubscribe();
 }
 
+/** Immediate self-test: asks the relay to push to THIS device right now. */
+export async function testPush(): Promise<{ ok: boolean; reason?: string }> {
+  if (!pushSupported()) return { ok: false, reason: "push unsupported here" };
+  const relay = await relayConfig();
+  if (!relay.url) return { ok: false, reason: "no relay configured" };
+  const reg = await navigator.serviceWorker.ready;
+  const sub = await reg.pushManager.getSubscription();
+  if (!sub) return { ok: false, reason: "not subscribed — enable push first" };
+  const ok = await postJson(relay.url, "/test", { subscription: sub.toJSON() });
+  return ok ? { ok: true } : { ok: false, reason: "relay declined the test ping" };
+}
+
 export async function pushActive(): Promise<boolean> {
   if (!pushSupported() || Notification.permission !== "granted") return false;
   const reg = await navigator.serviceWorker.ready;

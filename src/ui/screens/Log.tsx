@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../../db/db.ts";
-import { EXERCISES, type ReadingItem, type ReadingLog } from "../../engine/index.ts";
+import {
+  EXERCISES,
+  WORKOUT_STYLES,
+  type ReadingItem,
+  type ReadingLog,
+  type WorkoutLog,
+} from "../../engine/index.ts";
 import { addReadingItem, logReading, logWorkout, setReadingStatus } from "../../db/repo.ts";
 import { useDayKey, useSettings } from "../hooks.ts";
 import { BodyCard } from "../components/BodyMetrics.tsx";
@@ -10,28 +16,36 @@ function WorkoutCard() {
   const [name, setName] = useState("");
   const [minutes, setMinutes] = useState("");
   const [distance, setDistance] = useState("");
+  const [style, setStyle] = useState<NonNullable<WorkoutLog["style"]>>("sets");
+  const [score, setScore] = useState("");
   const today = useDayKey();
   const settings = useSettings();
   const distanceUnit = settings.distanceUnit ?? "mi";
 
-  const recent = useLiveQuery(async () => {
+  const history = useLiveQuery(async () => {
     const all = await db.workoutLogs.toArray();
-    return all.sort((a, b) => b.ts - a.ts).slice(0, 5);
+    return all.sort((a, b) => b.ts - a.ts);
   }, []);
-  // Your own history first, then the bundled offline exercise vocabulary.
-  const pastNames = [...new Set((recent ?? []).map((w) => w.name))];
+  const recent = history?.slice(0, 5);
+  // Your ENTIRE workout history feeds autocomplete (custom names included),
+  // then the bundled offline exercise vocabulary.
+  const pastNames = [...new Set((history ?? []).map((w) => w.name))];
   const suggestions = [...pastNames, ...EXERCISES.filter((e) => !pastNames.includes(e))];
+  const styleDef = WORKOUT_STYLES.find((s) => s.id === style)!;
 
   const submit = async () => {
     if (!name.trim()) return;
     await logWorkout({
       name,
+      style,
+      score,
       durationMin: Number(minutes) || undefined,
       distance: Number(distance) || undefined,
     });
     setName("");
     setMinutes("");
     setDistance("");
+    setScore("");
   };
 
   return (
@@ -52,6 +66,27 @@ function WorkoutCard() {
             <option key={n} value={n} />
           ))}
         </datalist>
+      </div>
+      <div className="chip-row" role="group" aria-label="Workout style">
+        {WORKOUT_STYLES.map((s) => (
+          <button
+            key={s.id}
+            className={style === s.id ? "chip on" : "chip"}
+            aria-pressed={style === s.id}
+            onClick={() => setStyle(s.id)}
+          >
+            {s.label}
+          </button>
+        ))}
+      </div>
+      <div className="form-row">
+        <input
+          className="input"
+          value={score}
+          onChange={(e) => setScore(e.target.value)}
+          placeholder={`score — ${styleDef.scoreHint}`}
+          aria-label="Score or result"
+        />
       </div>
       <div className="form-row">
         <input
@@ -86,6 +121,8 @@ function WorkoutCard() {
               <span>
                 {w.dayKey === today ? "▸ " : ""}
                 {w.name}
+                {w.style ? ` · ${WORKOUT_STYLES.find((s) => s.id === w.style)?.label ?? w.style}` : ""}
+                {w.score ? ` · ${w.score}` : ""}
                 {w.durationMin ? ` · ${w.durationMin} min` : ""}
                 {w.distance ? ` · ${w.distance} ${distanceUnit}` : ""}
               </span>
@@ -94,6 +131,10 @@ function WorkoutCard() {
           ))}
         </div>
       )}
+      <p className="placeholder">
+        // any name you type is saved to your own history — the list above is just suggestions.
+        drop #tags in names and notes to slice them later
+      </p>
     </div>
   );
 }

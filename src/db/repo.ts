@@ -157,6 +157,8 @@ export async function logWater(ml: number, dayKey?: DayKey): Promise<WaterLog> {
 
 export async function logWorkout(input: {
   name: string;
+  style?: WorkoutLog["style"];
+  score?: string;
   durationMin?: number;
   distance?: number;
   note?: string;
@@ -166,6 +168,8 @@ export async function logWorkout(input: {
     dayKey: await currentDayKey(),
     ts: Date.now(),
     name: input.name.trim(),
+    ...(input.style && input.style !== "sets" ? { style: input.style } : {}),
+    ...(input.score?.trim() ? { score: input.score.trim() } : {}),
     ...(input.durationMin ? { durationMin: input.durationMin } : {}),
     ...(input.distance ? { distance: input.distance } : {}),
     ...(input.note?.trim() ? { note: input.note.trim() } : {}),

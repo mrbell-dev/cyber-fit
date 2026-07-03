@@ -56,6 +56,15 @@ export default {
       return json({ ok: true }, 200, headers);
     }
 
+    // Immediate test ping — pushes only to the subscription supplied in the
+    // request (you can only ping yourself), so no auth needed.
+    if (url.pathname === "/test") {
+      const err = validateRecord({ subscription: body?.subscription, slots: [] });
+      if (err) return json({ error: err }, 400, headers);
+      const ok = await sendPush(env, body.subscription, "TEST PING — uplink verified. Welcome to Night City.");
+      return json({ ok }, ok ? 200 : 502, headers);
+    }
+
     return json({ error: "not found" }, 404, headers);
   },
 
@@ -64,30 +73,36 @@ export default {
   },
 };
 
+async function sendPush(env, subscription, text) {
+  try {
+    const { endpoint, headers, body } = await buildPushHTTPRequest({
+      privateJWK: JSON.parse(env.VAPID_PRIVATE_JWK),
+      subscription,
+      message: {
+        // Generic on purpose — the app picks the themed copy locally.
+        payload: { title: "cyber-fit", body: text },
+        adminContact: env.ADMIN_CONTACT || "mailto:admin@example.com",
+        options: { ttl: 3600, urgency: "normal" },
+      },
+    });
+    const res = await fetch(endpoint, { method: "POST", headers, body });
+    // 404/410 = subscription expired or revoked — clean it up.
+    if (res.status === 404 || res.status === 410) {
+      await deleteSub(env.SUBS, subscription.endpoint);
+      return false;
+    }
+    return res.ok || res.status === 201;
+  } catch {
+    // Never let one bad subscription break the batch; never log details.
+    return false;
+  }
+}
+
 async function dispatch(env, now) {
   const slot = slotOf(now);
   const subs = await listSubs(env.SUBS);
-
   for (const record of subs) {
     if (!record.slots.includes(slot)) continue;
-    try {
-      const { endpoint, headers, body } = await buildPushHTTPRequest({
-        privateJWK: JSON.parse(env.VAPID_PRIVATE_JWK),
-        subscription: record.subscription,
-        message: {
-          // Generic on purpose — the app picks the themed copy locally.
-          payload: { title: "cyber-fit", body: "Time to sync." },
-          adminContact: env.ADMIN_CONTACT || "mailto:admin@example.com",
-          options: { ttl: 3600, urgency: "normal" },
-        },
-      });
-      const res = await fetch(endpoint, { method: "POST", headers, body });
-      // 404/410 = subscription expired or revoked — clean it up.
-      if (res.status === 404 || res.status === 410) {
-        await deleteSub(env.SUBS, record.subscription.endpoint);
-      }
-    } catch {
-      // Never let one bad subscription break the batch; never log details.
-    }
+    await sendPush(env, record.subscription, "Time to sync.");
   }
 }

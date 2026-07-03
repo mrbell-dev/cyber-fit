@@ -72,11 +72,23 @@ export interface WorkoutLog {
   ts: number;
   /** fast path: just a name ("Lift", "5k walk") */
   name: string;
+  /** workout format — plain sets, or conditioning styles with a score */
+  style?: "sets" | "amrap" | "emom" | "fortime" | "tabata";
+  /** style-dependent result, e.g. "12 rounds + 5 reps" (AMRAP), "14:32" (for time) */
+  score?: string;
   durationMin?: number;
   distance?: number; // in the user's display unit (mi/km per settings)
   note?: string;
   exercises?: { name: string; sets?: { reps?: number; weight?: number }[] }[];
 }
+
+export const WORKOUT_STYLES: { id: NonNullable<WorkoutLog["style"]>; label: string; scoreHint: string }[] = [
+  { id: "sets", label: "Sets × reps", scoreHint: "e.g. 5×5 @ 225" },
+  { id: "amrap", label: "AMRAP", scoreHint: "rounds + reps, e.g. 12+5" },
+  { id: "emom", label: "EMOM", scoreHint: "e.g. 20 min, all rounds held" },
+  { id: "fortime", label: "For time", scoreHint: "e.g. 14:32" },
+  { id: "tabata", label: "Tabata", scoreHint: "e.g. 8 rounds, low score 9" },
+];
 
 /** Body metrics — monthly weigh-ins by design (fluctuations are noise; trend is signal). */
 export interface BodyLog {

@@ -4,7 +4,7 @@ import { db } from "../../db/db.ts";
 import { DEFAULT_REMINDERS, type Reminders } from "../../engine/index.ts";
 import { saveSettings } from "../../db/repo.ts";
 import { useSettings } from "../hooks.ts";
-import { disablePush, enablePush, pushActive, saveReminders, syncPush } from "../notify.ts";
+import { disablePush, enablePush, pushActive, saveReminders, syncPush, testPush } from "../notify.ts";
 
 const WEEKDAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 
@@ -50,9 +50,23 @@ export function ReminderUplink() {
         slots — your schedule, logs, and identity never leave this device
       </p>
 
-      <button className={active ? "btn ghost" : "btn"} onClick={toggle}>
-        {active ? "Sever uplink" : "Enable push reminders"}
-      </button>
+      <div className="form-row">
+        <button className={active ? "btn ghost" : "btn"} onClick={toggle}>
+          {active ? "Sever uplink" : "Enable push reminders"}
+        </button>
+        {active && (
+          <button
+            className="btn"
+            onClick={async () => {
+              setStatus("Test ping requested — lock your phone and watch for it…");
+              const r = await testPush();
+              if (!r.ok) setStatus(`Test failed: ${r.reason}`);
+            }}
+          >
+            Send test ping
+          </button>
+        )}
+      </div>
       {status && <p className="placeholder">// {status}</p>}
 
       <div className="form-block">
