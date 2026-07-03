@@ -19,6 +19,14 @@ describe("vault crypto", () => {
     expect(a).not.toBe(b);
   });
 
+  it("stored-key blobs decrypt with the original passphrase (cross-device)", async () => {
+    const { deriveStoredKey, encryptWithKey } = await import("./vault.ts");
+    const { key, salt } = await deriveStoredKey("shared secret");
+    const blob = await encryptWithKey("auto-sync payload", key, salt);
+    expect(await decryptVault(blob, "shared secret")).toBe("auto-sync payload");
+    await expect(decryptVault(blob, "other")).rejects.toThrow();
+  });
+
   it("vault ids are 32 hex chars", () => {
     expect(randomVaultId()).toMatch(/^[0-9a-f]{32}$/);
     expect(randomVaultId()).not.toBe(randomVaultId());

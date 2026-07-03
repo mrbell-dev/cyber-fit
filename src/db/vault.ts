@@ -34,11 +34,10 @@ async function deriveKey(passphrase: string, salt: Uint8Array): Promise<CryptoKe
   );
 }
 
-/** plaintext + passphrase → base64(salt ‖ iv ‖ ciphertext) */
-export async function encryptVault(plaintext: string, passphrase: string): Promise<string> {
-  const salt = crypto.getRandomValues(new Uint8Array(16));
+/** plaintext + key + salt → base64(salt ‖ iv ‖ ciphertext). The salt rides
+ *  along so the other device can re-derive the key from the passphrase. */
+export async function encryptWithKey(plaintext: string, key: CryptoKey, salt: Uint8Array): Promise<string> {
   const iv = crypto.getRandomValues(new Uint8Array(12));
-  const key = await deriveKey(passphrase, salt);
   const ct = new Uint8Array(
     await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv as BufferSource }, key, enc.encode(plaintext)),
   );
@@ -47,6 +46,24 @@ export async function encryptVault(plaintext: string, passphrase: string): Promi
   out.set(iv, salt.length);
   out.set(ct, salt.length + iv.length);
   return toB64(out);
+}
+
+/** plaintext + passphrase → base64(salt ‖ iv ‖ ciphertext) */
+export async function encryptVault(plaintext: string, passphrase: string): Promise<string> {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  return encryptWithKey(plaintext, await deriveKey(passphrase, salt), salt);
+}
+
+/** For auto-sync: derive once, keep the NON-EXTRACTABLE key + salt on-device
+ *  so every app open can push fresh ciphertext without re-entering the
+ *  passphrase. The key can encrypt but never be exported — and the local
+ *  data it protects is already plaintext on this device, so this stores
+ *  nothing more sensitive than what's already here. */
+export async function deriveStoredKey(
+  passphrase: string,
+): Promise<{ key: CryptoKey; salt: Uint8Array }> {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  return { key: await deriveKey(passphrase, salt), salt };
 }
 
 /** Throws on wrong passphrase or corrupt blob (GCM authenticates). */

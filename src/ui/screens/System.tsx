@@ -4,9 +4,9 @@ import { db } from "../../db/db.ts";
 import { AREAS, AUGMENTS, mlToOz, ozToMl, type PlayerState } from "../../engine/index.ts";
 import { archiveHabit, deleteHabit, saveSettings } from "../../db/repo.ts";
 import { downloadExport, exportJson, importJson } from "../../db/export.ts";
-import { decryptVault, encryptVault, randomVaultId } from "../../db/vault.ts";
+import { decryptVault, deriveStoredKey, encryptVault, randomVaultId } from "../../db/vault.ts";
 import { relayConfig } from "../notify.ts";
-import { writeLinkedBackup } from "../backupFile.ts";
+import { autoVaultPush, writeLinkedBackup } from "../backupFile.ts";
 import { THEMES } from "../theme/themes.ts";
 import { ReminderUplink } from "../components/ReminderUplink.tsx";
 import { HabitEditor, type EditorSeed } from "../components/HabitEditor.tsx";
@@ -180,6 +180,21 @@ function VaultSync() {
     async () => (await db.kv.get("vaultSync"))?.value as { id: string } | undefined,
     [],
   );
+  const auto = useLiveQuery(async () => Boolean((await db.kv.get("vaultAuto"))?.value), []);
+
+  const toggleAuto = async (on: boolean) => {
+    if (!on) {
+      await db.kv.delete("vaultAuto");
+      return setMsg("auto-sync off — manual push still works");
+    }
+    if (pass.length < 8) return setMsg("enter your passphrase first to enable auto-sync");
+    const id = sync?.id ?? randomVaultId();
+    const { key, salt } = await deriveStoredKey(pass);
+    await db.kv.put({ key: "vaultAuto", value: { id, key, salt: salt.buffer } });
+    await db.kv.put({ key: "vaultSync", value: { id, lastPush: Date.now() } });
+    await autoVaultPush();
+    setMsg(`auto-sync on — pushes fresh ciphertext on every app open. vault id: ${id}`);
+  };
 
   const push = async () => {
     const relay = await relayConfig();
@@ -247,6 +262,17 @@ function VaultSync() {
         placeholder={sync?.id ? `vault id: ${sync.id}` : "vault id (from your other device)"}
         aria-label="Vault id"
       />
+      <label className="check-label">
+        <input
+          type="checkbox"
+          checked={auto ?? false}
+          onChange={(e) => toggleAuto(e.target.checked)}
+        />
+        auto-push on every app open
+        <span className="off-day-tag">
+          keeps a non-exportable key on this device — the relay still sees only ciphertext
+        </span>
+      </label>
       {msg && <p className="placeholder">// {msg}</p>}
     </>
   );

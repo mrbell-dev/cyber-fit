@@ -11,6 +11,28 @@ interface FileHandleish {
   createWritable: () => Promise<{ write: (s: string) => Promise<void>; close: () => Promise<void> }>;
 }
 
+/** Auto vault push: if the user enabled auto-sync, encrypt with the stored
+ *  non-extractable key and push fresh ciphertext on every app open. */
+export async function autoVaultPush(): Promise<void> {
+  try {
+    const row = await db.kv.get("vaultAuto");
+    const auto = row?.value as { id: string; key: CryptoKey; salt: ArrayBuffer } | undefined;
+    if (!auto?.key) return;
+    const { encryptWithKey } = await import("../db/vault.ts");
+    const { relayConfig } = await import("./notify.ts");
+    const relay = await relayConfig();
+    if (!relay.url) return;
+    const blob = await encryptWithKey(await exportJson(), auto.key, new Uint8Array(auto.salt));
+    await fetch(`${relay.url.replace(/\/$/, "")}/vault`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: auto.id, blob }),
+    });
+  } catch {
+    // sync is a bonus, never a blocker
+  }
+}
+
 export async function writeLinkedBackup(): Promise<void> {
   try {
     const row = await db.kv.get("backupHandle");
