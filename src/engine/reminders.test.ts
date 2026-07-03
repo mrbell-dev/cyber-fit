@@ -55,6 +55,44 @@ describe("slotsFor", () => {
   });
 });
 
+describe("per-habit reminders", () => {
+  const habit = (over: object) => ({
+    id: "h1", name: "Stretch", icon: "🦾", schedule: { kind: "daily" as const },
+    domain: "general" as const, target: 1, createdAt: 0, order: 0, ...over,
+  });
+
+  it("habit with reminderTime pings on its scheduled days only", () => {
+    const h = habit({ schedule: { kind: "weekdays", days: [1, 3] }, reminderTime: "07:15" });
+    const pings = localPings(DEFAULT_REMINDERS, [h]).filter((p) => p.kind === "habit");
+    expect(pings).toHaveLength(1);
+    expect(pings[0]).toMatchObject({ minutes: 435, days: [1, 3], label: "Stretch" });
+  });
+
+  it("no reminderTime or archived → no ping", () => {
+    expect(localPings(DEFAULT_REMINDERS, [habit({})]).filter((p) => p.kind === "habit")).toHaveLength(0);
+    expect(
+      localPings(DEFAULT_REMINDERS, [habit({ reminderTime: "07:00", archivedAt: 1 })])
+        .filter((p) => p.kind === "habit"),
+    ).toHaveLength(0);
+  });
+
+  it("habit slots land in slotsFor", () => {
+    const h = habit({ reminderTime: "07:15" });
+    const slots = slotsFor(DEFAULT_REMINDERS, 0, [h]);
+    for (let d = 0; d < 7; d++) expect(slots).toContain(d * 1440 + 435);
+  });
+});
+
+describe("highlight reminder", () => {
+  it("off by default; on adds a daily ping", () => {
+    expect(localPings(DEFAULT_REMINDERS).some((p) => p.kind === "highlight")).toBe(false);
+    const on = { ...DEFAULT_REMINDERS, highlight: { on: true, time: "19:00" } };
+    const pings = localPings(on).filter((p) => p.kind === "highlight");
+    expect(pings).toHaveLength(1);
+    expect(pings[0].minutes).toBe(1140);
+  });
+});
+
 describe("duePingsToday", () => {
   it("returns only pings already past on a matching weekday", () => {
     // Thursday (4), 12:00 local.

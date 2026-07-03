@@ -2,7 +2,8 @@ import { useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../../db/db.ts";
 import { AUGMENTS, type PlayerState, type Schedule } from "../../engine/index.ts";
-import { addHabit, archiveHabit, deleteHabit, saveSettings } from "../../db/repo.ts";
+import { addHabit, archiveHabit, deleteHabit, saveSettings, updateHabit } from "../../db/repo.ts";
+import { syncPush } from "../notify.ts";
 import { downloadExport, exportJson, importJson } from "../../db/export.ts";
 import { THEMES } from "../theme/themes.ts";
 import { ReminderUplink } from "../components/ReminderUplink.tsx";
@@ -176,6 +177,7 @@ function AddHabitForm() {
   const [days, setDays] = useState<number[]>([1, 2, 3, 4, 5]);
   const [perWeek, setPerWeek] = useState(3);
   const [learning, setLearning] = useState(false);
+  const [reminderTime, setReminderTime] = useState("");
 
   const submit = async () => {
     if (!name.trim()) return;
@@ -185,8 +187,13 @@ function AddHabitForm() {
         : kind === "weekdays"
           ? { kind: "weekdays", days }
           : { kind: "timesPerWeek", target: perWeek };
-    await addHabit({ name, icon, schedule, domain: learning ? "learning" : "general" });
+    const habit = await addHabit({ name, icon, schedule, domain: learning ? "learning" : "general" });
+    if (reminderTime) {
+      await updateHabit(habit.id, { reminderTime });
+      await syncPush();
+    }
     setName("");
+    setReminderTime("");
   };
 
   return (
@@ -259,6 +266,20 @@ function AddHabitForm() {
         </div>
       )}
 
+      <div className="form-row">
+        <label className="check-label">
+          Remind me at
+          <input
+            type="time"
+            className="input time-input"
+            value={reminderTime}
+            onChange={(e) => setReminderTime(e.target.value)}
+            aria-label="Optional reminder time for this directive"
+          />
+          <span className="off-day-tag">optional — clear to skip</span>
+        </label>
+      </div>
+
       <button className="btn" onClick={submit} disabled={!name.trim()}>
         Install directive
       </button>
@@ -282,6 +303,17 @@ export function System() {
               {h.domain === "learning" && <span className="off-day-tag"> · learning</span>}
             </span>
             <span className="row-actions">
+              <input
+                type="time"
+                className="input time-input"
+                value={h.reminderTime ?? ""}
+                onChange={async (e) => {
+                  await updateHabit(h.id, { reminderTime: e.target.value || undefined });
+                  await syncPush();
+                }}
+                aria-label={`Reminder time for ${h.name} (empty = none)`}
+                title="Optional reminder — clear to remove"
+              />
               {confirmDelete === h.id ? (
                 <>
                   <button className="link-btn danger" onClick={() => deleteHabit(h.id)}>

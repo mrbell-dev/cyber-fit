@@ -150,6 +150,23 @@ export function ReminderUplink() {
         <label className="check-label">
           <input
             type="checkbox"
+            checked={reminders.highlight.on}
+            onChange={(e) => update({ highlight: { ...reminders.highlight, on: e.target.checked } })}
+          />
+          Highlight nudge —
+          <input
+            type="time"
+            className="input time-input"
+            value={reminders.highlight.time}
+            onChange={(e) => update({ highlight: { ...reminders.highlight, time: e.target.value } })}
+            aria-label="Highlight reminder time"
+          />
+          <span className="off-day-tag">"One good frame from today."</span>
+        </label>
+
+        <label className="check-label">
+          <input
+            type="checkbox"
             checked={reminders.catchup.on}
             onChange={(e) => update({ catchup: { ...reminders.catchup, on: e.target.checked } })}
           />

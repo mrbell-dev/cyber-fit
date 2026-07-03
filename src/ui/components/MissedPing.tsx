@@ -14,8 +14,9 @@ import {
  */
 export function MissedPing({ today }: { today: DayKey }) {
   const info = useLiveQuery(async () => {
-    const [remRow, habitLogs, waterLogs, moodLogs] = await Promise.all([
+    const [remRow, habits, habitLogs, waterLogs, moodLogs] = await Promise.all([
       db.kv.get("reminders"),
+      db.habits.filter((h) => !h.archivedAt).toArray(),
       db.habitLogs.where({ dayKey: today }).toArray(),
       db.waterLogs.where({ dayKey: today }).toArray(),
       db.moodLogs.where({ dayKey: today }).toArray(),
@@ -27,13 +28,18 @@ export function MissedPing({ today }: { today: DayKey }) {
       ...waterLogs.map((l) => l.ts),
       ...moodLogs.map((l) => l.ts),
     );
-    return { reminders, lastLogTs };
+    return { reminders, habits, lastLogTs };
   }, [today]);
 
   if (!info) return null;
 
   const now = new Date();
-  const due = duePingsToday(info.reminders, now.getDay(), now.getHours() * 60 + now.getMinutes());
+  const due = duePingsToday(
+    info.reminders,
+    now.getDay(),
+    now.getHours() * 60 + now.getMinutes(),
+    info.habits,
+  );
   if (due.length === 0) return null;
 
   const latest = due.reduce((a, b) => (a.minutes > b.minutes ? a : b));
@@ -48,7 +54,11 @@ export function MissedPing({ today }: { today: DayKey }) {
   return (
     <div className="missed-ping" role="status">
       <span className="missed-ping-title">⚠ MISSED PING ×{missed.length}</span>
-      <span>{REMINDER_COPY[latest.kind]}</span>
+      <span>
+        {latest.kind === "habit" && latest.label
+          ? `Directive window open: ${latest.label}`
+          : REMINDER_COPY[latest.kind]}
+      </span>
     </div>
   );
 }

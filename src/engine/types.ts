@@ -17,6 +17,8 @@ export interface Habit {
   domain: HabitDomain;
   /** completions needed per day (partial credit below it); default 1 */
   target: number;
+  /** optional per-habit reminder, "HH:MM" local; fires on scheduled days only */
+  reminderTime?: string;
   createdAt: number;
   archivedAt?: number;
   order: number;
