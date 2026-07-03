@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useSettings } from "./hooks.ts";
 import { applyFx, applyTheme } from "./theme/themes.ts";
 import { syncPush } from "./notify.ts";
+import { writeLinkedBackup } from "./backupFile.ts";
 import { Nav, type Tab } from "./Nav.tsx";
 import { InstallPrompt } from "./Install.tsx";
 import { RewardToast } from "./components/RewardToast.tsx";
@@ -39,6 +40,13 @@ export function App() {
   // when push was never enabled).
   useEffect(() => {
     syncPush();
+    writeLinkedBackup();
+    // Notification deep link: ?go=workout|bio|water|… → land on the right screen.
+    const go = new URLSearchParams(location.search).get("go");
+    if (go) {
+      setTab(go === "workout" || go === "bio" ? "log" : "today");
+      history.replaceState(null, "", location.pathname);
+    }
   }, []);
 
   return (

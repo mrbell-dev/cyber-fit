@@ -232,6 +232,8 @@ export interface Settings {
   weighinCadence?: WeighinCadence;
   /** level-curve steepness — chosen by the user, changeable anytime */
   difficulty?: "easy" | "standard" | "hard";
+  /** show the dev test bench in System */
+  devMode?: boolean;
 }
 
 export function difficultyFactor(s: Settings): number {

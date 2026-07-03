@@ -1,7 +1,7 @@
 // Push opt-in + slot sync. Strictly nice-to-have: every failure path is
 // silent-but-reported, never blocking. The only bytes that ever leave the
 // device: the anonymous push subscription + slot numbers, over TLS.
-import { DEFAULT_REMINDERS, slotBundleFor, type Reminders } from "../engine/index.ts";
+import { DEFAULT_REMINDERS, localPings, slotBundleFor, type Reminders } from "../engine/index.ts";
 import { db } from "../db/db.ts";
 import { getSettings } from "../db/repo.ts";
 
@@ -45,7 +45,22 @@ function b64ToUint8(base64: string): Uint8Array {
 async function currentSlots(): Promise<{ slots: number[]; motivationSlots: number[] }> {
   const habits = await db.habits.filter((h) => !h.archivedAt).toArray();
   const metrics = await db.bioMetrics.filter((m) => !m.archivedAt).toArray();
-  return slotBundleFor(await getReminders(), new Date().getTimezoneOffset(), habits, metrics);
+  const reminders = await getReminders();
+  const tz = new Date().getTimezoneOffset();
+
+  // Deep-link map for the SW: which slot means which kind of ping (stays local).
+  const kinds: Record<number, string> = {};
+  for (const p of localPings(reminders, habits, metrics)) {
+    if (p.kind === "motivation") continue;
+    for (const day of p.days) {
+      const wrapped = (((day * 1440 + p.minutes + tz) % 10080) + 10080) % 10080;
+      const slot = Math.floor(wrapped / 15) * 15;
+      kinds[slot] ??= p.kind;
+    }
+  }
+  await db.kv.put({ key: "slotKinds", value: kinds });
+
+  return slotBundleFor(reminders, tz, habits, metrics);
 }
 
 async function postJson(url: string, path: string, body: unknown): Promise<boolean> {

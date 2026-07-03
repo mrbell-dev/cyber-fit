@@ -10,13 +10,14 @@ import {
   waterTotal,
   type PlayerState,
 } from "../../engine/index.ts";
+import { useState } from "react";
 import { useDayKey, useSettings } from "../hooks.ts";
 import { HighlightReel } from "../components/Highlight.tsx";
 import { VolumeChart, WeightChart } from "../components/BodyMetrics.tsx";
 import { TagExplorer } from "../components/TagExplorer.tsx";
 import { CareTeamExport } from "../components/CareTeamExport.tsx";
 
-const GRID_DAYS = 70; // 14-wide rows, GitHub-style intensity
+const GRID_DAYS = 28; // 14-wide rows, GitHub-style intensity; tap a day for detail
 
 interface WeekData {
   habitLogs: import("../../engine/index.ts").HabitLog[];
@@ -90,6 +91,8 @@ function intensityLevel(count: number): 0 | 1 | 2 | 3 | 4 {
 export function Stats() {
   const today = useDayKey();
   const settings = useSettings();
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [shieldInfo, setShieldInfo] = useState(false);
 
   const data = useLiveQuery(async () => {
     const [habits, habitLogs, waterLogs, moodLogs, workoutLogs, readingLogs, highlightLogs, playerRow] =
@@ -165,23 +168,36 @@ export function Stats() {
             <span className="stat-num">{player?.globalStreak.best ?? 0}</span>
             <span className="stat-label">Best</span>
           </div>
-          <div className="stat-tile">
+          <button className="stat-tile tappable" onClick={() => setShieldInfo(!shieldInfo)}>
             <span className="stat-num">▣{player?.freezeTokens ?? 0}</span>
-            <span className="stat-label">Shields</span>
-          </div>
-          <div className="stat-tile">
-            <span className="stat-num">📖{readStreak}</span>
-            <span className="stat-label">Reading</span>
-          </div>
-          <div className="stat-tile">
-            <span className="stat-num">🧠{learnStreak}</span>
-            <span className="stat-label">Learning</span>
-          </div>
-          <div className="stat-tile">
-            <span className="stat-num">{data.workoutLogs.length}</span>
-            <span className="stat-label">Workouts</span>
-          </div>
+            <span className="stat-label">Shields ⓘ</span>
+          </button>
+          {(data.readingLogs.length > 0 || readStreak > 0) && (
+            <div className="stat-tile">
+              <span className="stat-num">📖{readStreak}</span>
+              <span className="stat-label">Reading</span>
+            </div>
+          )}
+          {(learnStreak > 0 || data.habits.some((h) => h.domain === "learning")) && (
+            <div className="stat-tile">
+              <span className="stat-num">🧠{learnStreak}</span>
+              <span className="stat-label">Learning</span>
+            </div>
+          )}
+          {data.workoutLogs.length > 0 && (
+            <div className="stat-tile">
+              <span className="stat-num">{data.workoutLogs.length}</span>
+              <span className="stat-label">Workouts</span>
+            </div>
+          )}
         </div>
+        {shieldInfo && (
+          <p className="placeholder">
+            // shields bank automatically every 5 active days (max 3). when you miss a
+            day, one absorbs the hit and your streak holds — you never see a "streak
+            lost". untracked domains hide their tiles; this screen shapes itself to you
+          </p>
+        )}
       </div>
 
       <WeeklyReport
@@ -198,14 +214,32 @@ export function Stats() {
             const n = countByDay.get(day) ?? 0;
             const lvl = intensityLevel(n);
             return (
-              <span
+              <button
                 key={day}
-                className={lvl === 0 ? "day-dot" : `day-dot l${lvl}`}
+                className={`day-dot${lvl ? ` l${lvl}` : ""}${selectedDay === day ? " sel" : ""}`}
                 title={`${day}: ${n} sync${n === 1 ? "" : "s"}`}
+                aria-label={`${day}: ${n} syncs`}
+                onClick={() => setSelectedDay(selectedDay === day ? null : day)}
               />
             );
           })}
         </div>
+        {selectedDay && (
+          <p className="placeholder">
+            // {selectedDay}:{" "}
+            {[
+              [data.habitLogs.filter((l) => l.dayKey === selectedDay && l.kind === "done" && l.amount > 0).length, "directive syncs"],
+              [data.waterLogs.filter((l) => l.dayKey === selectedDay && l.ml > 0).length, "water logs"],
+              [data.moodLogs.filter((l) => l.dayKey === selectedDay).length, "vitals"],
+              [data.workoutLogs.filter((l) => l.dayKey === selectedDay).length, "workouts"],
+              [data.readingLogs.filter((l) => l.dayKey === selectedDay).length, "reading"],
+              [data.highlightLogs.filter((l) => l.dayKey === selectedDay).length, "highlights"],
+            ]
+              .filter(([n]) => (n as number) > 0)
+              .map(([n, label]) => `${n} ${label}`)
+              .join(" · ") || "quiet day — the grid held your place"}
+          </p>
+        )}
         <div className="grid-legend" aria-hidden="true">
           less
           <span className="day-dot" />

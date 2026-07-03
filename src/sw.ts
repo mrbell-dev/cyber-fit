@@ -32,12 +32,45 @@ self.addEventListener("push", (event) => {
   );
 });
 
+/** Which kind of ping is due right now, from the locally stored slot→kind map. */
+async function currentPingKind(): Promise<string> {
+  try {
+    const kinds = await new Promise<Record<number, string>>((resolve) => {
+      const req = indexedDB.open("cyber-fit");
+      req.onerror = () => resolve({});
+      req.onsuccess = () => {
+        try {
+          const get = req.result.transaction("kv").objectStore("kv").get("slotKinds");
+          get.onsuccess = () => resolve((get.result?.value as Record<number, string>) ?? {});
+          get.onerror = () => resolve({});
+        } catch {
+          resolve({});
+        }
+      };
+    });
+    const now = new Date();
+    const weekMin = now.getUTCDay() * 1440 + now.getUTCHours() * 60 + now.getUTCMinutes();
+    const slot = Math.floor(weekMin / 15) * 15;
+    const prev = (slot - 15 + 10080) % 10080; // pushes can land a few minutes late
+    return kinds[slot] ?? kinds[prev] ?? "";
+  } catch {
+    return "";
+  }
+}
+
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   event.waitUntil(
-    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+    (async () => {
+      const kind = await currentPingKind();
+      const url = kind ? `./?go=${kind}` : ".";
+      const clients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
       const open = clients.find((c) => "focus" in c);
-      return open ? open.focus() : self.clients.openWindow(".");
-    }),
+      if (open) {
+        if (kind && "navigate" in open) await (open as WindowClient).navigate(url).catch(() => null);
+        return open.focus();
+      }
+      return self.clients.openWindow(url);
+    })(),
   );
 });

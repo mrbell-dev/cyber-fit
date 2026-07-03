@@ -20,6 +20,7 @@ import { Highlight } from "../components/Highlight.tsx";
 import { DailyBoot } from "../components/DailyBoot.tsx";
 import { HabitEditor, type EditorSeed } from "../components/HabitEditor.tsx";
 import { GigList } from "../components/GigList.tsx";
+import { Onboarding } from "../components/Onboarding.tsx";
 import { useState } from "react";
 
 function habitView(habit: Habit, logs: HabitLog[], today: DayKey) {
@@ -68,6 +69,7 @@ export function Today() {
 
   return (
     <section aria-label="Today">
+      <Onboarding />
       <DailyBoot today={today} />
       <MissedPing today={today} />
       <XpBar />

@@ -1303,3 +1303,17 @@ html.theme-ice {
 .metric-block:last-of-type {
   border-bottom: none;
 }
+
+/* ---------- tier B/C bits ---------- */
+.stat-tile.tappable {
+  cursor: pointer;
+}
+
+.day-dot.sel {
+  outline: 2px solid var(--neon-yellow);
+}
+
+.manual-row {
+  width: 100%;
+  text-align: left;
+}

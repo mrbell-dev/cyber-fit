@@ -1,12 +1,18 @@
 import { useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../../db/db.ts";
-import { AREAS, AUGMENTS, mlToOz, ozToMl, PRESETS, type PlayerState } from "../../engine/index.ts";
+import { AREAS, AUGMENTS, mlToOz, ozToMl, type PlayerState } from "../../engine/index.ts";
 import { archiveHabit, deleteHabit, saveSettings } from "../../db/repo.ts";
 import { downloadExport, exportJson, importJson } from "../../db/export.ts";
+import { decryptVault, encryptVault, randomVaultId } from "../../db/vault.ts";
+import { relayConfig } from "../notify.ts";
+import { writeLinkedBackup } from "../backupFile.ts";
 import { THEMES } from "../theme/themes.ts";
 import { ReminderUplink } from "../components/ReminderUplink.tsx";
 import { HabitEditor, type EditorSeed } from "../components/HabitEditor.tsx";
+import { DirectiveCodex } from "../components/DirectiveCodex.tsx";
+import { FieldManual } from "../components/FieldManual.tsx";
+import { DevPanel } from "../components/DevPanel.tsx";
 import { useSettings } from "../hooks.ts";
 
 const REPO_URL = "https://github.com/mrbell-dev/cyber-fit";
@@ -19,9 +25,7 @@ function Directives() {
   const habits = useLiveQuery(() => db.habits.filter((h) => !h.archivedAt).sortBy("order"), []);
   const [seed, setSeed] = useState<EditorSeed | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
-  const [libraryOpen, setLibraryOpen] = useState(false);
-
-  const installedPresets = new Set((habits ?? []).map((h) => h.presetId).filter(Boolean));
+  const [codexOpen, setCodexOpen] = useState(false);
 
   return (
     <>
@@ -65,51 +69,25 @@ function Directives() {
             </span>
           </div>
         ))}
-        <button className="btn" style={{ marginTop: 10 }} onClick={() => setSeed({})}>
-          + New directive
-        </button>
+        <div className="form-row" style={{ marginTop: 10 }}>
+          <button className="btn" onClick={() => setSeed({})}>
+            + New directive
+          </button>
+          <button className="btn ghost" onClick={() => setCodexOpen(true)}>
+            Open codex
+          </button>
+        </div>
       </div>
 
-      <div className="card">
-        <h2 className="card-title">Directive Library</h2>
-        <p className="placeholder">// defaults you can install, tweak, or ignore — nothing is mandatory</p>
-        {(libraryOpen ? PRESETS : PRESETS.slice(0, 3)).map((p) => {
-          const installed = installedPresets.has(p.presetId);
-          return (
-            <div className="row-item" key={p.presetId}>
-              <span>
-                {p.icon} {p.name}
-                <span className="off-day-tag"> · {areaIcon(p.area)}</span>
-              </span>
-              {installed ? (
-                <span className="off-day-tag">installed</span>
-              ) : (
-                <button
-                  className="link-btn"
-                  onClick={() =>
-                    setSeed({
-                      name: p.name,
-                      icon: p.icon,
-                      area: p.area,
-                      schedule: p.schedule,
-                      timeOfDay: p.timeOfDay,
-                      reminderTime: p.suggestedReminder,
-                      presetId: p.presetId,
-                    })
-                  }
-                >
-                  install
-                </button>
-              )}
-            </div>
-          );
-        })}
-        {PRESETS.length > 3 && (
-          <button className="link-btn" onClick={() => setLibraryOpen(!libraryOpen)}>
-            {libraryOpen ? "show less" : `… ${PRESETS.length - 3} more`}
-          </button>
-        )}
-      </div>
+      {codexOpen && (
+        <DirectiveCodex
+          onSeed={(s) => {
+            setCodexOpen(false);
+            setSeed(s);
+          }}
+          onClose={() => setCodexOpen(false)}
+        />
+      )}
     </>
   );
 }
@@ -194,9 +172,108 @@ function Augments() {
   );
 }
 
+function VaultSync() {
+  const [pass, setPass] = useState("");
+  const [pullId, setPullId] = useState("");
+  const [msg, setMsg] = useState<string | null>(null);
+  const sync = useLiveQuery(
+    async () => (await db.kv.get("vaultSync"))?.value as { id: string } | undefined,
+    [],
+  );
+
+  const push = async () => {
+    const relay = await relayConfig();
+    if (!relay.url) return setMsg("no relay configured");
+    const id = sync?.id ?? randomVaultId();
+    const blob = await encryptVault(await exportJson(), pass);
+    const res = await fetch(`${relay.url.replace(/\/$/, "")}/vault`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, blob }),
+    }).catch(() => null);
+    if (!res?.ok) return setMsg("relay unreachable — try again later");
+    await db.kv.put({ key: "vaultSync", value: { id, lastPush: Date.now() } });
+    setMsg(`pushed. vault id: ${id} — enter it + your passphrase on the other device`);
+  };
+
+  const pull = async () => {
+    const relay = await relayConfig();
+    const id = (pullId || sync?.id || "").trim();
+    if (!relay.url || !/^[0-9a-f]{32}$/.test(id)) return setMsg("need a valid 32-char vault id");
+    const res = await fetch(`${relay.url.replace(/\/$/, "")}/vault?id=${id}`).catch(() => null);
+    if (!res?.ok) return setMsg("vault not found on relay");
+    try {
+      const { blob } = await res.json();
+      await importJson(await decryptVault(blob, pass));
+      await db.kv.put({ key: "vaultSync", value: { id, lastPush: Date.now() } });
+      setMsg("pulled + decrypted — everything restored");
+    } catch {
+      setMsg("decryption failed — wrong passphrase (no recovery exists, by design)");
+    }
+  };
+
+  return (
+    <>
+      <h3 className="card-title" style={{ marginTop: 14 }}>
+        Vault Sync — encrypted, no accounts
+      </h3>
+      <p className="placeholder">
+        // your vault is AES-encrypted ON THIS DEVICE with your passphrase before
+        upload. the relay stores unreadable ciphertext under a random id. lose the
+        passphrase, lose the vault — nobody can reset it, including us
+      </p>
+      <div className="form-row">
+        <input
+          className="input"
+          type="password"
+          value={pass}
+          onChange={(e) => setPass(e.target.value)}
+          placeholder="sync passphrase (make it long)"
+          aria-label="Vault passphrase"
+        />
+      </div>
+      <div className="form-row">
+        <button className="btn" onClick={push} disabled={pass.length < 8}>
+          Push to vault
+        </button>
+        <button className="btn ghost" onClick={pull} disabled={pass.length < 8}>
+          Pull from vault
+        </button>
+      </div>
+      <input
+        className="input"
+        value={pullId}
+        onChange={(e) => setPullId(e.target.value)}
+        placeholder={sync?.id ? `vault id: ${sync.id}` : "vault id (from your other device)"}
+        aria-label="Vault id"
+      />
+      {msg && <p className="placeholder">// {msg}</p>}
+    </>
+  );
+}
+
 function DataVault() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [linked, setLinked] = useState<boolean | null>(null);
+
+  const linkBackup = async () => {
+    const picker = (window as unknown as { showSaveFilePicker?: (o: object) => Promise<unknown> })
+      .showSaveFilePicker;
+    if (!picker) return setMessage("file linking needs Chrome/Edge — use export or vault sync instead");
+    try {
+      const handle = await picker({
+        suggestedName: "cyber-fit-backup.json",
+        types: [{ description: "JSON", accept: { "application/json": [".json"] } }],
+      });
+      await db.kv.put({ key: "backupHandle", value: handle });
+      setLinked(true);
+      setMessage("linked — the backup rewrites itself on every app open. park it in any synced folder");
+      await writeLinkedBackup();
+    } catch {
+      // picker dismissed
+    }
+  };
 
   const doExport = async () => {
     downloadExport(await exportJson());
@@ -235,10 +312,15 @@ function DataVault() {
           }}
         />
       </div>
+      <button className="link-btn" onClick={linkBackup}>
+        {linked ? "backup file linked ✓" : "link a backup file (auto-rewrites on open)"}
+      </button>
       {message && <p className="placeholder">// {message}</p>}
       <p className="placeholder">
         // your entire vault as one JSON file — move devices, keep your own backups
       </p>
+
+      <VaultSync />
     </div>
   );
 }
@@ -353,16 +435,28 @@ export function System() {
             <option value="km">km</option>
           </select>
         </label>
+        <label className="check-label">
+          <input
+            type="checkbox"
+            checked={settings.devMode ?? false}
+            onChange={(e) => saveSettings({ devMode: e.target.checked })}
+          />
+          Dev mode — test bench for pings, toasts, popups
+        </label>
         <p className="placeholder">
           // logs before the rollover hour count as the previous day — night owls stay safe
         </p>
       </div>
+
+      {settings.devMode && <DevPanel />}
 
       <ReminderUplink />
 
       <Augments />
 
       <DataVault />
+
+      <FieldManual />
 
       <About />
     </section>

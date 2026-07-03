@@ -270,7 +270,7 @@ function SessionForm({ item, onDone }: { item: ReadingItem | null; onDone: () =>
         className="input note-input"
         value={note}
         onChange={(e) => setNote(e.target.value)}
-        placeholder="What did it say? How did it make you feel? (+bonus XP for reflecting)"
+        placeholder="What did it say? How did it land? #tags work (+bonus XP for reflecting)"
         aria-label="Post-reading note"
         rows={2}
       />

@@ -34,6 +34,15 @@ export default {
       return json({ ok: true }, 200, headers);
     }
 
+    // Encrypted vault sync: we store ciphertext we cannot read, under a
+    // random 128-bit id. No accounts, no metadata, ~4-month TTL keeps KV lean.
+    if (url.pathname === "/vault" && request.method === "GET") {
+      const id = url.searchParams.get("id") ?? "";
+      if (!/^[0-9a-f]{32}$/.test(id)) return json({ error: "bad id" }, 400, headers);
+      const blob = await env.SUBS.get(`vault:${id}`);
+      return blob ? json({ blob }, 200, headers) : json({ error: "not found" }, 404, headers);
+    }
+
     if (request.method !== "POST") return json({ error: "POST only" }, 405, headers);
 
     let body;
@@ -63,6 +72,16 @@ export default {
       if (err) return json({ error: err }, 400, headers);
       const ok = await sendPush(env, body.subscription, "TEST PING — uplink verified. Welcome to Night City.");
       return json({ ok }, ok ? 200 : 502, headers);
+    }
+
+    if (url.pathname === "/vault") {
+      const { id, blob } = body ?? {};
+      if (!/^[0-9a-f]{32}$/.test(id ?? "")) return json({ error: "bad id" }, 400, headers);
+      if (typeof blob !== "string" || blob.length > 400_000 || !/^[A-Za-z0-9+/=]+$/.test(blob)) {
+        return json({ error: "bad blob" }, 400, headers);
+      }
+      await env.SUBS.put(`vault:${id}`, blob, { expirationTtl: 120 * 86400 });
+      return json({ ok: true }, 200, headers);
     }
 
     return json({ error: "not found" }, 404, headers);

@@ -53,7 +53,7 @@ export function MoodRow({ today }: { today: DayKey }) {
           className="input"
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          placeholder="Optional log entry — what's running in the background?"
+          placeholder="Optional note — what's running in the background? #tags work"
           aria-label="Mood note"
         />
       ) : (

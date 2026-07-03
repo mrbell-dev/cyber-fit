@@ -34,10 +34,14 @@ async function lastActiveDay(): Promise<DayKey | null> {
 export function DailyBoot({ today }: { today: DayKey }) {
   const info = useLiveQuery(async () => {
     const lastBoot = ((await db.kv.get(BOOT_KEY))?.value as string | undefined) ?? "";
-    return { lastBoot, lastActive: await lastActiveDay() };
+    const onboarded = Boolean((await db.kv.get("onboarded"))?.value);
+    const habitCount = await db.habits.count();
+    return { lastBoot, onboarded, habitCount, lastActive: await lastActiveDay() };
   }, [today]);
 
   if (!info || info.lastBoot === today) return null;
+  // Brand-new user: onboarding owns the screen — don't stack a boot modal under it.
+  if (!info.onboarded && info.habitCount === 0) return null;
 
   const dismiss = () => db.kv.put({ key: BOOT_KEY, value: today });
   const gapDays = info.lastActive ? diffDays(info.lastActive, today) : 0;

@@ -66,24 +66,24 @@ push verified on Michael's iPhone.
 
 ### TIER B — insight, polish, onboarding
 
-- [ ] **Stats made personal:** telemetry tiles hide untracked domains; uptime
+- [x] **Stats made personal:** telemetry tiles hide untracked domains; uptime
       grid → 28 days with tap-for-day-detail; Highlight Reel → 28 days;
       shields explained in-app.
-- [ ] **Directives + Library merge** into one searchable, categorized popout.
-- [ ] **Tag hints** at every input where tags work.
-- [ ] **Dev mode** (System): fire test pings, fake grants/crits/drops, preview
+- [x] **Directives + Library merge** into one searchable, categorized popout.
+- [x] **Tag hints** at every input where tags work.
+- [x] **Dev mode** (System): fire test pings, fake grants/crits/drops, preview
       popups — playtest without grinding.
-- [ ] **First-run guide + per-feature info screens** (what shields are, tips;
+- [x] **First-run guide + per-feature info screens** (what shields are, tips;
       pick difficulty, starter directives, units, optional uplink).
 
 ### TIER C — infrastructure
 
-- [ ] **Encrypted vault sync** (approved design): on-device AES-GCM with
+- [x] **Encrypted vault sync** (approved design): on-device AES-GCM with
       passphrase-derived key (PBKDF2/Argon2) → random vault id in KV/R2;
       second device pulls + decrypts. Server sees only ciphertext. No accounts
       (accounts-first was rejected: privacy, liability, migration gravity).
       Plus scheduled auto-export via File System Access into any synced folder.
-- [ ] **Notification deep links:** tapping a workout ping opens straight into
+- [x] **Notification deep links:** tapping a workout ping opens straight into
       a record-workout popup (SW notificationclick → URL param → modal);
       client-side slot→kind map; relay stays schedule-blind.
 

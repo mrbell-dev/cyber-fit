@@ -85,7 +85,7 @@ export function Highlight({ today }: { today: DayKey }) {
           className="input"
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder={todays ? "Another one?" : "Today's highlight…"}
+          placeholder={todays ? "Another one? (#tags work)" : "Today's highlight… (#tags work)"}
           aria-label="Highlight of the day"
           maxLength={200}
           onKeyDown={(e) => e.key === "Enter" && submit()}
@@ -98,11 +98,12 @@ export function Highlight({ today }: { today: DayKey }) {
   );
 }
 
-/** Last handful of highlights — the reel is the dialectical payoff. */
+/** Last 28 days of highlights — the reel is the dialectical payoff. */
 export function HighlightReel() {
   const recent = useLiveQuery(async () => {
     const all = await db.highlightLogs.toArray();
-    return all.sort((a, b) => b.ts - a.ts).slice(0, 7);
+    const cutoff = Date.now() - 28 * 86_400_000;
+    return all.filter((h) => h.ts >= cutoff).sort((a, b) => b.ts - a.ts).slice(0, 28);
   }, []);
 
   if (!recent || recent.length === 0) return null;
