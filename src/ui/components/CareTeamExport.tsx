@@ -26,10 +26,11 @@ export function CareTeamExport() {
 
   return (
     <div className="card">
-      <h2 className="card-title">Care-Team Export</h2>
+      <h2 className="card-title">Trauma Team Export</h2>
       <p className="placeholder">
-        // a clean summary of your last weeks for a therapist or doctor — pick
-        what each of them gets to see. plain professional english, no slang
+        // dispatch a clean summary of your last weeks to your care team —
+        therapist, doctor, whoever's on retainer. pick what each of them sees.
+        the document itself stays in plain professional english
       </p>
       {!open ? (
         <button className="btn" onClick={() => setOpen(true)}>
