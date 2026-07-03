@@ -1,5 +1,101 @@
 # CYBER//FIT — Plan & Status
 
+## ROADMAP v2 (from TODO.md + playtest feedback — the active plan)
+
+Ordered for daily-driver impact. Each item cites its source so intent survives.
+
+### R1 — Tone & arrival (small, do first)
+- [ ] **Kill MISSED PING as guilt.** Never show missed counts. Replace with:
+      logged yesterday-ish → current gentle nudge copy; gap of 2+ days → warm
+      welcome-back popup: "Good to see you, choom. Ready for a new gig?" (no
+      numbers, no backlog). Doctrine is in CLAUDE.md rule 6.
+- [ ] **Boot popups, gravedigger-style.** Morning + afternoon greetings become
+      a full-screen modal (like gravedigger's win screen) shown once on first
+      open, dismissed with one tap. Evening/late stay as the inline card.
+      Voice: sample StreetSlang.md sparingly.
+- [ ] **Haptics** on completions/crits/level-ups via `navigator.vibrate`
+      (Android/Chrome only — iOS Safari doesn't support it; degrade silently).
+      Michael has an Android device to test.
+
+### R2 — Today screen (TODO.md)
+- [ ] **User-defined difficulty / dynamic lightning:** per-directive "charge"
+      value (1–5 ⚡) set by the user — water can be someone's 5⚡ boss fight,
+      grounding someone's 1⚡ freebie. XP = charge-weighted. Level curve gains a
+      difficulty setting (easy/standard/hard) chosen at first run, changeable.
+- [ ] **+ quick-add** on the Directives card header (opens the editor; replaces
+      the Suggested Protocols card at the bottom — suggestions move into the
+      + flow / library).
+- [ ] **Highlight ⇄ Journal toggle:** some days journaling beats highlighting;
+      radio/tab switch on the card, both stored (journal = new table, tagged,
+      feeds Tag Explorer + med-export).
+- [ ] **Gig list (bullet-journal todos):** daily checklist; unfinished gigs roll
+      forward to the next day (that's the bullet-journal migration mechanic).
+      Gigs are NOT streak-bearing — they're tasks, not habits.
+- [ ] **Hydration units** ml/oz with US-friendly quick sizes (8/16 oz) and
+      user-defined goal (Michael: 128 oz). Config + gauge + XP goal all honor it.
+- [ ] **Vitals (mood) multiple readings/day:** mood can swing; log many, show
+      the day's trace, mark earlier readings in a different color, show logged
+      time + note inline. Note field compact (not full-width w/ save button).
+
+### R3 — Log screen (TODO.md + playtest)
+- [ ] **Dynamic workout form:** time/distance fields only when relevant to the
+      chosen style; sets/reps grid for lifts.
+- [ ] **Workout templates:** repeating a named workout pre-fills the last
+      session's sets/weights for one-tap re-log (progressive overload visible).
+- [ ] **Bio-scan v2:** per-metric tracking beyond weight, user-defined (e.g. BP
+      2×/day for a doctor), each with optional reminders and a chart. Rule:
+      **anything recordable gets a chart or calendar view** if chartable.
+- [ ] **Reading v2:** feeling glyphs need labels; item types become Book, Audio,
+      Video, Article, Studying, Class.
+
+### R4 — Stats screen (TODO.md)
+- [ ] **Telemetry tiles dynamic:** hide tiles for domains the user doesn't track
+      (no workout tile for someone who can't work out); explain shields in-app
+      (info screens, R6). Uptime grid → 28 days with tap-for-day-detail.
+      Highlight Reel → 28 days.
+- [ ] **Med-team export:** "System Report → Export" produces a clean .md of the
+      last N days/weeks for a therapist/doctor — good/bad days, journals, wins,
+      optional sections togglable per audience (bio-scan for the doc, not the
+      therapist). This is a headline feature; design it with care.
+- [ ] **Tag hints** everywhere tags work (directives, highlights, journal, notes).
+
+### R5 — System screen (TODO.md)
+- [ ] **Directives + Library merge** into one searchable, categorized popout.
+- [ ] **Dev mode** toggle: test pings, fire fake grants/crits/drops, preview
+      popups — so playtesting doesn't require earning everything.
+- [ ] **Data Vault sync:** encrypted vault sync (design already below) plus
+      scheduled auto-export; "sync to Drive-like folder" via File System Access.
+- [ ] **About:** Buy Me a Coffee link → https://buymeacoffee.com/mrbell.dev
+      (replaces placeholder donate link; also fix README #support anchor).
+
+### R6 — Onboarding & help (TODO.md "Total")
+- [ ] First-run guided setup (pick difficulty, install starter directives, units,
+      optional uplink) + per-feature info screens (what shields are, tips).
+
+### R7 — Push UX
+- [ ] **Notification deep links:** clicking a workout ping opens the app on a
+      record-this-workout popup (SW notificationclick → URL param → modal).
+      Requires slot→kind mapping client-side; relay stays schedule-blind.
+
+### R-LT — Long-term (research before building)
+- [ ] **Finch feature comparison** — inventory what Finch does (goals coach,
+      first-run, reflections, breathing exercises, town/social) vs ours; decide
+      what translates to cyberpunk without the cutesiness. Output: a table in
+      this file with adopt/adapt/reject calls.
+- [ ] **Cyberware progression** — leveling installs visible cyberware on a
+      user avatar/rig (pure cosmetics; never gates usability — CLAUDE.md rule 7).
+- [ ] **Native iOS/Android ports + pricing.** Capacitor wrap of this codebase.
+      Model per Michael: stores charge ~$1 (one-time 99¢ where no remote push
+      needed; or $1 per 3–6mo sub only if hosted push costs demand it); web
+      version stays free forever (self-host push); sideloadable builds published
+      free — store price is honestly framed as covering licensing/hosting.
+      Research: Apple fee waiver ($99/yr — waivers exist only for nonprofits/edu/
+      gov; a personal self-help app likely does NOT qualify → verify, consider
+      forming a nonprofit later or eating the fee), Google Play $25 one-time.
+      PWA remains the canonical free path regardless.
+
+
+
 Cyberpunk self-improvement PWA. React 18 + Vite + TS + vite-plugin-pwa on GitHub Pages;
 all data local (Dexie/IndexedDB); optional opt-in push via a Cloudflare Worker.
 Pure-core engine pattern (see CLAUDE.md).
