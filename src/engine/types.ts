@@ -9,6 +9,21 @@ export type Schedule =
 
 export type HabitDomain = "general" | "learning";
 
+/** Area of focus — grouping, color, and (for "learning") streak wiring. */
+export type Area = "mind" | "body" | "health" | "sleep" | "nutrition" | "learning" | "grounding";
+
+export const AREAS: { id: Area; name: string; icon: string }[] = [
+  { id: "mind", name: "Mind", icon: "🧠" },
+  { id: "body", name: "Body", icon: "🦾" },
+  { id: "health", name: "Health", icon: "❤️" },
+  { id: "sleep", name: "Sleep", icon: "🌙" },
+  { id: "nutrition", name: "Nutrition", icon: "🥗" },
+  { id: "learning", name: "Learning", icon: "📖" },
+  { id: "grounding", name: "Grounding", icon: "🧘" },
+];
+
+export type TimeOfDay = "morning" | "day" | "evening" | "anytime";
+
 export interface Habit {
   id: string;
   name: string;
@@ -19,6 +34,12 @@ export interface Habit {
   target: number;
   /** optional per-habit reminder, "HH:MM" local; fires on scheduled days only */
   reminderTime?: string;
+  /** area of focus (grouping/color; "learning" also feeds the learning streak) */
+  area?: Area;
+  /** rough slot in the day — Today screen groups by this */
+  timeOfDay?: TimeOfDay;
+  /** set when installed from the Directive Library (enables clean re-install) */
+  presetId?: string;
   createdAt: number;
   archivedAt?: number;
   order: number;

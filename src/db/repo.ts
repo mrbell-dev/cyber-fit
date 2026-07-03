@@ -78,6 +78,10 @@ export async function addHabit(input: {
   schedule: Schedule;
   domain?: Habit["domain"];
   target?: number;
+  area?: Habit["area"];
+  timeOfDay?: Habit["timeOfDay"];
+  reminderTime?: string;
+  presetId?: string;
 }): Promise<Habit> {
   const order = (await db.habits.count()) + 1;
   const habit: Habit = {
@@ -85,10 +89,15 @@ export async function addHabit(input: {
     name: input.name.trim(),
     icon: input.icon || "⚡",
     schedule: input.schedule,
-    domain: input.domain ?? "general",
+    // "learning" area feeds the learning streak via domain.
+    domain: input.domain ?? (input.area === "learning" ? "learning" : "general"),
     target: Math.max(1, input.target ?? 1),
     createdAt: Date.now(),
     order,
+    ...(input.area ? { area: input.area } : {}),
+    ...(input.timeOfDay ? { timeOfDay: input.timeOfDay } : {}),
+    ...(input.reminderTime ? { reminderTime: input.reminderTime } : {}),
+    ...(input.presetId ? { presetId: input.presetId } : {}),
   };
   await db.habits.add(habit);
   return habit;

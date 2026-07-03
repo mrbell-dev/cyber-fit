@@ -4,6 +4,7 @@ import {
   dayStatus,
   habitStreak,
   isScheduledOn,
+  PRESETS,
   type DayKey,
   type Habit,
   type HabitLog,
@@ -41,10 +42,13 @@ export function Today() {
   const today = useDayKey();
   const settings = useSettings();
 
-  const habits = useLiveQuery(
-    () => db.habits.filter((h) => !h.archivedAt).sortBy("order"),
-    [],
-  );
+  const TIME_RANK: Record<string, number> = { morning: 0, day: 1, evening: 2, anytime: 3 };
+  const habits = useLiveQuery(async () => {
+    const all = await db.habits.filter((h) => !h.archivedAt).sortBy("order");
+    return all.sort(
+      (a, b) => (TIME_RANK[a.timeOfDay ?? "anytime"] - TIME_RANK[b.timeOfDay ?? "anytime"]) || a.order - b.order,
+    );
+  }, []);
   const habitLogs = useLiveQuery(() => db.habitLogs.toArray(), []);
   const waterLogs = useLiveQuery(() => db.waterLogs.where({ dayKey: today }).toArray(), [today]);
 
@@ -73,14 +77,18 @@ export function Today() {
             <button
               className="btn"
               onClick={async () => {
-                await addHabit({ name: "Grounding ritual — 10 min offline", icon: "🧘", schedule: { kind: "daily" } });
-                await addHabit({ name: "Move your chrome — stretch", icon: "🦾", schedule: { kind: "daily" } });
-                await addHabit({ name: "Feed the wetware — read", icon: "📖", schedule: { kind: "timesPerWeek", target: 3 }, domain: "learning" });
+                for (const id of ["grounding", "stretch", "read"]) {
+                  const p = PRESETS.find((x) => x.presetId === id)!;
+                  await addHabit({
+                    name: p.name, icon: p.icon, schedule: p.schedule,
+                    area: p.area, timeOfDay: p.timeOfDay, presetId: p.presetId,
+                  });
+                }
               }}
             >
               Install grounding protocol
             </button>
-            <p className="placeholder">// or build your own directives in the SYSTEM tab</p>
+            <p className="placeholder">// or browse the Directive Library in the SYSTEM tab</p>
           </>
         ) : (
           habits.map((h) => {

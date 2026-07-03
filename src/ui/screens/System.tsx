@@ -1,15 +1,111 @@
 import { useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../../db/db.ts";
-import { AUGMENTS, type PlayerState, type Schedule } from "../../engine/index.ts";
-import { addHabit, archiveHabit, deleteHabit, saveSettings, updateHabit } from "../../db/repo.ts";
-import { syncPush } from "../notify.ts";
+import { AREAS, AUGMENTS, PRESETS, type PlayerState } from "../../engine/index.ts";
+import { archiveHabit, deleteHabit, saveSettings } from "../../db/repo.ts";
 import { downloadExport, exportJson, importJson } from "../../db/export.ts";
 import { THEMES } from "../theme/themes.ts";
 import { ReminderUplink } from "../components/ReminderUplink.tsx";
+import { HabitEditor, type EditorSeed } from "../components/HabitEditor.tsx";
 import { useSettings } from "../hooks.ts";
 
 const REPO_URL = "https://github.com/mrbell-dev/cyber-fit";
+
+function areaIcon(id?: string): string {
+  return AREAS.find((a) => a.id === id)?.icon ?? "";
+}
+
+function Directives() {
+  const habits = useLiveQuery(() => db.habits.filter((h) => !h.archivedAt).sortBy("order"), []);
+  const [seed, setSeed] = useState<EditorSeed | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+
+  const installedPresets = new Set((habits ?? []).map((h) => h.presetId).filter(Boolean));
+
+  return (
+    <>
+      {seed && <HabitEditor seed={seed} onClose={() => setSeed(null)} />}
+
+      <div className="card">
+        <h2 className="card-title">Directives</h2>
+        {(habits ?? []).map((h) => (
+          <div className="row-item" key={h.id}>
+            <span>
+              {h.icon} {h.name}
+              <span className="off-day-tag">
+                {h.area ? ` · ${areaIcon(h.area)}` : ""}
+                {h.reminderTime ? ` · 🔔${h.reminderTime}` : ""}
+              </span>
+            </span>
+            <span className="row-actions">
+              {confirmDelete === h.id ? (
+                <>
+                  <button className="link-btn danger" onClick={() => deleteHabit(h.id)}>
+                    confirm delete
+                  </button>
+                  <button className="link-btn" onClick={() => setConfirmDelete(null)}>
+                    keep
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button className="link-btn" onClick={() => setSeed({ habit: h })}>
+                    edit
+                  </button>
+                  <button className="link-btn" onClick={() => archiveHabit(h.id)}>
+                    archive
+                  </button>
+                  <button className="link-btn danger" onClick={() => setConfirmDelete(h.id)}>
+                    delete
+                  </button>
+                </>
+              )}
+            </span>
+          </div>
+        ))}
+        <button className="btn" style={{ marginTop: 10 }} onClick={() => setSeed({})}>
+          + New directive
+        </button>
+      </div>
+
+      <div className="card">
+        <h2 className="card-title">Directive Library</h2>
+        <p className="placeholder">// defaults you can install, tweak, or ignore — nothing is mandatory</p>
+        {PRESETS.map((p) => {
+          const installed = installedPresets.has(p.presetId);
+          return (
+            <div className="row-item" key={p.presetId}>
+              <span>
+                {p.icon} {p.name}
+                <span className="off-day-tag"> · {areaIcon(p.area)}</span>
+              </span>
+              {installed ? (
+                <span className="off-day-tag">installed</span>
+              ) : (
+                <button
+                  className="link-btn"
+                  onClick={() =>
+                    setSeed({
+                      name: p.name,
+                      icon: p.icon,
+                      area: p.area,
+                      schedule: p.schedule,
+                      timeOfDay: p.timeOfDay,
+                      reminderTime: p.suggestedReminder,
+                      presetId: p.presetId,
+                    })
+                  }
+                >
+                  install
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );
+}
 
 function Augments() {
   const settings = useSettings();
@@ -91,34 +187,6 @@ function Augments() {
   );
 }
 
-function About() {
-  return (
-    <div className="card">
-      <h2 className="card-title">About</h2>
-      <p className="lore">
-        <strong>Stay grounded. Avoid cyberpsychosis.</strong> Too many augments and not enough
-        humanity is a known failure mode — this app is the counter-protocol: daily syncs with
-        your body and brain, tracked on your own hardware.
-      </p>
-      <p>
-        Free forever, open source (MIT), zero tracking. Everything you log lives on this device —
-        no accounts, no analytics, no server holding your data.
-      </p>
-      <div className="about-links">
-        <a href={REPO_URL} target="_blank" rel="noreferrer">
-          ⌥ contribute on GitHub
-        </a>
-        <a href={`${REPO_URL}#support`} target="_blank" rel="noreferrer">
-          ◈ chip in $1 for server costs
-        </a>
-        <a href={`${REPO_URL}/wiki/Self-hosting-notifications`} target="_blank" rel="noreferrer">
-          ⚙ self-host the notification relay
-        </a>
-      </div>
-    </div>
-  );
-}
-
 function DataVault() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -168,176 +236,40 @@ function DataVault() {
   );
 }
 
-const WEEKDAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
-
-function AddHabitForm() {
-  const [name, setName] = useState("");
-  const [icon, setIcon] = useState("⚡");
-  const [kind, setKind] = useState<Schedule["kind"]>("daily");
-  const [days, setDays] = useState<number[]>([1, 2, 3, 4, 5]);
-  const [perWeek, setPerWeek] = useState(3);
-  const [learning, setLearning] = useState(false);
-  const [reminderTime, setReminderTime] = useState("");
-
-  const submit = async () => {
-    if (!name.trim()) return;
-    const schedule: Schedule =
-      kind === "daily"
-        ? { kind: "daily" }
-        : kind === "weekdays"
-          ? { kind: "weekdays", days }
-          : { kind: "timesPerWeek", target: perWeek };
-    const habit = await addHabit({ name, icon, schedule, domain: learning ? "learning" : "general" });
-    if (reminderTime) {
-      await updateHabit(habit.id, { reminderTime });
-      await syncPush();
-    }
-    setName("");
-    setReminderTime("");
-  };
-
+function About() {
   return (
-    <div className="form-block">
-      <div className="form-row">
-        <input
-          className="input icon-input"
-          value={icon}
-          onChange={(e) => setIcon(e.target.value)}
-          aria-label="Icon"
-          maxLength={4}
-        />
-        <input
-          className="input"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="New directive (e.g. Stretch 5 min)"
-          aria-label="Habit name"
-          onKeyDown={(e) => e.key === "Enter" && submit()}
-        />
+    <div className="card">
+      <h2 className="card-title">About</h2>
+      <p className="lore">
+        <strong>Stay grounded. Avoid cyberpsychosis.</strong> Too many augments and not enough
+        humanity is a known failure mode — this app is the counter-protocol: daily syncs with
+        your body and brain, tracked on your own hardware.
+      </p>
+      <p>
+        Free forever, open source (MIT), zero tracking. Everything you log lives on this device —
+        no accounts, no analytics, no server holding your data.
+      </p>
+      <div className="about-links">
+        <a href={REPO_URL} target="_blank" rel="noreferrer">
+          ⌥ contribute on GitHub
+        </a>
+        <a href={`${REPO_URL}#support`} target="_blank" rel="noreferrer">
+          ◈ chip in $1 for server costs
+        </a>
+        <a href={`${REPO_URL}/blob/main/SELF-HOSTING.md`} target="_blank" rel="noreferrer">
+          ⚙ self-host the notification relay
+        </a>
       </div>
-
-      <div className="form-row">
-        <select
-          className="input"
-          value={kind}
-          onChange={(e) => setKind(e.target.value as Schedule["kind"])}
-          aria-label="Schedule"
-        >
-          <option value="daily">Every day</option>
-          <option value="weekdays">Specific weekdays</option>
-          <option value="timesPerWeek">N days a week (any days)</option>
-        </select>
-        <label className="check-label">
-          <input type="checkbox" checked={learning} onChange={(e) => setLearning(e.target.checked)} />
-          learning
-        </label>
-      </div>
-
-      {kind === "weekdays" && (
-        <div className="form-row weekday-row" role="group" aria-label="Days of week">
-          {WEEKDAY_LABELS.map((label, i) => (
-            <button
-              key={i}
-              className={days.includes(i) ? "day-toggle on" : "day-toggle"}
-              aria-pressed={days.includes(i)}
-              onClick={() =>
-                setDays(days.includes(i) ? days.filter((d) => d !== i) : [...days, i].sort())
-              }
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {kind === "timesPerWeek" && (
-        <div className="form-row">
-          <label className="check-label">
-            <input
-              type="number"
-              className="input num-input"
-              min={1}
-              max={7}
-              value={perWeek}
-              onChange={(e) => setPerWeek(Math.max(1, Math.min(7, Number(e.target.value) || 1)))}
-            />
-            days per week — any days count
-          </label>
-        </div>
-      )}
-
-      <div className="form-row">
-        <label className="check-label">
-          Remind me at
-          <input
-            type="time"
-            className="input time-input"
-            value={reminderTime}
-            onChange={(e) => setReminderTime(e.target.value)}
-            aria-label="Optional reminder time for this directive"
-          />
-          <span className="off-day-tag">optional — clear to skip</span>
-        </label>
-      </div>
-
-      <button className="btn" onClick={submit} disabled={!name.trim()}>
-        Install directive
-      </button>
     </div>
   );
 }
 
 export function System() {
   const settings = useSettings();
-  const habits = useLiveQuery(() => db.habits.filter((h) => !h.archivedAt).sortBy("order"), []);
-  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   return (
     <section aria-label="System">
-      <div className="card">
-        <h2 className="card-title">Directives</h2>
-        {(habits ?? []).map((h) => (
-          <div className="row-item" key={h.id}>
-            <span>
-              {h.icon} {h.name}
-              {h.domain === "learning" && <span className="off-day-tag"> · learning</span>}
-            </span>
-            <span className="row-actions">
-              <input
-                type="time"
-                className="input time-input"
-                value={h.reminderTime ?? ""}
-                onChange={async (e) => {
-                  await updateHabit(h.id, { reminderTime: e.target.value || undefined });
-                  await syncPush();
-                }}
-                aria-label={`Reminder time for ${h.name} (empty = none)`}
-                title="Optional reminder — clear to remove"
-              />
-              {confirmDelete === h.id ? (
-                <>
-                  <button className="link-btn danger" onClick={() => deleteHabit(h.id)}>
-                    confirm delete
-                  </button>
-                  <button className="link-btn" onClick={() => setConfirmDelete(null)}>
-                    keep
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button className="link-btn" onClick={() => archiveHabit(h.id)}>
-                    archive
-                  </button>
-                  <button className="link-btn danger" onClick={() => setConfirmDelete(h.id)}>
-                    delete
-                  </button>
-                </>
-              )}
-            </span>
-          </div>
-        ))}
-        <AddHabitForm />
-      </div>
+      <Directives />
 
       <div className="card">
         <h2 className="card-title">Config</h2>

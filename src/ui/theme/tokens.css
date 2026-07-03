@@ -1022,3 +1022,84 @@ html.theme-ice {
   font-size: 14px;
   margin-bottom: 10px;
 }
+
+/* ---------- directive editor (Finch-style card) ---------- */
+.modal.editor {
+  max-height: 86dvh;
+  overflow-y: auto;
+}
+
+.editor-icon-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.editor-icon {
+  flex: 0 0 64px;
+  height: 64px;
+  font-size: 28px;
+  text-align: center;
+}
+
+.emoji-strip {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.emoji-pick {
+  width: 34px;
+  height: 34px;
+  font-size: 18px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+}
+
+.emoji-pick:active {
+  border-color: var(--neon-green);
+}
+
+.editor-name {
+  width: 100%;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.editor-row {
+  margin-bottom: 14px;
+}
+
+.editor-row-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.chip {
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.chip.on {
+  border-color: var(--neon-green);
+  color: var(--text);
+  background: rgba(0, 255, 179, 0.08);
+}

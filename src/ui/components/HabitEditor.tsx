@@ -1,0 +1,221 @@
+import { useState } from "react";
+import {
+  AREAS,
+  type Area,
+  type Habit,
+  type Schedule,
+  type TimeOfDay,
+} from "../../engine/index.ts";
+import { addHabit, updateHabit } from "../../db/repo.ts";
+import { syncPush } from "../notify.ts";
+
+const WEEKDAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
+const TIMES: { id: TimeOfDay; name: string; icon: string }[] = [
+  { id: "morning", name: "Morning", icon: "🌅" },
+  { id: "day", name: "Day", icon: "☀️" },
+  { id: "evening", name: "Evening", icon: "🌆" },
+  { id: "anytime", name: "Anytime", icon: "∞" },
+];
+
+const EMOJI_SUGGESTIONS = ["⚡", "🧘", "🦾", "📖", "🧠", "🚶", "🥗", "🌙", "🫁", "💊", "🎸", "🐣"];
+
+export interface EditorSeed {
+  habit?: Habit; // present = editing
+  // preset fields for "install from library" (or blank for brand-new)
+  name?: string;
+  icon?: string;
+  area?: Area;
+  schedule?: Schedule;
+  timeOfDay?: TimeOfDay;
+  reminderTime?: string;
+  presetId?: string;
+}
+
+/** Finch-style single-card editor: the directive is one object — name, emoji,
+ *  area, schedule, time of day, and its notification — created together. */
+export function HabitEditor({ seed, onClose }: { seed: EditorSeed; onClose: () => void }) {
+  const h = seed.habit;
+  const [name, setName] = useState(h?.name ?? seed.name ?? "");
+  const [icon, setIcon] = useState(h?.icon ?? seed.icon ?? "⚡");
+  const [area, setArea] = useState<Area | undefined>(h?.area ?? seed.area);
+  const [schedule, setSchedule] = useState<Schedule>(h?.schedule ?? seed.schedule ?? { kind: "daily" });
+  const [timeOfDay, setTimeOfDay] = useState<TimeOfDay>(h?.timeOfDay ?? seed.timeOfDay ?? "anytime");
+  const [remindOn, setRemindOn] = useState(Boolean(h?.reminderTime));
+  const [reminderTime, setReminderTime] = useState(h?.reminderTime ?? seed.reminderTime ?? "18:00");
+
+  const save = async () => {
+    if (!name.trim()) return;
+    const fields = {
+      name: name.trim(),
+      icon: icon || "⚡",
+      schedule,
+      area,
+      timeOfDay,
+      reminderTime: remindOn ? reminderTime : undefined,
+      domain: area === "learning" ? ("learning" as const) : ("general" as const),
+    };
+    if (h) await updateHabit(h.id, fields);
+    else await addHabit({ ...fields, presetId: seed.presetId });
+    await syncPush();
+    onClose();
+  };
+
+  const days = schedule.kind === "weekdays" ? schedule.days : [];
+
+  return (
+    <div className="overlay" onClick={onClose}>
+      <div
+        className="modal editor"
+        role="dialog"
+        aria-modal="true"
+        aria-label={h ? "Edit directive" : "New directive"}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="editor-icon-row">
+          <input
+            className="input editor-icon"
+            value={icon}
+            onChange={(e) => setIcon(e.target.value)}
+            aria-label="Emoji"
+            maxLength={4}
+          />
+          <div className="emoji-strip" role="group" aria-label="Emoji suggestions">
+            {EMOJI_SUGGESTIONS.map((e) => (
+              <button key={e} className="emoji-pick" onClick={() => setIcon(e)} aria-label={`Use ${e}`}>
+                {e}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <input
+          className="input editor-name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Name the directive…"
+          aria-label="Directive name"
+          autoFocus={!h}
+        />
+
+        <div className="editor-row">
+          <span className="editor-row-label">Area</span>
+          <div className="chip-row" role="group" aria-label="Area of focus">
+            {AREAS.map((a) => (
+              <button
+                key={a.id}
+                className={area === a.id ? "chip on" : "chip"}
+                aria-pressed={area === a.id}
+                onClick={() => setArea(area === a.id ? undefined : a.id)}
+              >
+                {a.icon} {a.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="editor-row">
+          <span className="editor-row-label">Schedule</span>
+          <div className="chip-row" role="group" aria-label="Schedule">
+            <button
+              className={schedule.kind === "daily" ? "chip on" : "chip"}
+              onClick={() => setSchedule({ kind: "daily" })}
+            >
+              Daily
+            </button>
+            <button
+              className={schedule.kind === "weekdays" ? "chip on" : "chip"}
+              onClick={() => setSchedule({ kind: "weekdays", days: days.length ? days : [1, 2, 3, 4, 5] })}
+            >
+              Specific days
+            </button>
+            <button
+              className={schedule.kind === "timesPerWeek" ? "chip on" : "chip"}
+              onClick={() => setSchedule({ kind: "timesPerWeek", target: 3 })}
+            >
+              N per week
+            </button>
+          </div>
+          {schedule.kind === "weekdays" && (
+            <div className="chip-row" role="group" aria-label="Days of week">
+              {WEEKDAY_LABELS.map((label, i) => (
+                <button
+                  key={i}
+                  className={days.includes(i) ? "day-toggle sm on" : "day-toggle sm"}
+                  aria-pressed={days.includes(i)}
+                  onClick={() =>
+                    setSchedule({
+                      kind: "weekdays",
+                      days: days.includes(i) ? days.filter((d) => d !== i) : [...days, i].sort(),
+                    })
+                  }
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+          {schedule.kind === "timesPerWeek" && (
+            <label className="check-label">
+              <input
+                type="number"
+                className="input num-input-sm"
+                min={1}
+                max={7}
+                value={schedule.target}
+                onChange={(e) =>
+                  setSchedule({ kind: "timesPerWeek", target: Math.max(1, Math.min(7, Number(e.target.value) || 3)) })
+                }
+                aria-label="Days per week"
+              />
+              days a week — any days count
+            </label>
+          )}
+        </div>
+
+        <div className="editor-row">
+          <span className="editor-row-label">Time of day</span>
+          <div className="chip-row" role="group" aria-label="Time of day">
+            {TIMES.map((t) => (
+              <button
+                key={t.id}
+                className={timeOfDay === t.id ? "chip on" : "chip"}
+                aria-pressed={timeOfDay === t.id}
+                onClick={() => setTimeOfDay(t.id)}
+              >
+                {t.icon} {t.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="editor-row">
+          <label className="check-label">
+            <input type="checkbox" checked={remindOn} onChange={(e) => setRemindOn(e.target.checked)} />
+            Ping me
+            {remindOn && (
+              <input
+                type="time"
+                className="input time-input"
+                value={reminderTime}
+                onChange={(e) => setReminderTime(e.target.value)}
+                aria-label="Reminder time"
+              />
+            )}
+            <span className="off-day-tag">
+              {remindOn ? "fires on scheduled days only" : "optional — off by default"}
+            </span>
+          </label>
+        </div>
+
+        <div className="install-actions">
+          <button className="btn ghost" onClick={onClose}>
+            Cancel
+          </button>
+          <button className="btn" onClick={save} disabled={!name.trim()}>
+            {h ? "Save changes" : "Install directive"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
