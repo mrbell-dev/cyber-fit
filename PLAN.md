@@ -101,6 +101,16 @@ Costs: ~$1.15/mo for the number + ~$0.0079/SMS. Twilio requires A2P registration
 US traffic (one-time hassle, fine for personal low volume). Kept out of the app repo —
 it would violate the zero-PII/zero-server design pillar; lives as its own private repo.
 
+## Encrypted vault sync (backlog — approved 2026-07-03, next up)
+
+Account-free cross-device sync: app encrypts the export blob ON-DEVICE
+(AES-GCM, key derived from a user passphrase via PBKDF2/Argon2) and PUTs it to
+the relay under a random vault id; another device enters vault id + passphrase
+and pulls/decrypts. Server holds only ciphertext it cannot read; no accounts,
+no email, no PII. Storage: Workers KV (small blobs) or R2. Deliberately chosen
+over online accounts — accounts-first was considered and rejected (privacy
+promise, liability, cost, migration gravity).
+
 ## Cross-device sync idea (backlog)
 
 The Data Vault JSON can already be dropped in any cloud drive manually. Optional

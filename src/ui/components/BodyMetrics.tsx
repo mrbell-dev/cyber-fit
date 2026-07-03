@@ -1,11 +1,17 @@
 import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../../db/db.ts";
-import { addDays, diffDays, type BodyLog, type DayKey } from "../../engine/index.ts";
-import { logWeight } from "../../db/repo.ts";
+import {
+  addDays,
+  diffDays,
+  WEIGHIN_CADENCES,
+  weighinCadenceOf,
+  type BodyLog,
+  type DayKey,
+  type WeighinCadence,
+} from "../../engine/index.ts";
+import { logWeight, saveSettings } from "../../db/repo.ts";
 import { useSettings } from "../hooks.ts";
-
-const CHECKIN_DAYS = 30;
 
 export function useBodyLogs(): BodyLog[] | undefined {
   return useLiveQuery(async () => {
@@ -14,11 +20,12 @@ export function useBodyLogs(): BodyLog[] | undefined {
   }, []);
 }
 
-/** Monthly weigh-in card. Cadence over frequency: fluctuations are noise, the
- *  trend is the signal — XP only rewards ~monthly check-ins by design. */
+/** Weigh-in card. Cadence is the user's call (daily → bimonthly); XP spacing
+ *  scales with it, so scans faster than your own rhythm are never incentivized. */
 export function BodyCard({ today }: { today: DayKey }) {
   const settings = useSettings();
   const unit = settings.weightUnit ?? "lbs";
+  const cadence = weighinCadenceOf(settings);
   const [value, setValue] = useState("");
   const logs = useBodyLogs();
 
@@ -26,7 +33,7 @@ export function BodyCard({ today }: { today: DayKey }) {
   const last = logs[logs.length - 1];
   const prev = logs[logs.length - 2];
   const daysSince = last ? diffDays(last.dayKey, today) : null;
-  const due = daysSince === null || daysSince >= CHECKIN_DAYS;
+  const due = daysSince === null || daysSince >= cadence.days;
   const delta = last && prev && last.unit === prev.unit ? last.weight - prev.weight : null;
 
   const submit = async () => {
@@ -38,7 +45,22 @@ export function BodyCard({ today }: { today: DayKey }) {
 
   return (
     <div className="card">
-      <h2 className="card-title">Bio-Scan — Monthly Weigh-in</h2>
+      <h2 className="card-title">Bio-Scan — Weigh-in</h2>
+      <label className="check-label">
+        Cadence
+        <select
+          className="input"
+          value={cadence.id}
+          onChange={(e) => saveSettings({ weighinCadence: e.target.value as WeighinCadence })}
+          aria-label="Weigh-in cadence"
+        >
+          {WEIGHIN_CADENCES.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.label}
+            </option>
+          ))}
+        </select>
+      </label>
       {last ? (
         <p>
           Last scan: <strong>{last.weight} {last.unit}</strong>
@@ -54,8 +76,8 @@ export function BodyCard({ today }: { today: DayKey }) {
       )}
       <p className="placeholder">
         {due
-          ? "// scan window open — monthly cadence, not daily; fluctuations are noise"
-          : `// next check-in ~${last ? addDays(last.dayKey, CHECKIN_DAYS) : ""} — early scans are fine, they just don't earn XP`}
+          ? `// scan window open — ${cadence.label.toLowerCase()} cadence; the trend is the signal, fluctuations are noise`
+          : `// next check-in ~${last ? addDays(last.dayKey, cadence.days) : ""} — early scans are fine, they just don't earn XP`}
       </p>
       <div className="form-row">
         <input

@@ -97,10 +97,25 @@ describe("rebuild — weigh-in XP (monthly cadence)", () => {
     expect(keys).toEqual(["weighin:w1", "weighin:w3"]);
   });
 
-  it("daily scale-watching earns exactly once", () => {
+  it("daily scale-watching earns exactly once on monthly cadence", () => {
     const logs = Array.from({ length: 10 }, (_, i) => body(`d${i}`, addDays(TODAY, -9 + i), i));
     const { grants } = rebuild(bundle({ bodyLogs: logs }));
     expect(grants.filter((g) => g.source === "weighin")).toHaveLength(1);
+  });
+
+  it("daily cadence rewards every day; weekly rewards ~weekly", () => {
+    const logs = Array.from({ length: 10 }, (_, i) => body(`d${i}`, addDays(TODAY, -9 + i), i));
+    const daily = rebuild(bundle({
+      bodyLogs: logs,
+      settings: { ...DEFAULT_SETTINGS, weighinCadence: "daily" },
+    }));
+    expect(daily.grants.filter((g) => g.source === "weighin")).toHaveLength(10);
+
+    const weekly = rebuild(bundle({
+      bodyLogs: logs,
+      settings: { ...DEFAULT_SETTINGS, weighinCadence: "weekly" },
+    }));
+    expect(weekly.grants.filter((g) => g.source === "weighin")).toHaveLength(2); // day 0 + day 5
   });
 });
 

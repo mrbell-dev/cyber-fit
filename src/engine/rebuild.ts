@@ -14,6 +14,7 @@ import {
   type XpSource,
 } from "./rewards.ts";
 import { addDays, diffDays, type DayKey } from "./time.ts";
+import { weighinCadenceOf } from "./types.ts";
 import type {
   BodyLog,
   Habit,
@@ -41,9 +42,6 @@ export interface LogBundle {
   today: DayKey;
 }
 
-/** Weigh-in XP requires this many days since the last rewarded weigh-in —
- *  monthly cadence is the healthy one; daily scale-watching earns nothing. */
-export const WEIGHIN_SPACING_DAYS = 21;
 
 export interface RebuildResult {
   state: PlayerState;
@@ -182,10 +180,12 @@ function deriveMoments(bundle: LogBundle): Moment[] {
     moments.push({ eventId: log.id, ts: log.ts, dayKey: log.dayKey, source: "highlight" });
   }
 
-  // Weigh-in XP: only when ≥ WEIGHIN_SPACING_DAYS since the last rewarded one.
+  // Weigh-in XP: spaced to the user's chosen cadence — scans faster than your
+  // own rhythm are allowed but never incentivized.
+  const weighinSpacing = weighinCadenceOf(bundle.settings).xpSpacing;
   let lastRewardedWeighin: DayKey | null = null;
   for (const log of [...bundle.bodyLogs].sort((a, b) => a.ts - b.ts)) {
-    if (lastRewardedWeighin && diffDays(lastRewardedWeighin, log.dayKey) < WEIGHIN_SPACING_DAYS) continue;
+    if (lastRewardedWeighin && diffDays(lastRewardedWeighin, log.dayKey) < weighinSpacing) continue;
     lastRewardedWeighin = log.dayKey;
     moments.push({ eventId: log.id, ts: log.ts, dayKey: log.dayKey, source: "weighin" });
   }

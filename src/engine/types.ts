@@ -158,6 +158,29 @@ export interface Settings {
   activeFx?: string[];
   weightUnit?: "lbs" | "kg";
   distanceUnit?: "mi" | "km";
+  /** how often the user wants to weigh in; XP spacing scales with it */
+  weighinCadence?: WeighinCadence;
+}
+
+export type WeighinCadence = "daily" | "weekly" | "biweekly" | "monthly" | "bimonthly";
+
+export const WEIGHIN_CADENCES: {
+  id: WeighinCadence;
+  label: string;
+  /** the check-in window ("due after N days") */
+  days: number;
+  /** min days between XP-earning scans (~70% of cadence — early-ish is fine) */
+  xpSpacing: number;
+}[] = [
+  { id: "daily", label: "Daily", days: 1, xpSpacing: 1 },
+  { id: "weekly", label: "Weekly", days: 7, xpSpacing: 5 },
+  { id: "biweekly", label: "Every 2 weeks", days: 14, xpSpacing: 10 },
+  { id: "monthly", label: "Monthly", days: 30, xpSpacing: 21 },
+  { id: "bimonthly", label: "Every 2 months", days: 60, xpSpacing: 42 },
+];
+
+export function weighinCadenceOf(settings: Settings): (typeof WEIGHIN_CADENCES)[number] {
+  return WEIGHIN_CADENCES.find((c) => c.id === (settings.weighinCadence ?? "monthly"))!;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
