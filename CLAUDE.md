@@ -6,8 +6,9 @@ Cloudflare Worker: the app is static assets behind `gate/index.mjs`, the relay i
 `worker/`. GitHub Actions is CI-only; deploys are `npm run deploy` (app) and
 `npm run deploy:relay`. Repo: github.com/mrbell-dev/cyber-fit (MIT).
 
-**Roadmap lives in `PLAN.md` (design decisions + phased roadmap) and `TODO.md`
-(Michael's raw punch-list — treat it as requirements, translate it thoughtfully).**
+**The work queue is the TIER LIST in `PLAN.md`** (S → A → B → C → LT), with
+the stable design reference below it. When Michael sends raw feedback, fold it
+into the tier list thoughtfully — that file is the single source of "what's next."
 
 ## Product north star
 
@@ -87,7 +88,7 @@ scripts/      icons.mjs + Playwright checks: offline, persist, vault round-trip
 
 ## How to work on this project (the loop that built it)
 
-1. Read `PLAN.md` ROADMAP v2 and pick the next unchecked item (R1 first).
+1. Read the `PLAN.md` TIER LIST and pick the next unchecked item (Tier S first).
 2. Engine change → colocated vitest test IN THE SAME COMMIT. UI change → drive
    it with a throwaway Playwright script (copy a `scripts/demo-*.mjs` pattern,
    unique preview port, then delete the script), screenshot, and **send the
