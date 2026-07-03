@@ -298,6 +298,27 @@ export function System() {
             ))}
           </select>
         </label>
+        <label className="check-label">
+          Units
+          <select
+            className="input"
+            value={settings.weightUnit ?? "lbs"}
+            onChange={(e) => saveSettings({ weightUnit: e.target.value as "lbs" | "kg" })}
+            aria-label="Weight unit"
+          >
+            <option value="lbs">lbs</option>
+            <option value="kg">kg</option>
+          </select>
+          <select
+            className="input"
+            value={settings.distanceUnit ?? "mi"}
+            onChange={(e) => saveSettings({ distanceUnit: e.target.value as "mi" | "km" })}
+            aria-label="Distance unit"
+          >
+            <option value="mi">miles</option>
+            <option value="km">km</option>
+          </select>
+        </label>
         <p className="placeholder">
           // logs before the rollover hour count as the previous day — night owls stay safe
         </p>

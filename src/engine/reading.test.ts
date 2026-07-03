@@ -19,7 +19,8 @@ const wlog = (id: string, dayKey: string): WorkoutLog => ({ id, dayKey, ts: 100,
 function bundle(partial: Partial<LogBundle>): LogBundle {
   return {
     habits: [learnHabit], habitLogs: [], waterLogs: [], moodLogs: [],
-    workoutLogs: [], readingLogs: [], highlightLogs: [], settings: DEFAULT_SETTINGS, today: TODAY,
+    workoutLogs: [], readingLogs: [], highlightLogs: [], bodyLogs: [], settings: DEFAULT_SETTINGS,
+    today: TODAY,
     ...partial,
   };
 }

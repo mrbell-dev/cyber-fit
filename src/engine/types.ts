@@ -73,8 +73,19 @@ export interface WorkoutLog {
   /** fast path: just a name ("Lift", "5k walk") */
   name: string;
   durationMin?: number;
+  distance?: number; // in the user's display unit (mi/km per settings)
   note?: string;
-  exercises?: { name: string; sets?: { reps?: number; weightKg?: number }[] }[];
+  exercises?: { name: string; sets?: { reps?: number; weight?: number }[] }[];
+}
+
+/** Body metrics — monthly weigh-ins by design (fluctuations are noise; trend is signal). */
+export interface BodyLog {
+  id: string;
+  dayKey: DayKey;
+  ts: number;
+  /** in the user's display unit at log time */
+  weight: number;
+  unit: "lbs" | "kg";
 }
 
 export type ReadingType = "book" | "article" | "audiobook" | "other";
@@ -145,6 +156,8 @@ export interface Settings {
   relayVapidKey?: string;
   /** enabled fx augment ids (opt-in; motion fx also respect prefers-reduced-motion) */
   activeFx?: string[];
+  weightUnit?: "lbs" | "kg";
+  distanceUnit?: "mi" | "km";
 }
 
 export const DEFAULT_SETTINGS: Settings = {

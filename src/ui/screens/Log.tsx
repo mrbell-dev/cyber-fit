@@ -1,26 +1,37 @@
 import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../../db/db.ts";
-import type { ReadingItem, ReadingLog } from "../../engine/index.ts";
+import { EXERCISES, type ReadingItem, type ReadingLog } from "../../engine/index.ts";
 import { addReadingItem, logReading, logWorkout, setReadingStatus } from "../../db/repo.ts";
-import { useDayKey } from "../hooks.ts";
+import { useDayKey, useSettings } from "../hooks.ts";
+import { BodyCard } from "../components/BodyMetrics.tsx";
 
 function WorkoutCard() {
   const [name, setName] = useState("");
   const [minutes, setMinutes] = useState("");
+  const [distance, setDistance] = useState("");
   const today = useDayKey();
+  const settings = useSettings();
+  const distanceUnit = settings.distanceUnit ?? "mi";
 
   const recent = useLiveQuery(async () => {
     const all = await db.workoutLogs.toArray();
     return all.sort((a, b) => b.ts - a.ts).slice(0, 5);
   }, []);
+  // Your own history first, then the bundled offline exercise vocabulary.
   const pastNames = [...new Set((recent ?? []).map((w) => w.name))];
+  const suggestions = [...pastNames, ...EXERCISES.filter((e) => !pastNames.includes(e))];
 
   const submit = async () => {
     if (!name.trim()) return;
-    await logWorkout({ name, durationMin: Number(minutes) || undefined });
+    await logWorkout({
+      name,
+      durationMin: Number(minutes) || undefined,
+      distance: Number(distance) || undefined,
+    });
     setName("");
     setMinutes("");
+    setDistance("");
   };
 
   return (
@@ -37,10 +48,12 @@ function WorkoutCard() {
           onKeyDown={(e) => e.key === "Enter" && submit()}
         />
         <datalist id="past-workouts">
-          {pastNames.map((n) => (
+          {suggestions.map((n) => (
             <option key={n} value={n} />
           ))}
         </datalist>
+      </div>
+      <div className="form-row">
         <input
           className="input num-input"
           type="number"
@@ -50,10 +63,21 @@ function WorkoutCard() {
           placeholder="min"
           aria-label="Duration in minutes"
         />
+        <input
+          className="input num-input"
+          type="number"
+          inputMode="decimal"
+          step="0.1"
+          min={0}
+          value={distance}
+          onChange={(e) => setDistance(e.target.value)}
+          placeholder={distanceUnit}
+          aria-label={`Distance in ${distanceUnit}`}
+        />
+        <button className="btn" onClick={submit} disabled={!name.trim()}>
+          Log workout
+        </button>
       </div>
-      <button className="btn" onClick={submit} disabled={!name.trim()}>
-        Log workout
-      </button>
 
       {(recent ?? []).length > 0 && (
         <div className="recent-list">
@@ -63,6 +87,7 @@ function WorkoutCard() {
                 {w.dayKey === today ? "▸ " : ""}
                 {w.name}
                 {w.durationMin ? ` · ${w.durationMin} min` : ""}
+                {w.distance ? ` · ${w.distance} ${distanceUnit}` : ""}
               </span>
               <span className="off-day-tag">{w.dayKey}</span>
             </div>
@@ -243,9 +268,11 @@ function ReadingCard() {
 }
 
 export function Log() {
+  const today = useDayKey();
   return (
     <section aria-label="Log">
       <WorkoutCard />
+      <BodyCard today={today} />
       <ReadingCard />
     </section>
   );

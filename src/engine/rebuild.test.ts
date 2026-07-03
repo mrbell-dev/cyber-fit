@@ -21,6 +21,7 @@ function bundle(partial: Partial<LogBundle>): LogBundle {
     workoutLogs: [],
     readingLogs: [],
     highlightLogs: [],
+    bodyLogs: [],
     settings: DEFAULT_SETTINGS,
     today: TODAY,
     ...partial,
@@ -76,6 +77,30 @@ describe("rebuild — XP grants", () => {
       moodLogs: [mlog("m", TODAY, 300)],
     });
     expect(rebuild(b)).toEqual(rebuild(b));
+  });
+});
+
+describe("rebuild — weigh-in XP (monthly cadence)", () => {
+  const body = (id: string, dayKey: string, ts: number) => ({
+    id, dayKey, ts, weight: 200, unit: "lbs" as const,
+  });
+
+  it("first weigh-in earns; one 5 days later doesn't; one 25 days later does", () => {
+    const { grants } = rebuild(bundle({
+      bodyLogs: [
+        body("w1", addDays(TODAY, -30), 100),
+        body("w2", addDays(TODAY, -25), 200), // too soon after w1
+        body("w3", addDays(TODAY, -5), 300),  // 25 days after w1 → earns
+      ],
+    }));
+    const keys = grants.filter((g) => g.source === "weighin").map((g) => g.key);
+    expect(keys).toEqual(["weighin:w1", "weighin:w3"]);
+  });
+
+  it("daily scale-watching earns exactly once", () => {
+    const logs = Array.from({ length: 10 }, (_, i) => body(`d${i}`, addDays(TODAY, -9 + i), i));
+    const { grants } = rebuild(bundle({ bodyLogs: logs }));
+    expect(grants.filter((g) => g.source === "weighin")).toHaveLength(1);
   });
 });
 

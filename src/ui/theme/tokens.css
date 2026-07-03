@@ -1103,3 +1103,50 @@ html.theme-ice {
   color: var(--text);
   background: rgba(0, 255, 179, 0.08);
 }
+
+/* ---------- charts (weight trend + training volume) ---------- */
+.chart-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.chart-grid {
+  stroke: var(--border);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+
+.chart-line {
+  fill: none;
+  stroke: var(--neon-green);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.chart-dot {
+  fill: var(--bg-raised);
+  stroke: var(--neon-green);
+  stroke-width: 2;
+}
+
+.chart-label {
+  fill: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.volume-week {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 96px;
+}
+
+.volume-col {
+  width: 100%;
+  background: rgba(0, 255, 179, 0.35);
+  border-top: 2px solid var(--neon-green);
+  border-radius: 3px 3px 0 0;
+}

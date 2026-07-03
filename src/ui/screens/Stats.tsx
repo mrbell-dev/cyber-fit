@@ -11,6 +11,7 @@ import {
 } from "../../engine/index.ts";
 import { useDayKey, useSettings } from "../hooks.ts";
 import { HighlightReel } from "../components/Highlight.tsx";
+import { VolumeChart, WeightChart } from "../components/BodyMetrics.tsx";
 
 const GRID_DAYS = 70; // 14-wide rows, GitHub-style intensity
 
@@ -210,6 +211,10 @@ export function Stats() {
           more
         </div>
       </div>
+
+      <WeightChart />
+
+      <VolumeChart today={today} />
 
       <HighlightReel />
 

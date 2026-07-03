@@ -15,6 +15,7 @@ import {
 } from "./rewards.ts";
 import { addDays, diffDays, type DayKey } from "./time.ts";
 import type {
+  BodyLog,
   Habit,
   HabitLog,
   HighlightLog,
@@ -35,9 +36,14 @@ export interface LogBundle {
   workoutLogs: WorkoutLog[];
   readingLogs: ReadingLog[];
   highlightLogs: HighlightLog[];
+  bodyLogs: BodyLog[];
   settings: Settings;
   today: DayKey;
 }
+
+/** Weigh-in XP requires this many days since the last rewarded weigh-in —
+ *  monthly cadence is the healthy one; daily scale-watching earns nothing. */
+export const WEIGHIN_SPACING_DAYS = 21;
 
 export interface RebuildResult {
   state: PlayerState;
@@ -176,6 +182,14 @@ function deriveMoments(bundle: LogBundle): Moment[] {
     moments.push({ eventId: log.id, ts: log.ts, dayKey: log.dayKey, source: "highlight" });
   }
 
+  // Weigh-in XP: only when ≥ WEIGHIN_SPACING_DAYS since the last rewarded one.
+  let lastRewardedWeighin: DayKey | null = null;
+  for (const log of [...bundle.bodyLogs].sort((a, b) => a.ts - b.ts)) {
+    if (lastRewardedWeighin && diffDays(lastRewardedWeighin, log.dayKey) < WEIGHIN_SPACING_DAYS) continue;
+    lastRewardedWeighin = log.dayKey;
+    moments.push({ eventId: log.id, ts: log.ts, dayKey: log.dayKey, source: "weighin" });
+  }
+
   // First-of-day bonus: piggybacks the earliest moment of each day.
   const firstOfDay = new Map<DayKey, Moment>();
   for (const m of moments) {
@@ -215,6 +229,7 @@ function activeDays(bundle: LogBundle): Set<DayKey> {
   for (const l of bundle.workoutLogs) days.add(l.dayKey);
   for (const l of bundle.readingLogs) days.add(l.dayKey);
   for (const l of bundle.highlightLogs) days.add(l.dayKey);
+  for (const l of bundle.bodyLogs) days.add(l.dayKey);
   return days;
 }
 

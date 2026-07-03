@@ -27,7 +27,7 @@ const PLAYER_KEY = "player";
  * never drift), persist it, and announce any newly earned grants.
  */
 export async function refreshPlayer(): Promise<PlayerState> {
-  const [habits, habitLogs, waterLogs, moodLogs, workoutLogs, readingLogs, highlightLogs, settings, today, prevRow] =
+  const [habits, habitLogs, waterLogs, moodLogs, workoutLogs, readingLogs, highlightLogs, bodyLogs, settings, today, prevRow] =
     await Promise.all([
       db.habits.toArray(),
       db.habitLogs.toArray(),
@@ -36,12 +36,13 @@ export async function refreshPlayer(): Promise<PlayerState> {
       db.workoutLogs.toArray(),
       db.readingLogs.toArray(),
       db.highlightLogs.toArray(),
+      db.bodyLogs.toArray(),
       getSettings(),
       currentDayKey(),
       db.kv.get(PLAYER_KEY),
     ]);
   const { state, grants } = rebuild({
-    habits, habitLogs, waterLogs, moodLogs, workoutLogs, readingLogs, highlightLogs, settings, today,
+    habits, habitLogs, waterLogs, moodLogs, workoutLogs, readingLogs, highlightLogs, bodyLogs, settings, today,
   });
   await db.kv.put({ key: PLAYER_KEY, value: state });
 
@@ -157,6 +158,7 @@ export async function logWater(ml: number, dayKey?: DayKey): Promise<WaterLog> {
 export async function logWorkout(input: {
   name: string;
   durationMin?: number;
+  distance?: number;
   note?: string;
 }): Promise<WorkoutLog> {
   const entry: WorkoutLog = {
@@ -165,6 +167,7 @@ export async function logWorkout(input: {
     ts: Date.now(),
     name: input.name.trim(),
     ...(input.durationMin ? { durationMin: input.durationMin } : {}),
+    ...(input.distance ? { distance: input.distance } : {}),
     ...(input.note?.trim() ? { note: input.note.trim() } : {}),
   };
   await db.workoutLogs.add(entry);
@@ -214,6 +217,18 @@ export async function logReading(input: {
   await db.readingLogs.add(entry);
   await refreshPlayer();
   return entry;
+}
+
+export async function logWeight(weight: number, unit: "lbs" | "kg"): Promise<void> {
+  if (!Number.isFinite(weight) || weight <= 0) return;
+  await db.bodyLogs.add({
+    id: crypto.randomUUID(),
+    dayKey: await currentDayKey(),
+    ts: Date.now(),
+    weight,
+    unit,
+  });
+  await refreshPlayer();
 }
 
 export async function logHighlight(text: string): Promise<void> {
