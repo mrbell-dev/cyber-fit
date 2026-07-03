@@ -100,6 +100,67 @@ scripts/      icons.mjs + Playwright checks: offline, persist, vault round-trip
    accounts-first became encrypted vault sync). Precision over politeness;
    never claim something shipped without having verified it end-to-end.
 
+## Judgment layer — how to decide when the rules don't decide for you
+
+### Precedence when principles collide (higher wins)
+
+1. **Privacy / zero-PII** — beats every feature, every convenience.
+2. **Offline usability** — a feature that only works online isn't a feature yet.
+3. **Forgiveness** — beats accuracy ("you missed 5 days" may be true; we still
+   never say it). Beats engagement metrics too.
+4. **ADHD-simplicity of the DEFAULT path** — the first-run experience is 1–2
+   taps, zero required config. Depth is welcome **behind** progressive
+   disclosure (Michael wants power-user detail — as opt-in, never as friction).
+5. **Honesty of the system** — real limits stated in-UI beats magic that lies.
+6. **Cyberpunk flavor** — seasoning, applied last, never at the cost of 1–5.
+
+### The translate-don't-refuse pattern (use it constantly)
+
+When a request conflicts with a pillar, the job is to find the need under the
+request and ship the pillar-compatible version of it. Real calibration cases:
+- "Online accounts first" → need was cross-device → **encrypted vault sync**.
+- "Google Drive sync" → need was backup-everywhere → **File System Access
+  against any synced folder**.
+- "Remind until complete" → relay must stay completion-blind → **in-app nudges
+  quiet when done; push stays generic**.
+- "Emoji keyboard on focus" → impossible on web → **in-app emoji picker**.
+Name the conflict in one sentence, give the alternative, build it. Refusing
+without an alternative and silently complying are both failures.
+
+### When to build vs. when to assess
+
+- Michael states a problem or "I might want…" → give the honest assessment
+  first (he rejects ideas when shown real costs — accounts-first died in one
+  message). Don't build speculatively.
+- Michael asks for a feature → build it, and fold every queued follow-up into
+  the same pass. Record anything deferred in PLAN.md WITH the reasoning, so
+  decisions stick and don't get relitigated.
+- Genuinely ambiguous scope → ship the smallest verifiable slice, screenshot,
+  let the screenshot ask the question.
+
+### Definition of done — any new tracker/metric (checklist, all required)
+
+☐ 1–2-tap fast path (detail optional) ☐ forgiving streak semantics
+☐ XP source with a daily cap, rewarding the USER'S chosen cadence (never
+faster — see bio-scan spacing) ☐ chart or calendar if chartable ☐ covered by
+export/import + rebuild ☐ #tags work in its free text ☐ reminder option baked
+into the object, OFF by default ☐ engine tests incl. the fold≡rebuild property
+☐ fully usable offline and with push denied
+
+### Copy test (run on every user-facing string)
+
+Would this string feel kind at 11pm to someone who's had a bad week? Does it
+name the mechanic positively (shield/reboot/rest — never lost/failed/behind)?
+Is it clear with zero slang knowledge? Then at most one StreetSlang term.
+
+### Things to push FOR proactively (don't wait to be asked)
+
+Accessibility on every new control; a screenshot with every UI change; caps on
+every new XP source; recording rejected ideas in PLAN.md; flagging when a
+feature would be the app's first violation of a pillar (that's a red line, say
+so even mid-implementation); simplifying anything that grew a second config
+knob before its first real user.
+
 ## Settled decisions — don't reopen, don't re-promise
 
 - **No online accounts** (rejected 2026-07-03: privacy, liability, migration
