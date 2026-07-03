@@ -85,6 +85,45 @@ scripts/      icons.mjs + Playwright checks: offline, persist, vault round-trip
 - Commit per feature with a descriptive message; push to main (deploys nothing —
   CI tests only).
 
+## How to work on this project (the loop that built it)
+
+1. Read `PLAN.md` ROADMAP v2 and pick the next unchecked item (R1 first).
+2. Engine change → colocated vitest test IN THE SAME COMMIT. UI change → drive
+   it with a throwaway Playwright script (copy a `scripts/demo-*.mjs` pattern,
+   unique preview port, then delete the script), screenshot, and **send the
+   screenshot to Michael** — he reviews visually, usually on a phone.
+3. `npm test && npm run build` green → commit (one feature per commit,
+   descriptive message) → `git push` → `npm run deploy` (and `deploy:relay` if
+   `worker/` changed).
+4. Michael wants pushback, not agreement: if a request conflicts with the rules
+   above, say so plainly and offer the pillar-compatible version (that's how
+   accounts-first became encrypted vault sync). Precision over politeness;
+   never claim something shipped without having verified it end-to-end.
+
+## Settled decisions — don't reopen, don't re-promise
+
+- **No online accounts** (rejected 2026-07-03: privacy, liability, migration
+  gravity). Cross-device = encrypted vault sync (design in PLAN.md).
+- **No third-party fitness APIs** (Strava/Garmin/Apple Health need OAuth +
+  servers; Apple Health has no web API). Bundled open exercise list instead.
+- **No Google Drive API** (OAuth contradicts off-grid) — File System Access
+  API against any synced folder instead.
+- **OS emoji keyboard can't be forced on the web** — that's why the in-app
+  emoji picker exists.
+- **Push relay is completion-blind and schedule-blind by design** — "remind
+  until done" quiets in-app nudges only; don't "fix" this by sending state.
+
+## Platform physics (hard limits — design around, never against)
+
+- Relay slots are a WEEKLY 15-min UTC grid (day×1440+min, [0,10080)). Monthly/
+  yearly reminders therefore cannot push — in-app nudges cover those cadences.
+- iOS: no `navigator.vibrate` (haptics are Android-only), no PWA background
+  sync, push only for the installed A2HS app on 16.4+.
+- Secrets NEVER enter this (public) repo: GATE_PASSWORD/GATE_KEY/
+  VAPID_PRIVATE_JWK live as Cloudflare secrets (`npx wrangler secret put`,
+  run in the right directory). Rotating the gate code is one command; the
+  VAPID public key in `.env.production` is public by design.
+
 ## Known sharp edges
 
 - iOS push requires the installed (A2HS) app, 16.4+, user-gesture permission;
