@@ -11,6 +11,8 @@ export function isScheduledOn(habit: Habit, day: DayKey): boolean {
       return habit.schedule.days.includes(weekdayOf(day));
     case "timesPerWeek":
       return true;
+    case "nPerX":
+      return true;
   }
 }
 
@@ -55,6 +57,9 @@ export function habitStreak(
   if (habit.schedule.kind === "timesPerWeek") {
     return weeklyStreak(habit.schedule.target, satisfied, today);
   }
+  if (habit.schedule.kind === "nPerX") {
+    return nPerXStreak(habit.schedule.times, habit.schedule.periodDays, satisfied, today);
+  }
 
   let streak = 0;
   let day = today;
@@ -70,6 +75,28 @@ export function habitStreak(
       }
     }
     day = addDays(day, -1);
+  }
+  return streak;
+}
+
+/** Consecutive rolling X-day periods (newest ending today) with >= times satisfied
+ *  days. The in-progress current period counts when met, never breaks while open. */
+function nPerXStreak(times: number, periodDays: number, satisfied: Set<DayKey>, today: DayKey): number {
+  const countIn = (end: DayKey): number => {
+    let n = 0;
+    for (let i = 0; i < periodDays; i++) if (satisfied.has(addDays(end, -i))) n++;
+    return n;
+  };
+  let streak = 0;
+  if (countIn(today) >= times) streak++;
+  let end = addDays(today, -periodDays);
+  for (let i = 0; i < Math.ceil(3660 / periodDays); i++) {
+    if (countIn(end) >= times) {
+      streak++;
+      end = addDays(end, -periodDays);
+    } else {
+      break;
+    }
   }
   return streak;
 }

@@ -75,6 +75,23 @@ describe("habitStreak — weekdays", () => {
   });
 });
 
+describe("habitStreak — nPerX (rolling window)", () => {
+  const monthly: Habit = { ...base, schedule: { kind: "nPerX", times: 1, periodDays: 30 } };
+
+  it("1-per-30-days chains across periods", () => {
+    // one hit in current window, one in the prior window
+    const sat = new Set([addDays(TODAY, -5), addDays(TODAY, -40)]);
+    expect(habitStreak(monthly, sat, new Set(), TODAY)).toBe(2);
+  });
+
+  it("empty current window doesn't break; empty prior window does", () => {
+    const onlyPrior = new Set([addDays(TODAY, -40)]);
+    expect(habitStreak(monthly, onlyPrior, new Set(), TODAY)).toBe(1);
+    const gap = new Set([addDays(TODAY, -5), addDays(TODAY, -80)]);
+    expect(habitStreak(monthly, gap, new Set(), TODAY)).toBe(1);
+  });
+});
+
 describe("habitStreak — timesPerWeek", () => {
   it("current week satisfied counts; prior weeks chain", () => {
     // Week of 6/22 (Mon): 3 days done. Week of 6/29: 3 days done.

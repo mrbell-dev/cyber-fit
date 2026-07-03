@@ -2,6 +2,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../../db/db.ts";
 import {
   DEFAULT_REMINDERS,
+  dayStatus,
   duePingsToday,
   REMINDER_COPY,
   type DayKey,
@@ -28,18 +29,28 @@ export function MissedPing({ today }: { today: DayKey }) {
       ...waterLogs.map((l) => l.ts),
       ...moodLogs.map((l) => l.ts),
     );
-    return { reminders, habits, lastLogTs };
+    return { reminders, habits, habitLogs, lastLogTs };
   }, [today]);
 
   if (!info) return null;
 
   const now = new Date();
+  // Which habits are already satisfied today (quiets untilDone pings).
+  const doneHabits = new Set(
+    info.habits
+      .filter((h) => dayStatus(h, info.habitLogs.filter((l) => l.habitId === h.id)).done)
+      .map((h) => h.id),
+  );
   const due = duePingsToday(
     info.reminders,
     now.getDay(),
     now.getHours() * 60 + now.getMinutes(),
     info.habits,
-  );
+  ).filter((p) => {
+    if (p.kind === "motivation") return false; // encouragement never "misses"
+    if (p.untilDone && p.habitId && doneHabits.has(p.habitId)) return false;
+    return true;
+  });
   if (due.length === 0) return null;
 
   const latest = due.reduce((a, b) => (a.minutes > b.minutes ? a : b));

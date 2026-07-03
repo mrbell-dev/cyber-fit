@@ -1,7 +1,7 @@
 // Push opt-in + slot sync. Strictly nice-to-have: every failure path is
 // silent-but-reported, never blocking. The only bytes that ever leave the
 // device: the anonymous push subscription + slot numbers, over TLS.
-import { DEFAULT_REMINDERS, slotsFor, type Reminders } from "../engine/index.ts";
+import { DEFAULT_REMINDERS, slotBundleFor, type Reminders } from "../engine/index.ts";
 import { db } from "../db/db.ts";
 import { getSettings } from "../db/repo.ts";
 
@@ -42,9 +42,9 @@ function b64ToUint8(base64: string): Uint8Array {
   return Uint8Array.from(raw, (c) => c.charCodeAt(0));
 }
 
-async function currentSlots(): Promise<number[]> {
+async function currentSlots(): Promise<{ slots: number[]; motivationSlots: number[] }> {
   const habits = await db.habits.filter((h) => !h.archivedAt).toArray();
-  return slotsFor(await getReminders(), new Date().getTimezoneOffset(), habits);
+  return slotBundleFor(await getReminders(), new Date().getTimezoneOffset(), habits);
 }
 
 async function postJson(url: string, path: string, body: unknown): Promise<boolean> {
@@ -79,7 +79,7 @@ export async function enablePush(): Promise<{ ok: boolean; reason?: string }> {
 
   const ok = await postJson(relay.url, "/subscribe", {
     subscription: sub.toJSON(),
-    slots: await currentSlots(),
+    ...(await currentSlots()),
   });
   return ok ? { ok: true } : { ok: false, reason: "Relay unreachable — reminders will retry on next app open." };
 }
@@ -93,7 +93,7 @@ export async function syncPush(): Promise<void> {
   const reg = await navigator.serviceWorker.ready;
   const sub = await reg.pushManager.getSubscription();
   if (!sub) return;
-  await postJson(relay.url, "/subscribe", { subscription: sub.toJSON(), slots: await currentSlots() });
+  await postJson(relay.url, "/subscribe", { subscription: sub.toJSON(), ...(await currentSlots()) });
 }
 
 export async function disablePush(): Promise<void> {

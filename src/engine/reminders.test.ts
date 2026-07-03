@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_REMINDERS, duePingsToday, localPings, slotsFor } from "./reminders.ts";
+import { DEFAULT_REMINDERS, duePingsToday, localPings, slotBundleFor, slotsFor } from "./reminders.ts";
 
 describe("localPings", () => {
   it("water spreads count evenly across the window", () => {
@@ -90,6 +90,31 @@ describe("highlight reminder", () => {
     const pings = localPings(on).filter((p) => p.kind === "highlight");
     expect(pings).toHaveLength(1);
     expect(pings[0].minutes).toBe(1140);
+  });
+});
+
+describe("multi-ping habits + motivation slots", () => {
+  const habit = (over: object) => ({
+    id: "h1", name: "Hydra", icon: "💧", schedule: { kind: "daily" as const },
+    domain: "general" as const, target: 1, createdAt: 0, order: 0, ...over,
+  });
+
+  it("habit.pings spreads N pings across its window", () => {
+    const h = habit({ pings: { times: 3, start: "09:00", end: "21:00", untilDone: true } });
+    const pings = localPings(DEFAULT_REMINDERS, [h]).filter((p) => p.kind === "habit");
+    expect(pings.map((p) => p.minutes)).toEqual([540, 900, 1260]);
+    expect(pings.every((p) => p.untilDone && p.habitId === "h1")).toBe(true);
+  });
+
+  it("motivation slots are separated from reminder slots", () => {
+    const r = { ...DEFAULT_REMINDERS, motivation: { on: true, count: 2, start: "10:00", end: "18:00" } };
+    const bundle = slotBundleFor(r, 0);
+    expect(bundle.motivationSlots.length).toBeGreaterThan(0);
+    // 10:00 and 18:00 daily → slots at day*1440+600 and day*1440+1080
+    expect(bundle.motivationSlots).toContain(600);
+    expect(bundle.slots).not.toContain(600);
+    // motivation off by default → empty
+    expect(slotBundleFor(DEFAULT_REMINDERS, 0).motivationSlots).toEqual([]);
   });
 });
 

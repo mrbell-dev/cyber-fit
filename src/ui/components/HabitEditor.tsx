@@ -19,6 +19,17 @@ const TIMES: { id: TimeOfDay; name: string; icon: string }[] = [
 
 const EMOJI_SUGGESTIONS = ["⚡", "🧘", "🦾", "📖", "🧠", "🚶", "🥗", "🌙", "🫁", "💊", "🎸", "🐣"];
 
+// The web can't switch the OS keyboard to emoji, so we ship our own picker.
+const EMOJI_GRID = [
+  "⚡", "🔥", "💪", "🦾", "🦿", "🧠", "🫀", "🫁", "👁️", "🤖", "👾", "🕶️",
+  "🧘", "🏃", "🚶", "🏋️", "🤸", "🚴", "🏊", "🥊", "⛰️", "🧗", "🛹", "⚽",
+  "📖", "📚", "✍️", "🎓", "🧪", "💻", "🎯", "♟️", "🧩", "🎨", "🎸", "🎹",
+  "🥗", "🍎", "🥦", "🍳", "🥑", "🍵", "💧", "🚰", "☕", "🥤", "🍽️", "🧂",
+  "🌙", "😴", "🛏️", "🌅", "☀️", "🌆", "🌃", "⭐", "🌧️", "🌿", "🌵", "🌸",
+  "💊", "🩺", "🦷", "🧼", "🛁", "🧴", "❤️", "💚", "💜", "🖤", "✨", "🐣",
+  "🦎", "🐕", "🐈", "🌊", "🔋", "📵", "🎮", "🗡️", "🛡️", "💾", "📡", "🔧",
+];
+
 export interface EditorSeed {
   habit?: Habit; // present = editing
   // preset fields for "install from library" (or blank for brand-new)
@@ -40,18 +51,28 @@ export function HabitEditor({ seed, onClose }: { seed: EditorSeed; onClose: () =
   const [area, setArea] = useState<Area | undefined>(h?.area ?? seed.area);
   const [schedule, setSchedule] = useState<Schedule>(h?.schedule ?? seed.schedule ?? { kind: "daily" });
   const [timeOfDay, setTimeOfDay] = useState<TimeOfDay>(h?.timeOfDay ?? seed.timeOfDay ?? "anytime");
-  const [remindOn, setRemindOn] = useState(Boolean(h?.reminderTime));
-  const [reminderTime, setReminderTime] = useState(h?.reminderTime ?? seed.reminderTime ?? "18:00");
+  const [remindOn, setRemindOn] = useState(Boolean(h?.reminderTime || h?.pings));
+  const [reminderTime, setReminderTime] = useState(
+    h?.reminderTime ?? h?.pings?.start ?? seed.reminderTime ?? "18:00",
+  );
+  const [pingTimes, setPingTimes] = useState(h?.pings?.times ?? 1);
+  const [pingEnd, setPingEnd] = useState(h?.pings?.end ?? "21:00");
+  const [untilDone, setUntilDone] = useState(h?.pings?.untilDone ?? false);
+  const [emojiOpen, setEmojiOpen] = useState(false);
 
   const save = async () => {
     if (!name.trim()) return;
+    const multi = remindOn && (pingTimes > 1 || untilDone);
     const fields = {
       name: name.trim(),
       icon: icon || "⚡",
       schedule,
       area,
       timeOfDay,
-      reminderTime: remindOn ? reminderTime : undefined,
+      reminderTime: remindOn && !multi ? reminderTime : undefined,
+      pings: multi
+        ? { times: pingTimes, start: reminderTime, end: pingTimes > 1 ? pingEnd : reminderTime, untilDone }
+        : undefined,
       domain: area === "learning" ? ("learning" as const) : ("general" as const),
     };
     if (h) await updateHabit(h.id, fields);
@@ -61,6 +82,7 @@ export function HabitEditor({ seed, onClose }: { seed: EditorSeed; onClose: () =
   };
 
   const days = schedule.kind === "weekdays" ? schedule.days : [];
+  const nPerX = schedule.kind === "nPerX" ? schedule : null;
 
   return (
     <div className="overlay" onClick={onClose}>
@@ -85,8 +107,29 @@ export function HabitEditor({ seed, onClose }: { seed: EditorSeed; onClose: () =
                 {e}
               </button>
             ))}
+            <button className="emoji-pick more" onClick={() => setEmojiOpen(true)} aria-label="More emoji">
+              …
+            </button>
           </div>
         </div>
+
+        {emojiOpen && (
+          <div className="emoji-grid" role="group" aria-label="Emoji picker">
+            {EMOJI_GRID.map((e) => (
+              <button
+                key={e}
+                className="emoji-pick"
+                onClick={() => {
+                  setIcon(e);
+                  setEmojiOpen(false);
+                }}
+                aria-label={`Use ${e}`}
+              >
+                {e}
+              </button>
+            ))}
+          </div>
+        )}
 
         <input
           className="input editor-name"
@@ -134,7 +177,59 @@ export function HabitEditor({ seed, onClose }: { seed: EditorSeed; onClose: () =
             >
               N per week
             </button>
+            <button
+              className={nPerX && nPerX.periodDays === 7 && nPerX.times === 1 ? "chip on" : "chip"}
+              onClick={() => setSchedule({ kind: "nPerX", times: 1, periodDays: 7 })}
+            >
+              Weekly
+            </button>
+            <button
+              className={nPerX && nPerX.periodDays === 30 ? "chip on" : "chip"}
+              onClick={() => setSchedule({ kind: "nPerX", times: 1, periodDays: 30 })}
+            >
+              Monthly
+            </button>
+            <button
+              className={nPerX && nPerX.periodDays === 365 ? "chip on" : "chip"}
+              onClick={() => setSchedule({ kind: "nPerX", times: 1, periodDays: 365 })}
+            >
+              Yearly
+            </button>
+            <button
+              className={nPerX && ![7, 30, 365].includes(nPerX.periodDays) ? "chip on" : "chip"}
+              onClick={() => setSchedule({ kind: "nPerX", times: 2, periodDays: 10 })}
+            >
+              N per X days
+            </button>
           </div>
+          {nPerX && (
+            <label className="check-label">
+              <input
+                type="number"
+                className="input num-input-sm"
+                min={1}
+                max={99}
+                value={nPerX.times}
+                onChange={(e) =>
+                  setSchedule({ ...nPerX, times: Math.max(1, Math.min(99, Number(e.target.value) || 1)) })
+                }
+                aria-label="Times"
+              />
+              times every
+              <input
+                type="number"
+                className="input num-input-sm"
+                min={2}
+                max={365}
+                value={nPerX.periodDays}
+                onChange={(e) =>
+                  setSchedule({ ...nPerX, periodDays: Math.max(2, Math.min(365, Number(e.target.value) || 7)) })
+                }
+                aria-label="Days in period"
+              />
+              days (rolling window)
+            </label>
+          )}
           {schedule.kind === "weekdays" && (
             <div className="chip-row" role="group" aria-label="Days of week">
               {WEEKDAY_LABELS.map((label, i) => (
@@ -192,19 +287,55 @@ export function HabitEditor({ seed, onClose }: { seed: EditorSeed; onClose: () =
           <label className="check-label">
             <input type="checkbox" checked={remindOn} onChange={(e) => setRemindOn(e.target.checked)} />
             Ping me
-            {remindOn && (
-              <input
-                type="time"
-                className="input time-input"
-                value={reminderTime}
-                onChange={(e) => setReminderTime(e.target.value)}
-                aria-label="Reminder time"
-              />
-            )}
-            <span className="off-day-tag">
-              {remindOn ? "fires on scheduled days only" : "optional — off by default"}
-            </span>
+            {!remindOn && <span className="off-day-tag">optional — off by default</span>}
           </label>
+          {remindOn && (
+            <>
+              <label className="check-label">
+                <input
+                  type="number"
+                  className="input num-input-sm"
+                  min={1}
+                  max={10}
+                  value={pingTimes}
+                  onChange={(e) => setPingTimes(Math.max(1, Math.min(10, Number(e.target.value) || 1)))}
+                  aria-label="Pings per day"
+                />
+                ×/day, {pingTimes > 1 ? "between" : "at"}
+                <input
+                  type="time"
+                  className="input time-input"
+                  value={reminderTime}
+                  onChange={(e) => setReminderTime(e.target.value)}
+                  aria-label={pingTimes > 1 ? "Ping window start" : "Reminder time"}
+                />
+                {pingTimes > 1 && (
+                  <>
+                    –
+                    <input
+                      type="time"
+                      className="input time-input"
+                      value={pingEnd}
+                      onChange={(e) => setPingEnd(e.target.value)}
+                      aria-label="Ping window end"
+                    />
+                  </>
+                )}
+              </label>
+              <label className="check-label">
+                <input
+                  type="checkbox"
+                  checked={untilDone}
+                  onChange={(e) => setUntilDone(e.target.checked)}
+                />
+                quiet in-app nudges once it's done for the day
+              </label>
+              <p className="placeholder">
+                // fires on scheduled days only. push pings stay generic and schedule-blind —
+                the relay never learns whether you completed anything
+              </p>
+            </>
+          )}
         </div>
 
         <div className="install-actions">

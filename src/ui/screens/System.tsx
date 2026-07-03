@@ -19,6 +19,7 @@ function Directives() {
   const habits = useLiveQuery(() => db.habits.filter((h) => !h.archivedAt).sortBy("order"), []);
   const [seed, setSeed] = useState<EditorSeed | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [libraryOpen, setLibraryOpen] = useState(false);
 
   const installedPresets = new Set((habits ?? []).map((h) => h.presetId).filter(Boolean));
 
@@ -35,6 +36,7 @@ function Directives() {
               <span className="off-day-tag">
                 {h.area ? ` · ${areaIcon(h.area)}` : ""}
                 {h.reminderTime ? ` · 🔔${h.reminderTime}` : ""}
+                {h.pings ? ` · 🔔×${h.pings.times}` : ""}
               </span>
             </span>
             <span className="row-actions">
@@ -71,7 +73,7 @@ function Directives() {
       <div className="card">
         <h2 className="card-title">Directive Library</h2>
         <p className="placeholder">// defaults you can install, tweak, or ignore — nothing is mandatory</p>
-        {PRESETS.map((p) => {
+        {(libraryOpen ? PRESETS : PRESETS.slice(0, 3)).map((p) => {
           const installed = installedPresets.has(p.presetId);
           return (
             <div className="row-item" key={p.presetId}>
@@ -102,6 +104,11 @@ function Directives() {
             </div>
           );
         })}
+        {PRESETS.length > 3 && (
+          <button className="link-btn" onClick={() => setLibraryOpen(!libraryOpen)}>
+            {libraryOpen ? "show less" : `… ${PRESETS.length - 3} more`}
+          </button>
+        )}
       </div>
     </>
   );

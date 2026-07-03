@@ -5,7 +5,9 @@ import type { DayKey } from "./time.ts";
 export type Schedule =
   | { kind: "daily" }
   | { kind: "weekdays"; days: number[] } // 0=Sun … 6=Sat
-  | { kind: "timesPerWeek"; target: number }; // any N days, Monday-anchored weeks
+  | { kind: "timesPerWeek"; target: number } // any N days, Monday-anchored weeks
+  | { kind: "nPerX"; times: number; periodDays: number }; // N times per rolling X days
+                                                          // (weekly=1/7, monthly=1/30, yearly=1/365)
 
 export type HabitDomain = "general" | "learning";
 
@@ -34,6 +36,10 @@ export interface Habit {
   target: number;
   /** optional per-habit reminder, "HH:MM" local; fires on scheduled days only */
   reminderTime?: string;
+  /** richer per-habit pings: N times/day across a window; untilDone quiets
+   *  IN-APP nudges once the habit is satisfied that day (push stays generic
+   *  and schedule-blind by design — the relay knows nothing about completion) */
+  pings?: { times: number; start: string; end: string; untilDone: boolean };
   /** area of focus (grouping/color; "learning" also feeds the learning streak) */
   area?: Area;
   /** rough slot in the day — Today screen groups by this */

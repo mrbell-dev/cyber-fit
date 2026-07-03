@@ -98,11 +98,32 @@ async function sendPush(env, subscription, text) {
   }
 }
 
+// Motivation lines live in the (public, auditable) worker — the relay still
+// knows nothing about the user; it just varies the encouragement.
+const MOTIVATION_LINES = [
+  "Still breathing, still winning. Keep going, choom.",
+  "The grid remembers every small sync. Stack another one.",
+  "You don't need max chrome — you need one more rep of being you.",
+  "Night City chews up quitters. You're not on the menu.",
+  "Preem work staying grounded today. The wetware thanks you.",
+  "Small directives, big firmware upgrades. That's the whole game.",
+  "Your streak is a shield. Your habits are the armor under it.",
+  "Even V took rest days. Recover like it's a mission objective.",
+  "One glass of water is a rebellion against entropy. Drink up.",
+  "The most cyberpunk thing you can do is stay human. Nice work.",
+  "Legends aren't built in a day. They're built daily.",
+  "Check the highlight reel when it feels dark — the good frames are real.",
+];
+
 async function dispatch(env, now) {
   const slot = slotOf(now);
   const subs = await listSubs(env.SUBS);
   for (const record of subs) {
-    if (!record.slots.includes(slot)) continue;
-    await sendPush(env, record.subscription, "Time to sync.");
+    const motivate = (record.motivationSlots ?? []).includes(slot);
+    if (!motivate && !record.slots.includes(slot)) continue;
+    const text = motivate
+      ? MOTIVATION_LINES[Math.floor(Math.random() * MOTIVATION_LINES.length)]
+      : "Time to sync.";
+    await sendPush(env, record.subscription, text);
   }
 }

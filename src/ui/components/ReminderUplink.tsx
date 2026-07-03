@@ -181,6 +181,43 @@ export function ReminderUplink() {
         <label className="check-label">
           <input
             type="checkbox"
+            checked={reminders.motivation.on}
+            onChange={(e) => update({ motivation: { ...reminders.motivation, on: e.target.checked } })}
+          />
+          Motivation ×
+          <input
+            type="number"
+            className="input num-input-sm"
+            min={1}
+            max={5}
+            value={reminders.motivation.count}
+            onChange={(e) =>
+              update({ motivation: { ...reminders.motivation, count: Math.max(1, Math.min(5, Number(e.target.value) || 2)) } })
+            }
+            aria-label="Motivation pings per day"
+          />
+          between
+          <input
+            type="time"
+            className="input time-input"
+            value={reminders.motivation.start}
+            onChange={(e) => update({ motivation: { ...reminders.motivation, start: e.target.value } })}
+            aria-label="Motivation window start"
+          />
+          –
+          <input
+            type="time"
+            className="input time-input"
+            value={reminders.motivation.end}
+            onChange={(e) => update({ motivation: { ...reminders.motivation, end: e.target.value } })}
+            aria-label="Motivation window end"
+          />
+          <span className="off-day-tag">random encouragement, e.g. "Still breathing, still winning."</span>
+        </label>
+
+        <label className="check-label">
+          <input
+            type="checkbox"
             checked={reminders.catchup.on}
             onChange={(e) => update({ catchup: { ...reminders.catchup, on: e.target.checked } })}
           />

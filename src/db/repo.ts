@@ -82,6 +82,7 @@ export async function addHabit(input: {
   area?: Habit["area"];
   timeOfDay?: Habit["timeOfDay"];
   reminderTime?: string;
+  pings?: Habit["pings"];
   presetId?: string;
 }): Promise<Habit> {
   const order = (await db.habits.count()) + 1;
@@ -98,6 +99,7 @@ export async function addHabit(input: {
     ...(input.area ? { area: input.area } : {}),
     ...(input.timeOfDay ? { timeOfDay: input.timeOfDay } : {}),
     ...(input.reminderTime ? { reminderTime: input.reminderTime } : {}),
+    ...(input.pings ? { pings: input.pings } : {}),
     ...(input.presetId ? { presetId: input.presetId } : {}),
   };
   await db.habits.add(habit);

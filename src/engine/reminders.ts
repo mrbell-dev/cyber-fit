@@ -10,6 +10,8 @@ export interface Reminders {
   workout: { on: boolean; days: number[]; time: string }; // 0=Sun … 6=Sat
   catchup: { on: boolean; time: string };
   highlight: { on: boolean; time: string }; // savoring nudge — off by default
+  /** random encouragement pushes (relay picks the line; off by default) */
+  motivation: { on: boolean; count: number; start: string; end: string };
 }
 
 export const DEFAULT_REMINDERS: Reminders = {
@@ -18,6 +20,7 @@ export const DEFAULT_REMINDERS: Reminders = {
   workout: { on: true, days: [2, 3, 4], time: "17:30" }, // Tue/Wed/Thu
   catchup: { on: true, time: "21:30" },
   highlight: { on: false, time: "19:00" },
+  motivation: { on: false, count: 2, start: "09:00", end: "21:00" },
 };
 
 export type PingKind = keyof Reminders | "habit";
@@ -29,6 +32,7 @@ export const REMINDER_COPY: Record<PingKind, string> = {
   workout: "Chrome needs maintenance — training window open.",
   catchup: "Sync your logs before lights out.",
   highlight: "One good frame from today — capture the highlight.",
+  motivation: "Keep the chrome polished, choom.",
   habit: "Directive window open.",
 };
 
@@ -40,6 +44,9 @@ export interface LocalPing {
   days: number[];
   /** habit name for kind === "habit" */
   label?: string;
+  habitId?: string;
+  /** in-app nudges go quiet once the habit is done for the day */
+  untilDone?: boolean;
 }
 
 const ALL_DAYS = [0, 1, 2, 3, 4, 5, 6];
@@ -62,35 +69,54 @@ export function localPings(r: Reminders, habits: Habit[] = []): LocalPing[] {
   if (r.workout.on && r.workout.days.length > 0) {
     pings.push({ kind: "workout", minutes: parseTime(r.workout.time), days: [...r.workout.days] });
   }
-  if (r.water.on && r.water.count > 0) {
-    const start = parseTime(r.water.start);
-    const end = parseTime(r.water.end);
-    const n = Math.min(24, Math.max(1, Math.round(r.water.count)));
-    const span = Math.max(0, end - start);
-    for (let i = 0; i < n; i++) {
-      const minutes = n === 1 ? start : start + Math.round((span * i) / (n - 1));
-      pings.push({ kind: "water", minutes, days: ALL_DAYS });
-    }
-  }
+  spread(pings, "water", r.water, ALL_DAYS);
+  if (r.motivation.on) spread(pings, "motivation", r.motivation, ALL_DAYS);
+
   for (const habit of habits) {
-    if (!habit.reminderTime || habit.archivedAt) continue;
-    pings.push({
-      kind: "habit",
-      minutes: parseTime(habit.reminderTime),
-      days: habitDays(habit),
-      label: habit.name,
-    });
+    if (habit.archivedAt) continue;
+    if (habit.pings && habit.pings.times > 0) {
+      spread(
+        pings,
+        "habit",
+        { on: true, count: habit.pings.times, start: habit.pings.start, end: habit.pings.end },
+        habitDays(habit),
+        { label: habit.name, habitId: habit.id, untilDone: habit.pings.untilDone },
+      );
+    } else if (habit.reminderTime) {
+      pings.push({
+        kind: "habit",
+        minutes: parseTime(habit.reminderTime),
+        days: habitDays(habit),
+        label: habit.name,
+        habitId: habit.id,
+      });
+    }
   }
   return pings;
 }
 
-/**
- * Local pings → sorted, deduped UTC week-slots (15-min grid, [0,10080)).
- * tzOffsetMinutes uses the JS getTimezoneOffset convention (local + offset = UTC).
- */
-export function slotsFor(r: Reminders, tzOffsetMinutes: number, habits: Habit[] = []): number[] {
+/** Spread `count` pings evenly across a start–end window. */
+function spread(
+  pings: LocalPing[],
+  kind: PingKind,
+  cfg: { on: boolean; count: number; start: string; end: string },
+  days: number[],
+  extra: Partial<LocalPing> = {},
+): void {
+  if (!cfg.on || cfg.count <= 0) return;
+  const start = parseTime(cfg.start);
+  const end = parseTime(cfg.end);
+  const n = Math.min(24, Math.max(1, Math.round(cfg.count)));
+  const span = Math.max(0, end - start);
+  for (let i = 0; i < n; i++) {
+    const minutes = n === 1 ? start : start + Math.round((span * i) / (n - 1));
+    pings.push({ kind, minutes, days: [...days], ...extra });
+  }
+}
+
+function toSlots(pings: LocalPing[], tzOffsetMinutes: number): number[] {
   const slots = new Set<number>();
-  for (const ping of localPings(r, habits)) {
+  for (const ping of pings) {
     for (const day of ping.days) {
       const utcWeekMin = day * 1440 + ping.minutes + tzOffsetMinutes;
       const wrapped = ((utcWeekMin % 10080) + 10080) % 10080;
@@ -98,6 +124,29 @@ export function slotsFor(r: Reminders, tzOffsetMinutes: number, habits: Habit[] 
     }
   }
   return [...slots].sort((a, b) => a - b);
+}
+
+/**
+ * Local pings → sorted, deduped UTC week-slots (15-min grid, [0,10080)),
+ * split so the relay can send a motivational line for motivation slots and
+ * the generic "time to sync" for everything else.
+ * tzOffsetMinutes uses the JS getTimezoneOffset convention (local + offset = UTC).
+ */
+export function slotBundleFor(
+  r: Reminders,
+  tzOffsetMinutes: number,
+  habits: Habit[] = [],
+): { slots: number[]; motivationSlots: number[] } {
+  const pings = localPings(r, habits);
+  return {
+    slots: toSlots(pings.filter((p) => p.kind !== "motivation"), tzOffsetMinutes),
+    motivationSlots: toSlots(pings.filter((p) => p.kind === "motivation"), tzOffsetMinutes),
+  };
+}
+
+/** Reminder slots only (no motivation) — kept for tests/back-compat. */
+export function slotsFor(r: Reminders, tzOffsetMinutes: number, habits: Habit[] = []): number[] {
+  return slotBundleFor(r, tzOffsetMinutes, habits).slots;
 }
 
 /**

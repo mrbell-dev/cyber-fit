@@ -17,7 +17,11 @@ export async function keyFor(endpoint) {
  */
 export async function putSub(kv, record) {
   const key = await keyFor(record.subscription.endpoint);
-  await kv.put(key, JSON.stringify({ subscription: record.subscription, slots: record.slots }));
+  await kv.put(key, JSON.stringify({
+    subscription: record.subscription,
+    slots: record.slots,
+    motivationSlots: record.motivationSlots ?? [],
+  }));
 }
 
 export async function deleteSub(kv, endpoint) {
@@ -53,11 +57,11 @@ export function validateRecord(body) {
   if (!sub.keys || typeof sub.keys.p256dh !== "string" || typeof sub.keys.auth !== "string") {
     return "bad subscription keys";
   }
-  const slots = body?.slots;
-  if (!Array.isArray(slots) || slots.length > 672 || slots.some(
-    (s) => typeof s !== "number" || s < 0 || s >= 10080 || s % 15 !== 0,
-  )) {
-    return "bad slots";
-  }
+  const badSlots = (slots) =>
+    !Array.isArray(slots) || slots.length > 672 || slots.some(
+      (s) => typeof s !== "number" || s < 0 || s >= 10080 || s % 15 !== 0,
+    );
+  if (badSlots(body?.slots)) return "bad slots";
+  if (body?.motivationSlots !== undefined && badSlots(body.motivationSlots)) return "bad slots";
   return null;
 }
