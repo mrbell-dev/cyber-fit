@@ -16,10 +16,11 @@ export function MoodRow({ today }: { today: DayKey }) {
   const [note, setNote] = useState("");
   const [showNote, setShowNote] = useState(false);
 
-  const todayMood = useLiveQuery(async () => {
+  const readings = useLiveQuery(async () => {
     const logs = await db.moodLogs.where({ dayKey: today }).toArray();
-    return logs.sort((a, b) => b.ts - a.ts)[0];
+    return logs.sort((a, b) => a.ts - b.ts);
   }, [today]);
+  const todayMood = readings?.[readings.length - 1];
 
   const check = async (rating: MoodLog["rating"]) => {
     await logMood(rating, note.trim() ? { note } : {});
@@ -60,8 +61,20 @@ export function MoodRow({ today }: { today: DayKey }) {
           + add a note
         </button>
       )}
-      {todayMood && (
-        <p className="placeholder">// vitals logged{todayMood.note ? `: "${todayMood.note}"` : ""} — tap again to revise</p>
+      {(readings ?? []).length > 0 && (
+        <div className="vitals-trace">
+          {readings!.map((r, i) => (
+            <span
+              key={r.id}
+              className={i === readings!.length - 1 ? "vitals-reading latest" : "vitals-reading"}
+            >
+              {new Date(r.ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}{" "}
+              {MOODS.find((m) => m.rating === r.rating)?.glyph}
+              {r.note ? ` · ${r.note}` : ""}
+            </span>
+          ))}
+          <span className="off-day-tag">// vitals shift all day — log as many readings as you need</span>
+        </div>
       )}
     </div>
   );

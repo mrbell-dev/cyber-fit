@@ -3,6 +3,7 @@ import { db } from "../../db/db.ts";
 import {
   addDays,
   daySetStreak,
+  difficultyFactor,
   learningDays,
   levelFromXp,
   readingDays,
@@ -13,6 +14,7 @@ import { useDayKey, useSettings } from "../hooks.ts";
 import { HighlightReel } from "../components/Highlight.tsx";
 import { VolumeChart, WeightChart } from "../components/BodyMetrics.tsx";
 import { TagExplorer } from "../components/TagExplorer.tsx";
+import { CareTeamExport } from "../components/CareTeamExport.tsx";
 
 const GRID_DAYS = 70; // 14-wide rows, GitHub-style intensity
 
@@ -138,7 +140,9 @@ export function Stats() {
     today,
   );
 
-  const lv = player ? levelFromXp(player.xp) : { level: 0, into: 0, next: 100 };
+  const lv = player
+    ? levelFromXp(player.xp, difficultyFactor(settings))
+    : { level: 0, into: 0, next: 100 };
 
   return (
     <section aria-label="Stats">
@@ -212,6 +216,8 @@ export function Stats() {
           more
         </div>
       </div>
+
+      <CareTeamExport />
 
       <WeightChart />
 

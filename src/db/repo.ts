@@ -27,7 +27,7 @@ const PLAYER_KEY = "player";
  * never drift), persist it, and announce any newly earned grants.
  */
 export async function refreshPlayer(): Promise<PlayerState> {
-  const [habits, habitLogs, waterLogs, moodLogs, workoutLogs, readingLogs, highlightLogs, bodyLogs, settings, today, prevRow] =
+  const [habits, habitLogs, waterLogs, moodLogs, workoutLogs, readingLogs, highlightLogs, bodyLogs, journalLogs, gigs, bioReadings, settings, today, prevRow] =
     await Promise.all([
       db.habits.toArray(),
       db.habitLogs.toArray(),
@@ -37,12 +37,16 @@ export async function refreshPlayer(): Promise<PlayerState> {
       db.readingLogs.toArray(),
       db.highlightLogs.toArray(),
       db.bodyLogs.toArray(),
+      db.journalLogs.toArray(),
+      db.gigs.toArray(),
+      db.bioReadings.toArray(),
       getSettings(),
       currentDayKey(),
       db.kv.get(PLAYER_KEY),
     ]);
   const { state, grants } = rebuild({
-    habits, habitLogs, waterLogs, moodLogs, workoutLogs, readingLogs, highlightLogs, bodyLogs, settings, today,
+    habits, habitLogs, waterLogs, moodLogs, workoutLogs, readingLogs, highlightLogs, bodyLogs,
+    journalLogs, gigs, bioReadings, settings, today,
   });
   await db.kv.put({ key: PLAYER_KEY, value: state });
 
@@ -81,6 +85,7 @@ export async function addHabit(input: {
   target?: number;
   area?: Habit["area"];
   timeOfDay?: Habit["timeOfDay"];
+  charge?: number;
   reminderTime?: string;
   pings?: Habit["pings"];
   presetId?: string;
@@ -98,6 +103,7 @@ export async function addHabit(input: {
     order,
     ...(input.area ? { area: input.area } : {}),
     ...(input.timeOfDay ? { timeOfDay: input.timeOfDay } : {}),
+    ...(input.charge ? { charge: Math.max(1, Math.min(5, input.charge)) } : {}),
     ...(input.reminderTime ? { reminderTime: input.reminderTime } : {}),
     ...(input.pings ? { pings: input.pings } : {}),
     ...(input.presetId ? { presetId: input.presetId } : {}),
@@ -164,6 +170,7 @@ export async function logWorkout(input: {
   durationMin?: number;
   distance?: number;
   note?: string;
+  exercises?: WorkoutLog["exercises"];
 }): Promise<WorkoutLog> {
   const entry: WorkoutLog = {
     id: crypto.randomUUID(),
@@ -175,6 +182,7 @@ export async function logWorkout(input: {
     ...(input.durationMin ? { durationMin: input.durationMin } : {}),
     ...(input.distance ? { distance: input.distance } : {}),
     ...(input.note?.trim() ? { note: input.note.trim() } : {}),
+    ...(input.exercises?.length ? { exercises: input.exercises } : {}),
   };
   await db.workoutLogs.add(entry);
   await refreshPlayer();
@@ -233,6 +241,64 @@ export async function logWeight(weight: number, unit: "lbs" | "kg"): Promise<voi
     ts: Date.now(),
     weight,
     unit,
+  });
+  await refreshPlayer();
+}
+
+export async function logJournal(text: string): Promise<void> {
+  const trimmed = text.trim();
+  if (!trimmed) return;
+  await db.journalLogs.add({
+    id: crypto.randomUUID(), dayKey: await currentDayKey(), ts: Date.now(), text: trimmed,
+  });
+  await refreshPlayer();
+}
+
+export async function addGig(text: string): Promise<void> {
+  const trimmed = text.trim();
+  if (!trimmed) return;
+  await db.gigs.add({
+    id: crypto.randomUUID(), text: trimmed, createdDay: await currentDayKey(), ts: Date.now(),
+  });
+}
+
+export async function toggleGig(id: string, done: boolean): Promise<void> {
+  if (done) {
+    await db.gigs.update(id, { doneTs: Date.now(), doneDay: await currentDayKey() });
+  } else {
+    await db.gigs.update(id, { doneTs: undefined, doneDay: undefined });
+  }
+  await refreshPlayer();
+}
+
+export async function deleteGig(id: string): Promise<void> {
+  await db.gigs.delete(id);
+  await refreshPlayer();
+}
+
+export async function addBioMetric(input: {
+  name: string;
+  unit: string;
+  pings?: { times: number; start: string; end: string };
+}): Promise<void> {
+  await db.bioMetrics.add({
+    id: crypto.randomUUID(),
+    name: input.name.trim(),
+    unit: input.unit.trim(),
+    createdAt: Date.now(),
+    ...(input.pings ? { pings: input.pings } : {}),
+  });
+}
+
+export async function archiveBioMetric(id: string): Promise<void> {
+  await db.bioMetrics.update(id, { archivedAt: Date.now() });
+}
+
+export async function logBioReading(metricId: string, value: string): Promise<void> {
+  const trimmed = value.trim();
+  if (!trimmed) return;
+  await db.bioReadings.add({
+    id: crypto.randomUUID(), metricId, dayKey: await currentDayKey(), ts: Date.now(), value: trimmed,
   });
   await refreshPlayer();
 }

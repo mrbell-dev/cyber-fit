@@ -19,6 +19,7 @@ import { MissedPing } from "../components/MissedPing.tsx";
 import { Highlight } from "../components/Highlight.tsx";
 import { DailyBoot } from "../components/DailyBoot.tsx";
 import { HabitEditor, type EditorSeed } from "../components/HabitEditor.tsx";
+import { GigList } from "../components/GigList.tsx";
 import { useState } from "react";
 
 function habitView(habit: Habit, logs: HabitLog[], today: DayKey) {
@@ -120,6 +121,8 @@ export function Today() {
       </div>
 
       <WaterGauge logs={waterLogs} goalMl={settings.waterGoalMl} unit={settings.waterUnit ?? "ml"} />
+
+      <GigList today={today} />
 
       <MoodRow today={today} />
 

@@ -1,7 +1,11 @@
 import Dexie, { type EntityTable } from "dexie";
 import type {
+  BioMetric,
+  BioReading,
   BodyLog,
+  Gig,
   Habit,
+  JournalLog,
   HabitLog,
   HighlightLog,
   MoodLog,
@@ -29,6 +33,10 @@ export const db = new Dexie("cyber-fit") as Dexie & {
   readingLogs: EntityTable<ReadingLog, "id">;
   highlightLogs: EntityTable<HighlightLog, "id">;
   bodyLogs: EntityTable<BodyLog, "id">;
+  journalLogs: EntityTable<JournalLog, "id">;
+  gigs: EntityTable<Gig, "id">;
+  bioMetrics: EntityTable<BioMetric, "id">;
+  bioReadings: EntityTable<BioReading, "id">;
   kv: EntityTable<KvRow, "key">;
 };
 
@@ -55,4 +63,11 @@ db.version(4).stores({
 
 db.version(5).stores({
   bodyLogs: "id, dayKey",
+});
+
+db.version(6).stores({
+  journalLogs: "id, dayKey",
+  gigs: "id, createdDay, doneDay",
+  bioMetrics: "id",
+  bioReadings: "id, metricId, dayKey, [metricId+dayKey]",
 });

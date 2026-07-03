@@ -11,6 +11,9 @@ import {
 import { addReadingItem, logReading, logWorkout, setReadingStatus } from "../../db/repo.ts";
 import { useDayKey, useSettings } from "../hooks.ts";
 import { BodyCard } from "../components/BodyMetrics.tsx";
+import { BioMetricsCard } from "../components/BioMetrics.tsx";
+
+type SetRow = { reps: string; weight: string };
 
 function WorkoutCard() {
   const [name, setName] = useState("");
@@ -18,6 +21,8 @@ function WorkoutCard() {
   const [distance, setDistance] = useState("");
   const [style, setStyle] = useState<NonNullable<WorkoutLog["style"]>>("sets");
   const [score, setScore] = useState("");
+  const [sets, setSets] = useState<SetRow[]>([{ reps: "", weight: "" }]);
+  const [templated, setTemplated] = useState(false);
   const today = useDayKey();
   const settings = useSettings();
   const distanceUnit = settings.distanceUnit ?? "mi";
@@ -33,19 +38,49 @@ function WorkoutCard() {
   const suggestions = [...pastNames, ...EXERCISES.filter((e) => !pastNames.includes(e))];
   const styleDef = WORKOUT_STYLES.find((s) => s.id === style)!;
 
+  /** Template: repeating a known workout pre-fills the last session. */
+  const onName = (value: string) => {
+    setName(value);
+    const last = (history ?? []).find((w) => w.name === value);
+    if (!last) {
+      setTemplated(false);
+      return;
+    }
+    setStyle(last.style ?? "sets");
+    setScore(last.score ?? "");
+    setMinutes(last.durationMin ? String(last.durationMin) : "");
+    setDistance(last.distance ? String(last.distance) : "");
+    const lastSets = last.exercises?.[0]?.sets;
+    if (lastSets?.length) {
+      setSets(lastSets.map((s) => ({ reps: String(s.reps ?? ""), weight: String(s.weight ?? "") })));
+    }
+    setTemplated(true);
+  };
+
   const submit = async () => {
     if (!name.trim()) return;
+    const filledSets = sets
+      .filter((s) => Number(s.reps) || Number(s.weight))
+      .map((s) => ({
+        ...(Number(s.reps) ? { reps: Number(s.reps) } : {}),
+        ...(Number(s.weight) ? { weight: Number(s.weight) } : {}),
+      }));
     await logWorkout({
       name,
       style,
-      score,
-      durationMin: Number(minutes) || undefined,
-      distance: Number(distance) || undefined,
+      score: styleDef.fields.score ? score : "",
+      durationMin: styleDef.fields.duration ? Number(minutes) || undefined : undefined,
+      distance: styleDef.fields.distance ? Number(distance) || undefined : undefined,
+      exercises: styleDef.fields.sets && filledSets.length
+        ? [{ name: name.trim(), sets: filledSets }]
+        : undefined,
     });
     setName("");
     setMinutes("");
     setDistance("");
     setScore("");
+    setSets([{ reps: "", weight: "" }]);
+    setTemplated(false);
   };
 
   return (
@@ -55,7 +90,7 @@ function WorkoutCard() {
         <input
           className="input"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => onName(e.target.value)}
           placeholder="What did you do? (e.g. Lift, 5k walk)"
           aria-label="Workout name"
           list="past-workouts"
@@ -79,36 +114,77 @@ function WorkoutCard() {
           </button>
         ))}
       </div>
+      {templated && (
+        <p className="placeholder">// loaded from last time — tweak and log (progressive overload, choom)</p>
+      )}
+      {styleDef.fields.score && (
+        <div className="form-row">
+          <input
+            className="input"
+            value={score}
+            onChange={(e) => setScore(e.target.value)}
+            placeholder={`score — ${styleDef.scoreHint}`}
+            aria-label="Score or result"
+          />
+        </div>
+      )}
+      {styleDef.fields.sets && (
+        <div className="sets-grid" role="group" aria-label="Sets">
+          {sets.map((s, i) => (
+            <div className="form-row" key={i}>
+              <span className="off-day-tag set-num">set {i + 1}</span>
+              <input
+                className="input num-input"
+                type="number"
+                min={0}
+                value={s.reps}
+                onChange={(e) => setSets(sets.map((x, j) => (j === i ? { ...x, reps: e.target.value } : x)))}
+                placeholder="reps"
+                aria-label={`Set ${i + 1} reps`}
+              />
+              ×
+              <input
+                className="input num-input"
+                type="number"
+                inputMode="decimal"
+                min={0}
+                value={s.weight}
+                onChange={(e) => setSets(sets.map((x, j) => (j === i ? { ...x, weight: e.target.value } : x)))}
+                placeholder={settings.weightUnit ?? "lbs"}
+                aria-label={`Set ${i + 1} weight`}
+              />
+            </div>
+          ))}
+          <button className="link-btn" onClick={() => setSets([...sets, sets[sets.length - 1] ?? { reps: "", weight: "" }])}>
+            + add set (repeats last)
+          </button>
+        </div>
+      )}
       <div className="form-row">
-        <input
-          className="input"
-          value={score}
-          onChange={(e) => setScore(e.target.value)}
-          placeholder={`score — ${styleDef.scoreHint}`}
-          aria-label="Score or result"
-        />
-      </div>
-      <div className="form-row">
-        <input
-          className="input num-input"
-          type="number"
-          min={1}
-          value={minutes}
-          onChange={(e) => setMinutes(e.target.value)}
-          placeholder="min"
-          aria-label="Duration in minutes"
-        />
-        <input
-          className="input num-input"
-          type="number"
-          inputMode="decimal"
-          step="0.1"
-          min={0}
-          value={distance}
-          onChange={(e) => setDistance(e.target.value)}
-          placeholder={distanceUnit}
-          aria-label={`Distance in ${distanceUnit}`}
-        />
+        {styleDef.fields.duration && (
+          <input
+            className="input num-input"
+            type="number"
+            min={1}
+            value={minutes}
+            onChange={(e) => setMinutes(e.target.value)}
+            placeholder="min"
+            aria-label="Duration in minutes"
+          />
+        )}
+        {styleDef.fields.distance && (
+          <input
+            className="input num-input"
+            type="number"
+            inputMode="decimal"
+            step="0.1"
+            min={0}
+            value={distance}
+            onChange={(e) => setDistance(e.target.value)}
+            placeholder={distanceUnit}
+            aria-label={`Distance in ${distanceUnit}`}
+          />
+        )}
         <button className="btn" onClick={submit} disabled={!name.trim()}>
           Log workout
         </button>
@@ -185,6 +261,7 @@ function SessionForm({ item, onDone }: { item: ReadingItem | null; onDone: () =>
               onClick={() => setFeeling(f.value)}
             >
               <span className="mood-glyph" aria-hidden="true">{f.glyph}</span>
+              <span className="mood-label">{f.label}</span>
             </button>
           ))}
         </div>
@@ -238,7 +315,9 @@ function ReadingCard() {
         <div key={item.id}>
           <div className="row-item">
             <span>
-              {item.type === "book" ? "📖" : item.type === "article" ? "📄" : item.type === "audiobook" ? "🎧" : "◈"}{" "}
+              {{ book: "📖", article: "📄", audiobook: "🎧", video: "🎬", studying: "✍️", class: "🎓" }[
+                item.type as string
+              ] ?? "◈"}{" "}
               {item.title}
             </span>
             <span className="row-actions">
@@ -281,8 +360,11 @@ function ReadingCard() {
             aria-label="Type"
           >
             <option value="book">book</option>
-            <option value="article">article</option>
             <option value="audiobook">audio</option>
+            <option value="video">video</option>
+            <option value="article">article</option>
+            <option value="studying">studying</option>
+            <option value="class">class</option>
             <option value="other">other</option>
           </select>
         </div>
@@ -314,6 +396,7 @@ export function Log() {
     <section aria-label="Log">
       <WorkoutCard />
       <BodyCard today={today} />
+      <BioMetricsCard />
       <ReadingCard />
     </section>
   );

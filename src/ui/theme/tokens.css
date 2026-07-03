@@ -1233,3 +1233,73 @@ html.theme-ice {
   align-items: center;
   padding: 28px 20px;
 }
+
+/* ---------- gigs ---------- */
+.gig-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--tap-min);
+  border-bottom: 1px solid var(--border);
+  gap: 8px;
+}
+
+.gig-row:last-of-type {
+  border-bottom: none;
+}
+
+.gig-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  cursor: pointer;
+}
+
+.gig-main input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--neon-green);
+}
+
+.gig-row.done .gig-text {
+  text-decoration: line-through;
+  color: var(--text-dim);
+}
+
+/* ---------- vitals trace ---------- */
+.vitals-trace {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.vitals-reading {
+  color: var(--text-dim);
+}
+
+.vitals-reading.latest {
+  color: var(--neon-green);
+}
+
+/* ---------- sets grid / metrics ---------- */
+.sets-grid {
+  margin-bottom: 10px;
+}
+
+.set-num {
+  flex: 0 0 44px;
+}
+
+.metric-block {
+  border-bottom: 1px dashed var(--border);
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+}
+
+.metric-block:last-of-type {
+  border-bottom: none;
+}

@@ -2,16 +2,22 @@ import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../../db/db.ts";
 import type { DayKey } from "../../engine/index.ts";
-import { logHighlight } from "../../db/repo.ts";
+import { logHighlight, logJournal } from "../../db/repo.ts";
 
-/** One small good thing per day. Evidence-based savoring practice — trains
- *  the "the day wasn't all bad" muscle. */
+/** Some days you pick one good frame; some days you need to dump the buffer.
+ *  Highlight = savoring practice; Journal = catharsis. Both count. */
 export function Highlight({ today }: { today: DayKey }) {
+  const [mode, setMode] = useState<"highlight" | "journal">("highlight");
   const [text, setText] = useState("");
+  const [journalText, setJournalText] = useState("");
 
   const todays = useLiveQuery(async () => {
     const logs = await db.highlightLogs.where({ dayKey: today }).toArray();
     return logs.sort((a, b) => b.ts - a.ts)[0];
+  }, [today]);
+  const todaysJournal = useLiveQuery(async () => {
+    const logs = await db.journalLogs.where({ dayKey: today }).toArray();
+    return logs.sort((a, b) => b.ts - a.ts);
   }, [today]);
 
   const submit = async () => {
@@ -19,9 +25,51 @@ export function Highlight({ today }: { today: DayKey }) {
     setText("");
   };
 
+  const submitJournal = async () => {
+    await logJournal(journalText);
+    setJournalText("");
+  };
+
+  if (mode === "journal") {
+    return (
+      <div className="card">
+        <div className="card-header">
+          <h2 className="card-title">Journal</h2>
+          <button className="link-btn" onClick={() => setMode("highlight")}>
+            ⇄ highlight
+          </button>
+        </div>
+        <textarea
+          className="input note-input"
+          value={journalText}
+          onChange={(e) => setJournalText(e.target.value)}
+          placeholder="Dump the buffer — whatever's running in the background. #tags work here."
+          aria-label="Journal entry"
+          rows={4}
+        />
+        <button className="btn" onClick={submitJournal} disabled={!journalText.trim()}>
+          Commit entry
+        </button>
+        {(todaysJournal ?? []).map((j) => (
+          <p className="highlight-text reel" key={j.id}>
+            <span className="off-day-tag">
+              {new Date(j.ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+            </span>{" "}
+            {j.text}
+          </p>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="card">
-      <h2 className="card-title">Highlight of the Day</h2>
+      <div className="card-header">
+        <h2 className="card-title">Highlight of the Day</h2>
+        <button className="link-btn" onClick={() => setMode("journal")}>
+          ⇄ journal
+        </button>
+      </div>
       {todays ? (
         <>
           <p className="highlight-text">◆ {todays.text}</p>

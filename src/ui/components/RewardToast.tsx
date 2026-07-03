@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AUGMENTS, type Grant } from "../../engine/index.ts";
 import { onGrants } from "../toast.ts";
+import { haptics } from "../haptics.ts";
 
 interface Notice {
   id: number;
@@ -33,6 +34,9 @@ export function RewardToast() {
   useEffect(
     () =>
       onGrants((grants) => {
+        if (grants.some((g) => g.drop)) haptics.drop();
+        else if (grants.some((g) => g.crit)) haptics.crit();
+        else haptics.tap();
         const fresh = grants.flatMap((g) => {
           const n = [noticeFor(g)];
           if (g.drop) n.unshift(noticeFor({ ...g, drop: undefined }));

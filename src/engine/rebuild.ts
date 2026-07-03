@@ -16,10 +16,13 @@ import {
 import { addDays, diffDays, type DayKey } from "./time.ts";
 import { weighinCadenceOf } from "./types.ts";
 import type {
+  BioReading,
   BodyLog,
+  Gig,
   Habit,
   HabitLog,
   HighlightLog,
+  JournalLog,
   MoodLog,
   PlayerState,
   ReadingLog,
@@ -27,6 +30,7 @@ import type {
   WaterLog,
   WorkoutLog,
 } from "./types.ts";
+import { difficultyFactor } from "./types.ts";
 import { waterTotal } from "./water.ts";
 
 export interface LogBundle {
@@ -38,6 +42,9 @@ export interface LogBundle {
   readingLogs: ReadingLog[];
   highlightLogs: HighlightLog[];
   bodyLogs: BodyLog[];
+  journalLogs: JournalLog[];
+  gigs: Gig[];
+  bioReadings: BioReading[];
   settings: Settings;
   today: DayKey;
 }
@@ -54,6 +61,8 @@ interface Moment {
   ts: number;
   dayKey: DayKey;
   source: XpSource;
+  /** charge multiplier (habit charge 1–5); default 1 */
+  weight?: number;
 }
 
 export function rebuild(bundle: LogBundle): RebuildResult {
@@ -70,13 +79,13 @@ export function rebuild(bundle: LogBundle): RebuildResult {
     if (used >= DAILY_CAP[m.source]) continue;
     perDaySource.set(capKey, used + 1);
 
-    const grant = makeGrant(m.eventId, m.dayKey, m.source, owned);
+    const grant = makeGrant(m.eventId, m.dayKey, m.source, owned, m.weight ?? 1);
     if (grant.drop) owned.push(grant.drop);
     grants.push(grant);
   }
 
   const xp = grants.reduce((sum, g) => sum + g.xp, 0);
-  const { level } = levelFromXp(xp);
+  const { level } = levelFromXp(xp, difficultyFactor(bundle.settings));
 
   // Level-gated augments unlock on top of drops.
   for (const a of AUGMENTS) {
@@ -124,7 +133,10 @@ function deriveMoments(bundle: LogBundle): Moment[] {
       const before = dayStatus(habit, logs.slice(0, i));
       const after = dayStatus(habit, logs.slice(0, i + 1));
       if (!before.done && after.done) {
-        moments.push({ eventId: logs[i].id, ts: logs[i].ts, dayKey: logs[i].dayKey, source: "habit" });
+        moments.push({
+          eventId: logs[i].id, ts: logs[i].ts, dayKey: logs[i].dayKey, source: "habit",
+          weight: habit.charge ?? 1,
+        });
         break; // only the first completion of the day earns
       }
     }
@@ -190,6 +202,22 @@ function deriveMoments(bundle: LogBundle): Moment[] {
     moments.push({ eventId: log.id, ts: log.ts, dayKey: log.dayKey, source: "weighin" });
   }
 
+  // Journal XP: first entry of the day (cap enforces the once).
+  for (const log of [...bundle.journalLogs].sort((a, b) => a.ts - b.ts)) {
+    moments.push({ eventId: log.id, ts: log.ts, dayKey: log.dayKey, source: "journal" });
+  }
+
+  // Gig XP: each completion, on the day it was completed.
+  for (const gig of bundle.gigs) {
+    if (!gig.doneTs || !gig.doneDay) continue;
+    moments.push({ eventId: gig.id, ts: gig.doneTs, dayKey: gig.doneDay, source: "gig" });
+  }
+
+  // Bio readings: each one (daily cap 4 covers BP-twice-a-day and then some).
+  for (const r of bundle.bioReadings) {
+    moments.push({ eventId: r.id, ts: r.ts, dayKey: r.dayKey, source: "bio" });
+  }
+
   // First-of-day bonus: piggybacks the earliest moment of each day.
   const firstOfDay = new Map<DayKey, Moment>();
   for (const m of moments) {
@@ -230,6 +258,9 @@ function activeDays(bundle: LogBundle): Set<DayKey> {
   for (const l of bundle.readingLogs) days.add(l.dayKey);
   for (const l of bundle.highlightLogs) days.add(l.dayKey);
   for (const l of bundle.bodyLogs) days.add(l.dayKey);
+  for (const l of bundle.journalLogs) days.add(l.dayKey);
+  for (const g of bundle.gigs) if (g.doneDay) days.add(g.doneDay);
+  for (const r of bundle.bioReadings) days.add(r.dayKey);
   return days;
 }
 

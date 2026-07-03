@@ -39,27 +39,27 @@ push verified on Michael's iPhone.
 
 ### TIER A — daily-driver depth
 
-- [ ] **Charge & difficulty:** per-directive user-set charge (1–5 ⚡; water can
+- [x] **Charge & difficulty:** per-directive user-set charge (1–5 ⚡; water can
       be someone's boss fight, grounding a freebie) → XP is charge-weighted;
       global difficulty setting (easy/standard/hard) at first run, changeable.
-- [ ] **Vitals v2:** multiple readings/day with day trace, earlier readings in
+- [x] **Vitals v2:** multiple readings/day with day trace, earlier readings in
       a distinct color, logged time + note shown inline, compact note field.
-- [ ] **Highlight ⇄ Journal toggle:** switchable on the card; journal entries
+- [x] **Highlight ⇄ Journal toggle:** switchable on the card; journal entries
       stored (new table), tagged, feed Tag Explorer + med export.
-- [ ] **Gig list:** bullet-journal daily todos; unfinished gigs roll to the
+- [x] **Gig list:** bullet-journal daily todos; unfinished gigs roll to the
       next day. Tasks, not habits — no streaks attached.
-- [ ] **Workout form v2:** fields dynamic per style (time/distance only where
+- [x] **Workout form v2:** fields dynamic per style (time/distance only where
       relevant; sets/reps grid for lifts) + **templates** — re-logging a named
       workout pre-fills last session's sets/weights (progressive overload
       visible at a glance).
-- [ ] **Bio-scan v2:** user-defined metrics beyond weight (e.g. BP 2×/day for
+- [x] **Bio-scan v2:** user-defined metrics beyond weight (e.g. BP 2×/day for
       a doctor), each with optional reminders + a chart. House rule: anything
       recordable gets a chart or calendar if chartable.
-- [ ] **Reading v2:** label the feeling glyphs; types → Book, Audio, Video,
+- [x] **Reading v2:** label the feeling glyphs; types → Book, Audio, Video,
       Article, Studying, Class.
-- [ ] **Haptics** on completions/crits/level-ups (`navigator.vibrate`;
+- [x] **Haptics** on completions/crits/level-ups (`navigator.vibrate`;
       Android-only, silent degrade on iOS — Michael has a test device).
-- [ ] **Med-team export (headline feature):** System Report → export last N
+- [x] **Med-team export (headline feature):** System Report → export last N
       days/weeks as a clean .md for a therapist/doctor — good vs bad days,
       journals, wins; sections togglable per audience (bio-scan for the doc,
       not the therapist). Design with care; this is the app's superpower.

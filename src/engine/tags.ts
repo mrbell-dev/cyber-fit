@@ -16,7 +16,7 @@ export function stripTags(text: string): string {
 }
 
 export interface TaggedEntry {
-  kind: "workout" | "reading" | "highlight" | "mood";
+  kind: "workout" | "reading" | "highlight" | "mood" | "journal";
   ts: number;
   dayKey: string;
   text: string;

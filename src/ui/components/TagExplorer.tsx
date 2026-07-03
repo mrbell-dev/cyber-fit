@@ -9,11 +9,12 @@ import {
   type TaggedEntry,
 } from "../../engine/index.ts";
 
-const KIND_ICON: Record<TaggedEntry["kind"], string> = {
+const KIND_ICON: Record<string, string> = {
   workout: "⚡",
   reading: "📖",
   highlight: "◆",
   mood: "▥",
+  journal: "✍",
 };
 
 /** #tag explorer: select multiple tags to intersect — #lift ∩ #workout shows
@@ -22,11 +23,12 @@ export function TagExplorer() {
   const [selected, setSelected] = useState<string[]>([]);
 
   const entries = useLiveQuery(async () => {
-    const [workouts, readings, highlights, moods] = await Promise.all([
+    const [workouts, readings, highlights, moods, journals] = await Promise.all([
       db.workoutLogs.toArray(),
       db.readingLogs.toArray(),
       db.highlightLogs.toArray(),
       db.moodLogs.toArray(),
+      db.journalLogs.toArray(),
     ]);
     const out: TaggedEntry[] = [];
     for (const w of workouts) {
@@ -43,6 +45,9 @@ export function TagExplorer() {
     for (const m of moods) {
       if (!m.note) continue;
       out.push({ kind: "mood", ts: m.ts, dayKey: m.dayKey, text: m.note, tags: parseTags(m.note) });
+    }
+    for (const j of journals) {
+      out.push({ kind: "journal", ts: j.ts, dayKey: j.dayKey, text: j.text, tags: parseTags(j.text) });
     }
     return out;
   }, []);

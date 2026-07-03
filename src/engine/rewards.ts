@@ -4,10 +4,14 @@
 import { rollFor } from "./rng.ts";
 
 export type XpSource =
-  | "habit" | "water" | "workout" | "mood" | "reading" | "highlight" | "weighin" | "daily" | "combo";
+  | "habit" | "water" | "workout" | "mood" | "reading" | "highlight" | "journal"
+  | "gig" | "bio" | "weighin" | "daily" | "combo";
 
 export const BASE_XP: Record<XpSource, number> = {
-  habit: 10,
+  habit: 10, // × the directive's charge (1–5 ⚡)
+  journal: 10,
+  gig: 5,
+  bio: 10,
   water: 15,
   workout: 25,
   mood: 10,
@@ -21,6 +25,9 @@ export const BASE_XP: Record<XpSource, number> = {
 /** Max grants per source per day (caps kill grinding). */
 export const DAILY_CAP: Record<XpSource, number> = {
   habit: 5,
+  journal: 1,
+  gig: 5,
+  bio: 4,
   water: 1,
   workout: 2,
   mood: 1,
@@ -38,18 +45,22 @@ export const FREEZE_CAP = 3;
 
 // ---------- levels ----------
 
-export function xpToNext(level: number): number {
-  return 100 + 50 * level;
+/** difficultyFactor (types.ts): easy 0.75 · standard 1 · hard 1.5 */
+export function xpToNext(level: number, factor = 1): number {
+  return Math.round((100 + 50 * level) * factor);
 }
 
-export function levelFromXp(totalXp: number): { level: number; into: number; next: number } {
+export function levelFromXp(
+  totalXp: number,
+  factor = 1,
+): { level: number; into: number; next: number } {
   let level = 0;
   let rest = totalXp;
-  while (rest >= xpToNext(level)) {
-    rest -= xpToNext(level);
+  while (rest >= xpToNext(level, factor)) {
+    rest -= xpToNext(level, factor);
     level++;
   }
-  return { level, into: rest, next: xpToNext(level) };
+  return { level, into: rest, next: xpToNext(level, factor) };
 }
 
 // ---------- augments (cosmetic ONLY) ----------
@@ -84,15 +95,17 @@ export interface Grant {
   drop?: string; // augment id
 }
 
-/** Roll a grant for an event. Deterministic in (eventId, source, owned). */
+/** Roll a grant for an event. Deterministic in (eventId, source, owned).
+ *  `weight` = charge multiplier for charge-weighted sources (default 1). */
 export function makeGrant(
   eventId: string,
   dayKey: string,
   source: XpSource,
   owned: string[],
+  weight = 1,
 ): Grant {
   const crit = rollFor(eventId, "crit") < CRIT_CHANCE;
-  const xp = BASE_XP[source] * (crit ? 2 : 1);
+  const xp = BASE_XP[source] * Math.max(1, Math.min(5, weight)) * (crit ? 2 : 1);
   let drop: string | undefined;
   if (rollFor(eventId, "drop") < DROP_CHANCE) {
     const pool = AUGMENTS.filter((a) => !owned.includes(a.id));

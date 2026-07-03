@@ -58,6 +58,7 @@ export function HabitEditor({ seed, onClose }: { seed: EditorSeed; onClose: () =
   const [pingTimes, setPingTimes] = useState(h?.pings?.times ?? 1);
   const [pingEnd, setPingEnd] = useState(h?.pings?.end ?? "21:00");
   const [untilDone, setUntilDone] = useState(h?.pings?.untilDone ?? false);
+  const [charge, setCharge] = useState(h?.charge ?? 1);
   const [emojiOpen, setEmojiOpen] = useState(false);
 
   const save = async () => {
@@ -69,6 +70,7 @@ export function HabitEditor({ seed, onClose }: { seed: EditorSeed; onClose: () =
       schedule,
       area,
       timeOfDay,
+      charge,
       reminderTime: remindOn && !multi ? reminderTime : undefined,
       pings: multi
         ? { times: pingTimes, start: reminderTime, end: pingTimes > 1 ? pingEnd : reminderTime, untilDone }
@@ -265,6 +267,23 @@ export function HabitEditor({ seed, onClose }: { seed: EditorSeed; onClose: () =
               days a week — any days count
             </label>
           )}
+        </div>
+
+        <div className="editor-row">
+          <span className="editor-row-label">Charge — how hard is this for YOU?</span>
+          <div className="chip-row" role="group" aria-label="Charge">
+            {[1, 2, 3, 4, 5].map((c) => (
+              <button
+                key={c}
+                className={charge === c ? "chip on" : "chip"}
+                aria-pressed={charge === c}
+                onClick={() => setCharge(c)}
+              >
+                {"⚡".repeat(c)}
+              </button>
+            ))}
+          </div>
+          <p className="placeholder">// XP scales with charge — your boss fight, your rules</p>
         </div>
 
         <div className="editor-row">

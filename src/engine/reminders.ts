@@ -2,7 +2,7 @@
 // (labels, themed copy, what it's for) never leaves the device — only the
 // slot numbers do. EVERY ping is optional and user-defined.
 
-import type { Habit } from "./types.ts";
+import type { BioMetric, Habit } from "./types.ts";
 
 export interface Reminders {
   morning: { on: boolean; time: string }; // "HH:MM" local
@@ -23,7 +23,7 @@ export const DEFAULT_REMINDERS: Reminders = {
   motivation: { on: false, count: 2, start: "09:00", end: "21:00" },
 };
 
-export type PingKind = keyof Reminders | "habit";
+export type PingKind = keyof Reminders | "habit" | "bio";
 
 /** Themed copy shown by the app (in-app pings + self-hosted relays). */
 export const REMINDER_COPY: Record<PingKind, string> = {
@@ -34,6 +34,7 @@ export const REMINDER_COPY: Record<PingKind, string> = {
   highlight: "One good frame from today — capture the highlight.",
   motivation: "Keep the chrome polished, choom.",
   habit: "Directive window open.",
+  bio: "Bio-scan window — log your reading.",
 };
 
 export interface LocalPing {
@@ -60,8 +61,8 @@ function habitDays(habit: Habit): number[] {
   return habit.schedule.kind === "weekdays" ? [...habit.schedule.days] : ALL_DAYS;
 }
 
-/** Expand the schedule + per-habit reminders into concrete local ping times. */
-export function localPings(r: Reminders, habits: Habit[] = []): LocalPing[] {
+/** Expand the schedule + per-habit + per-bio-metric reminders into local ping times. */
+export function localPings(r: Reminders, habits: Habit[] = [], metrics: BioMetric[] = []): LocalPing[] {
   const pings: LocalPing[] = [];
   if (r.morning.on) pings.push({ kind: "morning", minutes: parseTime(r.morning.time), days: ALL_DAYS });
   if (r.catchup.on) pings.push({ kind: "catchup", minutes: parseTime(r.catchup.time), days: ALL_DAYS });
@@ -91,6 +92,16 @@ export function localPings(r: Reminders, habits: Habit[] = []): LocalPing[] {
         habitId: habit.id,
       });
     }
+  }
+  for (const m of metrics) {
+    if (m.archivedAt || !m.pings || m.pings.times <= 0) continue;
+    spread(
+      pings,
+      "bio",
+      { on: true, count: m.pings.times, start: m.pings.start, end: m.pings.end },
+      ALL_DAYS,
+      { label: m.name },
+    );
   }
   return pings;
 }
@@ -136,8 +147,9 @@ export function slotBundleFor(
   r: Reminders,
   tzOffsetMinutes: number,
   habits: Habit[] = [],
+  metrics: BioMetric[] = [],
 ): { slots: number[]; motivationSlots: number[] } {
-  const pings = localPings(r, habits);
+  const pings = localPings(r, habits, metrics);
   return {
     slots: toSlots(pings.filter((p) => p.kind !== "motivation"), tzOffsetMinutes),
     motivationSlots: toSlots(pings.filter((p) => p.kind === "motivation"), tzOffsetMinutes),

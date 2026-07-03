@@ -44,7 +44,8 @@ function b64ToUint8(base64: string): Uint8Array {
 
 async function currentSlots(): Promise<{ slots: number[]; motivationSlots: number[] }> {
   const habits = await db.habits.filter((h) => !h.archivedAt).toArray();
-  return slotBundleFor(await getReminders(), new Date().getTimezoneOffset(), habits);
+  const metrics = await db.bioMetrics.filter((m) => !m.archivedAt).toArray();
+  return slotBundleFor(await getReminders(), new Date().getTimezoneOffset(), habits, metrics);
 }
 
 async function postJson(url: string, path: string, body: unknown): Promise<boolean> {

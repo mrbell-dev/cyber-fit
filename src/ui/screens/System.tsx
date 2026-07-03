@@ -306,6 +306,19 @@ export function System() {
           </select>
         </label>
         <label className="check-label">
+          Difficulty
+          <select
+            className="input"
+            value={settings.difficulty ?? "standard"}
+            onChange={(e) => saveSettings({ difficulty: e.target.value as "easy" | "standard" | "hard" })}
+            aria-label="Difficulty"
+          >
+            <option value="easy">Easy — gentler level curve</option>
+            <option value="standard">Standard</option>
+            <option value="hard">Hard — full merc mode</option>
+          </select>
+        </label>
+        <label className="check-label">
           Day rolls over at
           <select
             className="input"

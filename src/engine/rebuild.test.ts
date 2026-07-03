@@ -22,6 +22,9 @@ function bundle(partial: Partial<LogBundle>): LogBundle {
     readingLogs: [],
     highlightLogs: [],
     bodyLogs: [],
+    journalLogs: [],
+    gigs: [],
+    bioReadings: [],
     settings: DEFAULT_SETTINGS,
     today: TODAY,
     ...partial,
@@ -116,6 +119,45 @@ describe("rebuild — weigh-in XP (monthly cadence)", () => {
       settings: { ...DEFAULT_SETTINGS, weighinCadence: "weekly" },
     }));
     expect(weekly.grants.filter((g) => g.source === "weighin")).toHaveLength(2); // day 0 + day 5
+  });
+});
+
+describe("rebuild — charge weighting + difficulty + new sources", () => {
+  it("a 5⚡ habit earns 5× base (before crit)", () => {
+    const boss = { ...habit, id: "boss", charge: 5 };
+    const { grants } = rebuild(bundle({
+      habits: [boss],
+      habitLogs: [{ id: "a", habitId: "boss", dayKey: TODAY, ts: 100, amount: 1, kind: "done" }],
+    }));
+    const g = grants.find((x) => x.source === "habit")!;
+    expect(g.xp === 50 || g.xp === 100).toBe(true); // ×5, or crit-doubled
+  });
+
+  it("difficulty changes level for the same XP", () => {
+    const logs = { habitLogs: [hlog("a", TODAY, 100)], moodLogs: [mlog("m", TODAY, 300)] };
+    const easy = rebuild(bundle({ ...logs, settings: { ...DEFAULT_SETTINGS, difficulty: "easy" } }));
+    const hard = rebuild(bundle({ ...logs, settings: { ...DEFAULT_SETTINGS, difficulty: "hard" } }));
+    expect(easy.state.xp).toBe(hard.state.xp);
+    expect(easy.state.level).toBeGreaterThanOrEqual(hard.state.level);
+  });
+
+  it("gigs earn on completion day; journal caps at 1/day; bio caps at 4/day", () => {
+    const { grants } = rebuild(bundle({
+      gigs: [
+        { id: "g1", text: "call clinic", createdDay: addDays(TODAY, -1), ts: 1, doneTs: 500, doneDay: TODAY },
+        { id: "g2", text: "not done", createdDay: TODAY, ts: 2 },
+      ],
+      journalLogs: [
+        { id: "j1", dayKey: TODAY, ts: 100, text: "brain dump" },
+        { id: "j2", dayKey: TODAY, ts: 200, text: "second dump" },
+      ],
+      bioReadings: Array.from({ length: 6 }, (_, i) => ({
+        id: `b${i}`, metricId: "bp", dayKey: TODAY, ts: 300 + i, value: "120/80",
+      })),
+    }));
+    expect(grants.filter((g) => g.source === "gig")).toHaveLength(1);
+    expect(grants.filter((g) => g.source === "journal")).toHaveLength(1);
+    expect(grants.filter((g) => g.source === "bio")).toHaveLength(4);
   });
 });
 

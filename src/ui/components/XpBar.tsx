@@ -1,15 +1,17 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../../db/db.ts";
-import { levelFromXp, type PlayerState } from "../../engine/index.ts";
+import { difficultyFactor, levelFromXp, type PlayerState } from "../../engine/index.ts";
+import { useSettings } from "../hooks.ts";
 
 export function XpBar() {
+  const settings = useSettings();
   const player = useLiveQuery(
     async () => (await db.kv.get("player"))?.value as PlayerState | undefined,
     [],
   );
   if (!player) return null;
 
-  const { level, into, next } = levelFromXp(player.xp);
+  const { level, into, next } = levelFromXp(player.xp, difficultyFactor(settings));
   const pct = Math.round((into / next) * 100);
   const streak = player.globalStreak.current;
 
