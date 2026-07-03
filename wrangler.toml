@@ -5,6 +5,10 @@
 name = "cyber-fit"
 compatibility_date = "2026-06-01"
 
+# PLAYTEST GATE (temporary): route every request through gate/index.mjs.
+# To open the app to the world: delete these two lines + gate/, redeploy.
+main = "gate/index.mjs"
+
 # NOTE: routes must sit ABOVE any [section] header — TOML scoping puts
 # everything after a header inside that section.
 routes = [
@@ -14,3 +18,5 @@ routes = [
 
 [assets]
 directory = "./dist"
+binding = "ASSETS"
+run_worker_first = true
