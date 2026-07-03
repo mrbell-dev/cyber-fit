@@ -10,6 +10,7 @@ import {
   type PlayerState,
 } from "../../engine/index.ts";
 import { useDayKey, useSettings } from "../hooks.ts";
+import { HighlightReel } from "../components/Highlight.tsx";
 
 const GRID_DAYS = 70; // 14-wide rows, GitHub-style intensity
 
@@ -19,6 +20,7 @@ interface WeekData {
   moodLogs: import("../../engine/index.ts").MoodLog[];
   workoutLogs: import("../../engine/index.ts").WorkoutLog[];
   readingLogs: import("../../engine/index.ts").ReadingLog[];
+  highlightLogs: import("../../engine/index.ts").HighlightLog[];
 }
 
 /** Last-7-days summary, framed positively — a report, never a scolding. */
@@ -55,6 +57,8 @@ function WeeklyReport({
   if (sessions.length > 0)
     lines.push(`${sessions.length} reading session${sessions.length === 1 ? "" : "s"}${notes ? ` (${notes} with reflections)` : ""}`);
   if (moodAvg) lines.push(`vitals averaged ${moodAvg}/5 across ${moods.length} check-in${moods.length === 1 ? "" : "s"}`);
+  const highlights = inWeek(data.highlightLogs).length;
+  if (highlights > 0) lines.push(`${highlights} highlight${highlights === 1 ? "" : "s"} captured — the week had good frames`);
   if (shields > 0) lines.push(`${shields} shield${shields === 1 ? "" : "s"} banked against missed days`);
   if (lines.length === 0) lines.push("quiet week — the grid held your place. Log anything to restart the feed.");
 
@@ -84,7 +88,7 @@ export function Stats() {
   const settings = useSettings();
 
   const data = useLiveQuery(async () => {
-    const [habits, habitLogs, waterLogs, moodLogs, workoutLogs, readingLogs, playerRow] =
+    const [habits, habitLogs, waterLogs, moodLogs, workoutLogs, readingLogs, highlightLogs, playerRow] =
       await Promise.all([
         db.habits.toArray(),
         db.habitLogs.toArray(),
@@ -92,9 +96,10 @@ export function Stats() {
         db.moodLogs.toArray(),
         db.workoutLogs.toArray(),
         db.readingLogs.toArray(),
+        db.highlightLogs.toArray(),
         db.kv.get("player"),
       ]);
-    return { habits, habitLogs, waterLogs, moodLogs, workoutLogs, readingLogs,
+    return { habits, habitLogs, waterLogs, moodLogs, workoutLogs, readingLogs, highlightLogs,
       player: playerRow?.value as PlayerState | undefined };
   }, []);
 
@@ -109,6 +114,7 @@ export function Stats() {
   for (const l of data.moodLogs) bump(l.dayKey);
   for (const l of data.workoutLogs) bump(l.dayKey);
   for (const l of data.readingLogs) bump(l.dayKey);
+  for (const l of data.highlightLogs) bump(l.dayKey);
 
   const gridDays = Array.from({ length: GRID_DAYS }, (_, i) => addDays(today, i - (GRID_DAYS - 1)));
 
@@ -204,6 +210,8 @@ export function Stats() {
           more
         </div>
       </div>
+
+      <HighlightReel />
 
       <div className="card">
         <h2 className="card-title">Hydration — last 7 days</h2>

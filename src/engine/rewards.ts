@@ -3,7 +3,8 @@
 
 import { rollFor } from "./rng.ts";
 
-export type XpSource = "habit" | "water" | "workout" | "mood" | "reading" | "daily" | "combo";
+export type XpSource =
+  | "habit" | "water" | "workout" | "mood" | "reading" | "highlight" | "daily" | "combo";
 
 export const BASE_XP: Record<XpSource, number> = {
   habit: 10,
@@ -11,6 +12,7 @@ export const BASE_XP: Record<XpSource, number> = {
   workout: 25,
   mood: 10,
   reading: 15,
+  highlight: 10, // one small good thing, noticed
   daily: 20, // first log of the day
   combo: 30, // every tracked domain satisfied in one day
 };
@@ -22,6 +24,7 @@ export const DAILY_CAP: Record<XpSource, number> = {
   workout: 2,
   mood: 1,
   reading: 2,
+  highlight: 1,
   daily: 1,
   combo: 1,
 };

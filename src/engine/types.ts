@@ -77,6 +77,15 @@ export interface ReadingLog {
   feeling?: 1 | 2 | 3 | 4 | 5;
 }
 
+/** "Highlight of the day" — one small good thing. Evidence-based savoring
+ *  practice; counters all-or-nothing thinking. One per day earns XP. */
+export interface HighlightLog {
+  id: string;
+  dayKey: DayKey;
+  ts: number;
+  text: string;
+}
+
 export interface MoodLog {
   id: string;
   dayKey: DayKey;

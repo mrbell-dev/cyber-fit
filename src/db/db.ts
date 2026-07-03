@@ -2,6 +2,7 @@ import Dexie, { type EntityTable } from "dexie";
 import type {
   Habit,
   HabitLog,
+  HighlightLog,
   MoodLog,
   ReadingItem,
   ReadingLog,
@@ -25,6 +26,7 @@ export const db = new Dexie("cyber-fit") as Dexie & {
   workoutLogs: EntityTable<WorkoutLog, "id">;
   readingItems: EntityTable<ReadingItem, "id">;
   readingLogs: EntityTable<ReadingLog, "id">;
+  highlightLogs: EntityTable<HighlightLog, "id">;
   kv: EntityTable<KvRow, "key">;
 };
 
@@ -43,4 +45,8 @@ db.version(3).stores({
   workoutLogs: "id, dayKey",
   readingItems: "id, status",
   readingLogs: "id, dayKey, itemId",
+});
+
+db.version(4).stores({
+  highlightLogs: "id, dayKey",
 });

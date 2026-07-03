@@ -27,7 +27,7 @@ const PLAYER_KEY = "player";
  * never drift), persist it, and announce any newly earned grants.
  */
 export async function refreshPlayer(): Promise<PlayerState> {
-  const [habits, habitLogs, waterLogs, moodLogs, workoutLogs, readingLogs, settings, today, prevRow] =
+  const [habits, habitLogs, waterLogs, moodLogs, workoutLogs, readingLogs, highlightLogs, settings, today, prevRow] =
     await Promise.all([
       db.habits.toArray(),
       db.habitLogs.toArray(),
@@ -35,12 +35,13 @@ export async function refreshPlayer(): Promise<PlayerState> {
       db.moodLogs.toArray(),
       db.workoutLogs.toArray(),
       db.readingLogs.toArray(),
+      db.highlightLogs.toArray(),
       getSettings(),
       currentDayKey(),
       db.kv.get(PLAYER_KEY),
     ]);
   const { state, grants } = rebuild({
-    habits, habitLogs, waterLogs, moodLogs, workoutLogs, readingLogs, settings, today,
+    habits, habitLogs, waterLogs, moodLogs, workoutLogs, readingLogs, highlightLogs, settings, today,
   });
   await db.kv.put({ key: PLAYER_KEY, value: state });
 
@@ -204,6 +205,18 @@ export async function logReading(input: {
   await db.readingLogs.add(entry);
   await refreshPlayer();
   return entry;
+}
+
+export async function logHighlight(text: string): Promise<void> {
+  const trimmed = text.trim();
+  if (!trimmed) return;
+  await db.highlightLogs.add({
+    id: crypto.randomUUID(),
+    dayKey: await currentDayKey(),
+    ts: Date.now(),
+    text: trimmed,
+  });
+  await refreshPlayer();
 }
 
 export async function logMood(

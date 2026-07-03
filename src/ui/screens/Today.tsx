@@ -15,6 +15,7 @@ import { WaterGauge } from "../components/WaterGauge.tsx";
 import { XpBar } from "../components/XpBar.tsx";
 import { MoodRow } from "../components/MoodRow.tsx";
 import { MissedPing } from "../components/MissedPing.tsx";
+import { Highlight } from "../components/Highlight.tsx";
 
 function habitView(habit: Habit, logs: HabitLog[], today: DayKey) {
   const byDay = new Map<DayKey, HabitLog[]>();
@@ -101,6 +102,8 @@ export function Today() {
       <WaterGauge logs={waterLogs} goalMl={settings.waterGoalMl} />
 
       <MoodRow today={today} />
+
+      <Highlight today={today} />
     </section>
   );
 }

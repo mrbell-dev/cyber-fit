@@ -20,6 +20,7 @@ function bundle(partial: Partial<LogBundle>): LogBundle {
     moodLogs: [],
     workoutLogs: [],
     readingLogs: [],
+    highlightLogs: [],
     settings: DEFAULT_SETTINGS,
     today: TODAY,
     ...partial,
@@ -75,6 +76,19 @@ describe("rebuild — XP grants", () => {
       moodLogs: [mlog("m", TODAY, 300)],
     });
     expect(rebuild(b)).toEqual(rebuild(b));
+  });
+});
+
+describe("rebuild — highlight XP", () => {
+  it("first highlight of the day earns; repeats don't", () => {
+    const { grants } = rebuild(bundle({
+      highlightLogs: [
+        { id: "hl1", dayKey: TODAY, ts: 100, text: "saw a lizard on the patio" },
+        { id: "hl2", dayKey: TODAY, ts: 200, text: "good coffee" },
+      ],
+    }));
+    expect(grants.filter((g) => g.source === "highlight")).toHaveLength(1);
+    expect(grants.find((g) => g.source === "highlight")!.key).toBe("highlight:hl1");
   });
 });
 

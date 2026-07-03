@@ -17,6 +17,7 @@ import { addDays, diffDays, type DayKey } from "./time.ts";
 import type {
   Habit,
   HabitLog,
+  HighlightLog,
   MoodLog,
   PlayerState,
   ReadingLog,
@@ -33,6 +34,7 @@ export interface LogBundle {
   moodLogs: MoodLog[];
   workoutLogs: WorkoutLog[];
   readingLogs: ReadingLog[];
+  highlightLogs: HighlightLog[];
   settings: Settings;
   today: DayKey;
 }
@@ -166,6 +168,14 @@ function deriveMoments(bundle: LogBundle): Moment[] {
     }
   }
 
+  // Highlight XP: first highlight of the day (savoring practice).
+  const highlightDays = new Set<DayKey>();
+  for (const log of [...bundle.highlightLogs].sort((a, b) => a.ts - b.ts)) {
+    if (highlightDays.has(log.dayKey)) continue;
+    highlightDays.add(log.dayKey);
+    moments.push({ eventId: log.id, ts: log.ts, dayKey: log.dayKey, source: "highlight" });
+  }
+
   // First-of-day bonus: piggybacks the earliest moment of each day.
   const firstOfDay = new Map<DayKey, Moment>();
   for (const m of moments) {
@@ -204,6 +214,7 @@ function activeDays(bundle: LogBundle): Set<DayKey> {
   for (const l of bundle.moodLogs) days.add(l.dayKey);
   for (const l of bundle.workoutLogs) days.add(l.dayKey);
   for (const l of bundle.readingLogs) days.add(l.dayKey);
+  for (const l of bundle.highlightLogs) days.add(l.dayKey);
   return days;
 }
 

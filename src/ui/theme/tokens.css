@@ -1008,3 +1008,17 @@ html.theme-ice {
   color: var(--neon-green);
   font-family: var(--font-mono);
 }
+
+/* ---------- highlight of the day ---------- */
+.highlight-text {
+  margin: 0 0 8px;
+  font-size: 15px;
+  color: var(--text);
+  border-left: 3px solid var(--neon-yellow);
+  padding-left: 10px;
+}
+
+.highlight-text.reel {
+  font-size: 14px;
+  margin-bottom: 10px;
+}
