@@ -20,55 +20,111 @@ push verified on Michael's iPhone.
 
 ---
 
-## TIER LIST v2 — chosen by judgment, in order
-(v1 tiers S/A/B/C fully shipped July 2026 — see STATUS and git history.
-Ranking principle: the app matters most on the user's worst night, so the
-bad-night features outrank the good-day features.)
+## TIER LIST v3 — playtest feedback pass (Michael's full walkthrough, 2026-07-04)
+(v1 AND v2 tiers fully shipped July 2026 — Crash Kit, copy audit, anchors,
+breathing overlay, PHQ-9/GAD-7 screeners, exercise DB, focus timer, hydration
+defaults; see STATUS and git history. This list folds Michael's raw TODO from
+using the live app. Ranking principle: bugs that break trust in the data
+outrank broken flows, which outrank ergonomics, which outrank new features.)
 
-### TIER S — the bad-night tier (build first)
+### TIER S — trust-breaking bugs (fix before ANY feature work)
 
-- [x] **Crash Kit.** One tap from anywhere (nav or Today header). Contents:
-      guided box-breathing overlay (animated, reduced-motion safe), 5-4-3-2-1
-      grounding exercise, YOUR OWN Highlight Reel replayed as evidence against
-      the spiral ("these good frames are real — you logged them"), and crisis
-      lines (988 call/text) — all fully offline except the phone call itself.
-      Finch's First Aid Kit, rebuilt for the cyberpsychosis lore. This is the
-      highest-human-value feature the app can add: everything else helps on
-      normal days; this one helps on the day that counts.
-- [x] **Self-compassion copy audit** (with Crash Kit copy written to the same
-      standard). Research basis: self-compassion predicts habit RECOVERY better
-      than grit — and recovery moments are exactly when copy is read most
-      closely. Audit every string against "kind at 11pm after a bad week."
+- [ ] **LVL reset to zero after an update, with completed tasks intact.**
+      PlayerState is derived by `rebuild()` folding ALL log tables, so either
+      (a) a log table silently stopped feeding `LogBundle` (check every table
+      added in Dexie v6/v7 is included in the bundle assembled in repo.ts), or
+      (b) a fold change regressed against old events. Reproduce with Michael's
+      real export before touching code. If any log table was actually lost,
+      that is data loss — the single worst bug this app can have. Root-cause
+      before shipping anything else.
+- [ ] **Highlight of the day OVERWRITES instead of keeping a running log.**
+      History must survive — one highlight per day is fine, but yesterday's
+      must never vanish. Check whether the UI upserts over prior rows; logs
+      are supposed to be append-only (rule 2 in CLAUDE.md).
+- [ ] **Data Vault: "relay unreachable" on desktop Chrome.** Vault round-trip
+      was verified live from this machine before — reproduce on desktop
+      Chrome specifically (CORS preflight? extension/shields? http vs https
+      dev origin?). Say what it actually is even if it's browser-side.
+- [ ] **iOS global: page zooms on input focus and STAYS zoomed.** Cause: any
+      input/select/textarea with font-size < 16px triggers Safari zoom. Fix
+      by making all form controls ≥ 16px. Do NOT use `maximum-scale=1` — that
+      disables pinch-zoom and violates the accessibility rule.
 
-### TIER A — the strongest evidence levers
+### TIER A — broken flows
 
-- [x] **Anchors (implementation intentions).** Optional field on a directive:
-      "after [existing routine]" — "after I pour coffee → stretch". The
-      single best-evidenced habit-formation technique not yet in the app, and
-      it's one field + display copy on the habit card. Cheap, huge.
-- [x] **Guided breathing as a reusable overlay** (shared with Crash Kit; also
-      attachable to any directive — tap "Box breathing" → the overlay runs it).
-- [x] **Self-screeners + Trauma Team integration.** Optional PHQ-9/GAD-7
-      (public domain) on a user-chosen cadence like bio-scans; score TRENDS
-      chart + inclusion in the export. Framed strictly as screeners, never
-      diagnosis; scores stay on-device like everything else. This turns the
-      Trauma Team export from useful into genuinely clinical — the app's
-      sharpest differentiator, done carefully.
+- [ ] **Reading/learning log-session dialog:** the "how you felt" control has
+      no labels, and the session TYPE comes up wrong when opened from the Log
+      button. Two straight bugs in one dialog.
+- [ ] **Physical training form must be dynamic per workout style.** Time and
+      distance only when the style uses them — `WORKOUT_STYLES` already
+      declares per-style `fields`; the form isn't honoring it.
+- [ ] **Directive editor bugs:** emoji dropdown doesn't close when other
+      controls (⋯ etc.) are tapped; the anchor row breaks the editor's layout
+      flow mid-page (stops half-way across with the type-in field).
+- [ ] **Vitals:** a reading must show the metric's NAME with its note, and
+      the note field must span the full card width (still doesn't).
+- [ ] **Shields are a mystery in Telemetry.** Nobody can tell what they are
+      or how to earn them from the UI. Add a one-tap explainer on the stat
+      (earned +1 per 5 active days, cap 3, auto-absorb a miss) linking the
+      Field Manual entry.
+- [ ] **Visual Cortex unlocks are invisible.** Michael can't tell what the
+      fx/themes look like or whether they exist. Add mini-previews (a swatch
+      strip / 1-line fx demo) and VERIFY each unlock actually applies.
 
-### TIER B — daily-driver upgrades
+### TIER B — the ⓘ restructure (the Stats verdict)
 
-- [x] **Full exercise DB import** (yuhonas/free-exercise-db, public domain):
-      800+ movements with instructions, offline-bundled behind the existing
-      autocomplete. Michael lifts; this is a direct quality-of-life win.
-- [x] **Focus timer** attachable to a directive (pomodoro-style, ADHD
-      body-doubling adjacent) — completing a timed session logs the directive.
-- [x] **Hydration science defaults:** onboarding suggests a goal from weight/
-      activity instead of a flat 2L (8×8 is folklore); user always overrides.
+Michael asked for an honest read: he's right, not obtuse. Stats-as-destination
+is a failed pattern here — nobody commutes to a stats tab; charts belong where
+the data lives. Direction:
+
+- [ ] **Every measurable card (Log/Today) gets an ⓘ top-right** opening that
+      thing's history + chart in a popup: weight trend (WITH numbers on the
+      data points) moves to bio-scan's ⓘ · hydration chart to hydration's ⓘ ·
+      reading/learning ⓘ = the full library, filterable by type (find the
+      book/video you want to recommend to a friend) · journal entries always
+      openable to review/edit.
+- [ ] **Highlight Reel: show last 10, truncate, "view all" → filterable
+      full-history view.** (Pairs with the running-log fix in Tier S.)
+- [ ] **Stats slims down to an overview:** uptime grid, level/streak
+      telemetry, screener trends, exports. Telemetry goes DYNAMIC — only
+      sources the user actually tracks appear (someone who can't work out
+      must never stare at a permanent zero. Forgiveness applies to layout
+      too).
+- [ ] **Drop the Tag Explorer screen.** Agreed and recorded: the screen isn't
+      earning its tab. KEEP #tag parsing in free text (zero-cost, feeds
+      export and any future search); delete only the explorer UI.
+- [ ] **Journal polish:** spacing between entries; long entries truncate with
+      … and open in a review/edit popup.
+
+### TIER C — editor ergonomics & bio-scan generalization
+
+- [ ] **Directive editor controls:** schedule and area become dropdowns;
+      anchor becomes a dropdown of the user's OWN active directives (free
+      text stays as fallback); charge (⚡) becomes a 1–5 slider.
+- [ ] **Global quiet hours + master notification switch.** When notifications
+      are globally off, editors never even SHOW ping options (don't prompt
+      for what can't fire). Quiet hours clamp all ping times, push and
+      in-app.
+- [ ] **Bio-scan generalization — metric library with a + (mirror the
+      directive codex):** weigh-in stops being the hardwired default; presets
+      to pick from (weight, blood pressure, glucose, resting HR, …) plus
+      fully custom; per-metric settings (cadence, pings on/off) saved at add
+      time and editable after; per-metric chart via the ⓘ; UNDO the last
+      reading (mistypes happen); the separate "custom biometrics" section
+      then folds away. Doctor-driven use case: "BP twice a day for my doc."
+- [ ] **Reading/learning one-shots:** a "this was a one-time thing" checkbox
+      → log the feeling, save, done — it never lingers in the feed waiting
+      for "finish".
+- [ ] **Codex growth:** a handful more general health/wellbeing presets;
+      optional suggestions popup reachable from the add-directive page.
+- [ ] **Notification inventory view:** one list of every ping that can fire —
+      user-defined (per-directive, per-metric) and system (morning boot,
+      motivation) — classified as such, each toggleable from the list.
+
+### TIER LT — flavor, reach, and the long game (carried forward)
+
 - [ ] **Accessibility audit:** full axe pass + a real VoiceOver/TalkBack
-      walkthrough. We verified contrast; we have not verified the experience.
-
-### TIER LT — flavor, reach, and the long game
-
+      walkthrough (carried from v2 — needs a human session, still owed).
 - [ ] **Cyberware rig:** SVG avatar gaining visible chrome per level (arm LVL 3,
       optic LVL 6, spine LVL 10…). Cosmetic only. Art is the bottleneck —
       build the slot system first, invite community art PRs.
@@ -76,11 +132,28 @@ bad-night features outrank the good-day features.)
       notifications (no relay), true background sync, haptics guaranteed.
       First store target per the pricing research; iOS only if ~120 sales/yr
       materialize (Apple waiver is free-apps-only — verified).
+- [ ] **Cyber-trainer SMS (Michael-only, separate private repo):** Twilio +
+      local Ollama; text the bot ("just finished the workout") → it infers
+      the Tuesday routine, logs it, and — holding Michael's vault cypher key
+      privately — pulls, modifies, re-uploads the encrypted vault. Never in
+      the OSS app.
 - [ ] **Localization scoping** (string extraction cost; the voice is hard to
       translate — scope before promising).
-- [ ] **Cyber-trainer SMS** (Michael-only, separate private repo).
 - [ ] Watch: Declarative Web Push / Safari releases (each may shrink the
       native-port motivation).
+
+### Decisions recorded this pass (don't relitigate)
+
+- **BYO push relay stays OPTIONAL, not the default.** Michael proposed making
+  users provide their own relay by default. Pushback given and holding:
+  requiring a Cloudflare deploy before the first ping means ~nobody gets
+  pings, and the central relay is already zero-PII/completion-blind (pillar 1
+  is satisfied; pillar 4 — ADHD-simple default path — decides). Ship instead:
+  make the self-host option loud in Reminder Uplink (custom relay URL + VAPID
+  field already exist; add the SELF-HOSTING.md link right there).
+- **Tag Explorer screen dropped; #tag parsing kept** (rationale above).
+- **Stats becomes overview-only; per-thing charts live on the things** (the ⓘ
+  pattern above).
 
 **Explicitly cut from the queue (recorded so it stays cut):** acts-of-kindness
 suggestions (nice, but suggestion fatigue is real and the gig list already
