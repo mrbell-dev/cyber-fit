@@ -6,3 +6,4 @@ coverage/
 *.tsbuildinfo
 .wrangler/
 .DS_Store
+security-audit.md
