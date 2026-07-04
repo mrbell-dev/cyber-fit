@@ -2,6 +2,7 @@ import { useState } from "react";
 import { buildReport, DEFAULT_SECTIONS, downloadReport, type ReportSections } from "../../db/report.ts";
 
 const SECTION_LABELS: { key: keyof ReportSections; label: string }[] = [
+  { key: "screeners", label: "PHQ-9 / GAD-7 scores" },
   { key: "vitals", label: "Mood readings" },
   { key: "journals", label: "Journal entries" },
   { key: "highlights", label: "Daily highlights" },

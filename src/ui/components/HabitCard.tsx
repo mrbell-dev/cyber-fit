@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { BreathingOverlay } from "./Breathing.tsx";
+import { FocusTimer } from "./FocusTimer.tsx";
 import type { DayKey, DayStatus, Habit } from "../../engine/index.ts";
 import { addDays } from "../../engine/index.ts";
 import { logHabit, undoHabit } from "../../db/repo.ts";
@@ -17,6 +19,8 @@ export function HabitCard({
   scheduledToday: boolean;
 }) {
   const [menu, setMenu] = useState(false);
+  const [breathing, setBreathing] = useState(false);
+  const [timer, setTimer] = useState(false);
 
   const tap = async () => {
     if (status.done && habit.target === 1) await undoHabit(habit.id);
@@ -40,6 +44,7 @@ export function HabitCard({
         </span>
         <span className="habit-name">
           {habit.name}
+          {habit.anchor && <span className="off-day-tag anchor-tag"> · after {habit.anchor.replace(/^after /i, "")}</span>}
           {!scheduledToday && <span className="off-day-tag"> · off-day</span>}
           {status.skipped && <span className="off-day-tag"> · rest</span>}
         </span>
@@ -79,6 +84,22 @@ export function HabitCard({
           >
             Rest today (keeps streak)
           </button>
+          <button
+            onClick={() => {
+              setTimer(true);
+              setMenu(false);
+            }}
+          >
+            Focus timer (logs on finish)
+          </button>
+          <button
+            onClick={() => {
+              setBreathing(true);
+              setMenu(false);
+            }}
+          >
+            Breathe first — 2 min
+          </button>
           {status.count > 0 && (
             <button
               onClick={async () => {
@@ -92,6 +113,8 @@ export function HabitCard({
           <button onClick={() => setMenu(false)}>Close</button>
         </div>
       )}
+      {breathing && <BreathingOverlay onClose={() => setBreathing(false)} />}
+      {timer && <FocusTimer habit={habit} onClose={() => setTimer(false)} />}
     </div>
   );
 }

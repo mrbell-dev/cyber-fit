@@ -86,6 +86,7 @@ export async function addHabit(input: {
   area?: Habit["area"];
   timeOfDay?: Habit["timeOfDay"];
   charge?: number;
+  anchor?: string;
   reminderTime?: string;
   pings?: Habit["pings"];
   presetId?: string;
@@ -104,6 +105,7 @@ export async function addHabit(input: {
     ...(input.area ? { area: input.area } : {}),
     ...(input.timeOfDay ? { timeOfDay: input.timeOfDay } : {}),
     ...(input.charge ? { charge: Math.max(1, Math.min(5, input.charge)) } : {}),
+    ...(input.anchor?.trim() ? { anchor: input.anchor.trim() } : {}),
     ...(input.reminderTime ? { reminderTime: input.reminderTime } : {}),
     ...(input.pings ? { pings: input.pings } : {}),
     ...(input.presetId ? { presetId: input.presetId } : {}),
@@ -301,6 +303,23 @@ export async function logBioReading(metricId: string, value: string): Promise<vo
     id: crypto.randomUUID(), metricId, dayKey: await currentDayKey(), ts: Date.now(), value: trimmed,
   });
   await refreshPlayer();
+}
+
+/** No XP, no refreshPlayer toast path — screeners are never gamified. */
+export async function logScreening(
+  tool: "phq9" | "gad7",
+  answers: number[],
+): Promise<{ score: number }> {
+  const score = answers.reduce((a, b) => a + b, 0);
+  await db.screenings.add({
+    id: crypto.randomUUID(),
+    dayKey: await currentDayKey(),
+    ts: Date.now(),
+    tool,
+    score,
+    answers,
+  });
+  return { score };
 }
 
 export async function logHighlight(text: string): Promise<void> {

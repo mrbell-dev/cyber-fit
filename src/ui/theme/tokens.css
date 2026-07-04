@@ -1317,3 +1317,61 @@ html.theme-ice {
   width: 100%;
   text-align: left;
 }
+
+/* ---------- breathing / focus / screeners ---------- */
+.breath-box {
+  width: 72px;
+  height: 72px;
+  border: 3px solid var(--neon-green);
+  border-radius: 14px;
+  margin: 0 auto;
+  transition: transform 3.5s ease-in-out, border-color 3.5s ease;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .breath-box.phase-0 { transform: scale(1.35); border-color: var(--neon-green); }
+  .breath-box.phase-1 { transform: scale(1.35); border-color: var(--neon-yellow); }
+  .breath-box.phase-2 { transform: scale(0.85); border-color: var(--neon-magenta); }
+  .breath-box.phase-3 { transform: scale(0.85); border-color: var(--neon-yellow); }
+}
+
+.timer-display {
+  font-size: 44px;
+  font-family: var(--font-mono);
+}
+
+.screener-item {
+  font-size: 16px;
+  margin: 8px 0 12px;
+}
+
+.screener-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.screener-opt {
+  width: 100%;
+  justify-content: flex-start;
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--font-body);
+}
+
+.crisis-note {
+  border-left: 3px solid var(--neon-yellow);
+  padding: 8px 12px;
+  background: rgba(255, 234, 0, 0.06);
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.crisis-note a {
+  color: var(--neon-green);
+  font-weight: 600;
+}
+
+.anchor-tag {
+  font-style: italic;
+}

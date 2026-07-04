@@ -47,6 +47,9 @@ export interface Habit {
   /** user-set effort weight 1–5 ⚡ — water can be a boss fight, grounding a
    *  freebie. XP is charge-weighted. Default 1. */
   charge?: number;
+  /** implementation intention: the existing routine this rides on
+   *  ("after I pour coffee"). Best-evidenced habit-formation lever there is. */
+  anchor?: string;
   /** set when installed from the Directive Library (enables clean re-install) */
   presetId?: string;
   createdAt: number;
@@ -143,6 +146,18 @@ export interface BioReading {
   ts: number;
   /** free text so "120/80" works; charted when numeric */
   value: string;
+}
+
+/** Self-screener result (PHQ-9 / GAD-7 — public domain instruments).
+ *  DELIBERATELY earns no XP: gamifying symptom reporting biases answers,
+ *  and biased trends would poison the Trauma Team export. */
+export interface Screening {
+  id: string;
+  dayKey: DayKey;
+  ts: number;
+  tool: "phq9" | "gad7";
+  score: number;
+  answers: number[]; // 0–3 per item
 }
 
 /** Body metrics — monthly weigh-ins by design (fluctuations are noise; trend is signal). */

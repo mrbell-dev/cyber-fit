@@ -3,11 +3,12 @@
 // deliberately slang-free — this document represents the user to their care
 // team. Generated entirely on-device; shared only by the user's own hand.
 
-import { addDays, dayKeyFor, stripTags, waterTotal } from "../engine/index.ts";
+import { addDays, dayKeyFor, SCREENERS, scoreBand, stripTags, waterTotal } from "../engine/index.ts";
 import { db } from "./db.ts";
 import { getSettings } from "./repo.ts";
 
 export interface ReportSections {
+  screeners: boolean;
   vitals: boolean;
   journals: boolean;
   highlights: boolean;
@@ -18,6 +19,7 @@ export interface ReportSections {
 }
 
 export const DEFAULT_SECTIONS: ReportSections = {
+  screeners: true,
   vitals: true, journals: true, highlights: true,
   bio: false, workouts: true, hydration: false, reading: false,
 };
@@ -33,12 +35,13 @@ export async function buildReport(days: number, sections: ReportSections): Promi
   const inRange = <T extends { dayKey: string }>(rows: T[]) =>
     rows.filter((r) => r.dayKey >= from && r.dayKey <= today);
 
-  const [moods, journals, highlights, bodyLogs, metrics, bioReadings, workouts, waterLogs, readingLogs, readingItems] =
+  const [moods, journals, highlights, bodyLogs, metrics, bioReadings, workouts, waterLogs, readingLogs, readingItems, screenings] =
     await Promise.all([
       db.moodLogs.toArray(), db.journalLogs.toArray(), db.highlightLogs.toArray(),
       db.bodyLogs.toArray(), db.bioMetrics.toArray(), db.bioReadings.toArray(),
       db.workoutLogs.toArray(), db.waterLogs.toArray(), db.readingLogs.toArray(),
       db.readingItems.toArray(),
+      db.screenings.toArray(),
     ]);
 
   const lines: string[] = [];
@@ -70,6 +73,21 @@ export async function buildReport(days: number, sections: ReportSections): Promi
     lines.push(`- Days with a high reading (4–5): ${goodDays} · days with a low reading (1–2): ${hardDays}`);
   }
   lines.push("");
+
+  if (sections.screeners) {
+    const rs = inRange(screenings).sort((a, b) => a.ts - b.ts);
+    if (rs.length > 0) {
+      lines.push("## Standardized screeners (PHQ-9 / GAD-7, self-administered)");
+      lines.push("");
+      for (const sc of rs) {
+        const def = SCREENERS.find((d) => d.tool === sc.tool)!;
+        lines.push(
+          `- ${sc.dayKey} — ${sc.tool === "phq9" ? "PHQ-9" : "GAD-7"}: ${sc.score}/${def.maxScore} (${scoreBand(def, sc.score)})`,
+        );
+      }
+      lines.push("");
+    }
+  }
 
   if (sections.vitals && rMoods.length > 0) {
     lines.push("## Mood readings (1 = lowest, 5 = highest)");

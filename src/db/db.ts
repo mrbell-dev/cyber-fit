@@ -1,6 +1,7 @@
 import Dexie, { type EntityTable } from "dexie";
 import type {
   BioMetric,
+  Screening,
   BioReading,
   BodyLog,
   Gig,
@@ -37,6 +38,7 @@ export const db = new Dexie("cyber-fit") as Dexie & {
   gigs: EntityTable<Gig, "id">;
   bioMetrics: EntityTable<BioMetric, "id">;
   bioReadings: EntityTable<BioReading, "id">;
+  screenings: EntityTable<Screening, "id">;
   kv: EntityTable<KvRow, "key">;
 };
 
@@ -63,6 +65,10 @@ db.version(4).stores({
 
 db.version(5).stores({
   bodyLogs: "id, dayKey",
+});
+
+db.version(7).stores({
+  screenings: "id, dayKey, tool",
 });
 
 db.version(6).stores({

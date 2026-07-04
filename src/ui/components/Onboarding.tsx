@@ -63,6 +63,25 @@ export function Onboarding() {
               ))}
             </div>
             <div className="chip-row">
+              {[
+                { label: "64 oz / ~2 L", ml: 2000 },
+                { label: "96 oz / ~3 L", ml: 2900 },
+                { label: "128 oz / ~3.8 L", ml: 3785 },
+              ].map((g) => (
+                <button
+                  key={g.ml}
+                  className={settings.waterGoalMl === g.ml ? "chip on" : "chip"}
+                  onClick={() => saveSettings({ waterGoalMl: g.ml })}
+                >
+                  💧 {g.label}
+                </button>
+              ))}
+            </div>
+            <p className="boot-sub">
+              // honest note: "8 glasses" is folklore. needs vary with body, meds, and
+              training — pick what your experience or doctor says, change it anytime
+            </p>
+            <div className="chip-row">
               {(["ml", "oz"] as const).map((u) => (
                 <button
                   key={u}

@@ -12,6 +12,7 @@ import { addReadingItem, logReading, logWorkout, setReadingStatus } from "../../
 import { useDayKey, useSettings } from "../hooks.ts";
 import { BodyCard } from "../components/BodyMetrics.tsx";
 import { BioMetricsCard } from "../components/BioMetrics.tsx";
+import { ScreenerCard } from "../components/Screeners.tsx";
 
 type SetRow = { reps: string; weight: string };
 
@@ -397,6 +398,7 @@ export function Log() {
       <WorkoutCard />
       <BodyCard today={today} />
       <BioMetricsCard />
+      <ScreenerCard />
       <ReadingCard />
     </section>
   );

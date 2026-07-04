@@ -59,6 +59,7 @@ export function HabitEditor({ seed, onClose }: { seed: EditorSeed; onClose: () =
   const [pingEnd, setPingEnd] = useState(h?.pings?.end ?? "21:00");
   const [untilDone, setUntilDone] = useState(h?.pings?.untilDone ?? false);
   const [charge, setCharge] = useState(h?.charge ?? 1);
+  const [anchor, setAnchor] = useState(h?.anchor ?? "");
   const [emojiOpen, setEmojiOpen] = useState(false);
 
   const save = async () => {
@@ -71,6 +72,7 @@ export function HabitEditor({ seed, onClose }: { seed: EditorSeed; onClose: () =
       area,
       timeOfDay,
       charge,
+      anchor: anchor.trim() || undefined,
       reminderTime: remindOn && !multi ? reminderTime : undefined,
       pings: multi
         ? { times: pingTimes, start: reminderTime, end: pingTimes > 1 ? pingEnd : reminderTime, untilDone }
@@ -267,6 +269,18 @@ export function HabitEditor({ seed, onClose }: { seed: EditorSeed; onClose: () =
               days a week — any days count
             </label>
           )}
+        </div>
+
+        <div className="editor-row">
+          <span className="editor-row-label">Anchor — ride an existing routine (optional)</span>
+          <input
+            className="input"
+            value={anchor}
+            onChange={(e) => setAnchor(e.target.value)}
+            placeholder="after I pour my morning coffee…"
+            aria-label="Anchor routine"
+          />
+          <p className="placeholder">// "after X, I do Y" — the best-proven habit trick there is</p>
         </div>
 
         <div className="editor-row">

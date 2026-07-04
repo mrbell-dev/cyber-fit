@@ -42,13 +42,13 @@ bad-night features outrank the good-day features.)
 
 ### TIER A — the strongest evidence levers
 
-- [ ] **Anchors (implementation intentions).** Optional field on a directive:
+- [x] **Anchors (implementation intentions).** Optional field on a directive:
       "after [existing routine]" — "after I pour coffee → stretch". The
       single best-evidenced habit-formation technique not yet in the app, and
       it's one field + display copy on the habit card. Cheap, huge.
-- [ ] **Guided breathing as a reusable overlay** (shared with Crash Kit; also
+- [x] **Guided breathing as a reusable overlay** (shared with Crash Kit; also
       attachable to any directive — tap "Box breathing" → the overlay runs it).
-- [ ] **Self-screeners + Trauma Team integration.** Optional PHQ-9/GAD-7
+- [x] **Self-screeners + Trauma Team integration.** Optional PHQ-9/GAD-7
       (public domain) on a user-chosen cadence like bio-scans; score TRENDS
       chart + inclusion in the export. Framed strictly as screeners, never
       diagnosis; scores stay on-device like everything else. This turns the
@@ -57,12 +57,12 @@ bad-night features outrank the good-day features.)
 
 ### TIER B — daily-driver upgrades
 
-- [ ] **Full exercise DB import** (yuhonas/free-exercise-db, public domain):
+- [x] **Full exercise DB import** (yuhonas/free-exercise-db, public domain):
       800+ movements with instructions, offline-bundled behind the existing
       autocomplete. Michael lifts; this is a direct quality-of-life win.
-- [ ] **Focus timer** attachable to a directive (pomodoro-style, ADHD
+- [x] **Focus timer** attachable to a directive (pomodoro-style, ADHD
       body-doubling adjacent) — completing a timed session logs the directive.
-- [ ] **Hydration science defaults:** onboarding suggests a goal from weight/
+- [x] **Hydration science defaults:** onboarding suggests a goal from weight/
       activity instead of a flat 2L (8×8 is folklore); user always overrides.
 - [ ] **Accessibility audit:** full axe pass + a real VoiceOver/TalkBack
       walkthrough. We verified contrast; we have not verified the experience.
