@@ -12,23 +12,48 @@ clientsClaim();
 cleanupOutdatedCaches();
 precacheAndRoute(self.__WB_MANIFEST);
 
+// Kind-specific copy rendered ON-DEVICE (the relay only knows
+// generic/motivation/test). iOS shows "from cyber-fit" itself, so titles
+// must carry meaning, never repeat the app name.
+const PING_COPY: Record<string, { title: string; body: string }> = {
+  morning: { title: "Rise and Shine", body: "New day on the grid. Boot up when you're ready." },
+  water: { title: "Hydration Ping", body: "Hydrate the wetware." },
+  workout: { title: "Training Window", body: "Chrome needs maintenance. Tap to log it." },
+  catchup: { title: "End-of-Day Sync", body: "Log the day before lights out." },
+  highlight: { title: "One Good Frame", body: "Capture today's highlight — anything real counts." },
+  habit: { title: "Directive Window", body: "A directive is ready when you are." },
+  bio: { title: "Bio-Scan Window", body: "Time to log your reading." },
+};
+
 self.addEventListener("push", (event) => {
-  let title = "cyber-fit";
-  let body = "Time to sync.";
-  try {
-    const data = event.data?.json();
-    if (data?.title) title = data.title;
-    if (data?.body) body = data.body;
-  } catch {
-    // generic fallback
-  }
   event.waitUntil(
-    self.registration.showNotification(title, {
-      body,
-      icon: "icon-192.png",
-      badge: "icon-192.png",
-      tag: "cyber-fit-ping", // collapse repeats instead of stacking
-    }),
+    (async () => {
+      let data: { type?: string; body?: string } = {};
+      try {
+        data = event.data?.json() ?? {};
+      } catch {
+        // fall through to generic copy
+      }
+      let title = "Sync Window";
+      let body = "Time to check in.";
+      if (data.type === "motivation" && data.body) {
+        title = "Incoming Transmission";
+        body = data.body;
+      } else if (data.type === "test" && data.body) {
+        title = "Uplink Test";
+        body = data.body;
+      } else {
+        const kind = await currentPingKind();
+        const copy = PING_COPY[kind];
+        if (copy) ({ title, body } = copy);
+      }
+      await self.registration.showNotification(title, {
+        body,
+        icon: "icon-192.png",
+        badge: "icon-192.png",
+        tag: "cyber-fit-ping", // collapse repeats instead of stacking
+      });
+    })(),
   );
 });
 

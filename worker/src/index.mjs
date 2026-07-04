@@ -70,7 +70,7 @@ export default {
     if (url.pathname === "/test") {
       const err = validateRecord({ subscription: body?.subscription, slots: [] });
       if (err) return json({ error: err }, 400, headers);
-      const ok = await sendPush(env, body.subscription, "TEST PING — uplink verified. Welcome to Night City.");
+      const ok = await sendPush(env, body.subscription, "Uplink verified. Welcome to Night City.", "test");
       return json({ ok }, ok ? 200 : 502, headers);
     }
 
@@ -92,14 +92,16 @@ export default {
   },
 };
 
-async function sendPush(env, subscription, text) {
+async function sendPush(env, subscription, text, type = "generic") {
   try {
     const { endpoint, headers, body } = await buildPushHTTPRequest({
       privateJWK: JSON.parse(env.VAPID_PRIVATE_JWK),
       subscription,
       message: {
-        // Generic on purpose — the app picks the themed copy locally.
-        payload: { title: "cyber-fit", body: text },
+        // Generic on purpose — the service worker on the device picks the
+        // themed, kind-specific copy locally. `type` only distinguishes
+        // generic/motivation/test so the SW knows which template to use.
+        payload: { type, body: text },
         adminContact: env.ADMIN_CONTACT || "mailto:admin@example.com",
         options: { ttl: 3600, urgency: "normal" },
       },
@@ -143,6 +145,6 @@ async function dispatch(env, now) {
     const text = motivate
       ? MOTIVATION_LINES[Math.floor(Math.random() * MOTIVATION_LINES.length)]
       : "Time to sync.";
-    await sendPush(env, record.subscription, text);
+    await sendPush(env, record.subscription, text, motivate ? "motivation" : "generic");
   }
 }
