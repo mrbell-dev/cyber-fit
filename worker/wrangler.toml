@@ -14,7 +14,7 @@ binding = "SUBS"
 id = "d5240c791a53455cb191c504ef243112"
 
 [vars]
-ALLOWED_ORIGIN = "https://cyberfit.dev"
+ALLOWED_ORIGIN = "https://cyberfit.dev,https://www.cyberfit.dev"
 ADMIN_CONTACT = "mailto:michael.bell1990@gmail.com"
 
 # Secret (never in this file): wrangler secret put VAPID_PRIVATE_JWK

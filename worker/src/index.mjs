@@ -9,11 +9,17 @@
 import { buildPushHTTPRequest } from "@pushforge/builder";
 import { deleteSub, listSubs, putSub, slotOf, validateRecord } from "./store.mjs";
 
-function cors(env) {
+// ALLOWED_ORIGIN is a comma-separated allowlist (a single ACAO value can't
+// cover both cyberfit.dev and www) — echo the request's Origin iff listed.
+function cors(env, request) {
+  const allowed = (env.ALLOWED_ORIGIN || "*").split(",").map((s) => s.trim());
+  const origin = request.headers.get("Origin") ?? "";
+  const allow = allowed.includes("*") ? "*" : allowed.includes(origin) ? origin : allowed[0];
   return {
-    "Access-Control-Allow-Origin": env.ALLOWED_ORIGIN || "*",
+    "Access-Control-Allow-Origin": allow,
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
+    Vary: "Origin",
   };
 }
 
@@ -25,7 +31,7 @@ const json = (data, status, headers) =>
 
 export default {
   async fetch(request, env) {
-    const headers = cors(env);
+    const headers = cors(env, request);
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers });
 
     const url = new URL(request.url);
