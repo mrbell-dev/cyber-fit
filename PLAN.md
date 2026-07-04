@@ -20,145 +20,73 @@ push verified on Michael's iPhone.
 
 ---
 
-## TIER LIST — the work, in order
+## TIER LIST v2 — chosen by judgment, in order
+(v1 tiers S/A/B/C fully shipped July 2026 — see STATUS and git history.
+Ranking principle: the app matters most on the user's worst night, so the
+bad-night features outrank the good-day features.)
 
-### TIER S — now (tone, trust, Michael's daily loop)
+### TIER S — the bad-night tier (build first)
 
-- [x] **Welcome-back, not missed-ping.** Delete the MISSED PING ×N banner.
-      Gap ≥ 2 days → warm full-screen popup ("Good to see you, choom. Ready
-      for a new gig?") — no counts, no backlog, ever. Same-day nudge keeps
-      current gentle copy. (Doctrine: CLAUDE.md rule 6.)
-- [x] **Boot popups, gravedigger-style.** Morning + afternoon first-open
-      greetings become one-tap full-screen modals; evening/late stay inline.
-- [x] **Hydration units + goal:** ml/oz with US quick sizes (8/16 oz), fully
-      user-defined goal (Michael: 128 oz). Gauge, config, XP, stats all honor it.
-- [x] **+ quick-add on Directives header** (opens editor); remove the Suggested
-      Protocols card (suggestions fold into the + flow / library).
-- [x] **About: Buy Me a Coffee** → https://buymeacoffee.com/mrbell.dev (also
-      fix README #support anchor).
+- [ ] **Crash Kit.** One tap from anywhere (nav or Today header). Contents:
+      guided box-breathing overlay (animated, reduced-motion safe), 5-4-3-2-1
+      grounding exercise, YOUR OWN Highlight Reel replayed as evidence against
+      the spiral ("these good frames are real — you logged them"), and crisis
+      lines (988 call/text) — all fully offline except the phone call itself.
+      Finch's First Aid Kit, rebuilt for the cyberpsychosis lore. This is the
+      highest-human-value feature the app can add: everything else helps on
+      normal days; this one helps on the day that counts.
+- [ ] **Self-compassion copy audit** (with Crash Kit copy written to the same
+      standard). Research basis: self-compassion predicts habit RECOVERY better
+      than grit — and recovery moments are exactly when copy is read most
+      closely. Audit every string against "kind at 11pm after a bad week."
 
-### TIER A — daily-driver depth
+### TIER A — the strongest evidence levers
 
-- [x] **Charge & difficulty:** per-directive user-set charge (1–5 ⚡; water can
-      be someone's boss fight, grounding a freebie) → XP is charge-weighted;
-      global difficulty setting (easy/standard/hard) at first run, changeable.
-- [x] **Vitals v2:** multiple readings/day with day trace, earlier readings in
-      a distinct color, logged time + note shown inline, compact note field.
-- [x] **Highlight ⇄ Journal toggle:** switchable on the card; journal entries
-      stored (new table), tagged, feed Tag Explorer + med export.
-- [x] **Gig list:** bullet-journal daily todos; unfinished gigs roll to the
-      next day. Tasks, not habits — no streaks attached.
-- [x] **Workout form v2:** fields dynamic per style (time/distance only where
-      relevant; sets/reps grid for lifts) + **templates** — re-logging a named
-      workout pre-fills last session's sets/weights (progressive overload
-      visible at a glance).
-- [x] **Bio-scan v2:** user-defined metrics beyond weight (e.g. BP 2×/day for
-      a doctor), each with optional reminders + a chart. House rule: anything
-      recordable gets a chart or calendar if chartable.
-- [x] **Reading v2:** label the feeling glyphs; types → Book, Audio, Video,
-      Article, Studying, Class.
-- [x] **Haptics** on completions/crits/level-ups (`navigator.vibrate`;
-      Android-only, silent degrade on iOS — Michael has a test device).
-- [x] **Med-team export (headline feature):** System Report → export last N
-      days/weeks as a clean .md for a therapist/doctor — good vs bad days,
-      journals, wins; sections togglable per audience (bio-scan for the doc,
-      not the therapist). Design with care; this is the app's superpower.
+- [ ] **Anchors (implementation intentions).** Optional field on a directive:
+      "after [existing routine]" — "after I pour coffee → stretch". The
+      single best-evidenced habit-formation technique not yet in the app, and
+      it's one field + display copy on the habit card. Cheap, huge.
+- [ ] **Guided breathing as a reusable overlay** (shared with Crash Kit; also
+      attachable to any directive — tap "Box breathing" → the overlay runs it).
+- [ ] **Self-screeners + Trauma Team integration.** Optional PHQ-9/GAD-7
+      (public domain) on a user-chosen cadence like bio-scans; score TRENDS
+      chart + inclusion in the export. Framed strictly as screeners, never
+      diagnosis; scores stay on-device like everything else. This turns the
+      Trauma Team export from useful into genuinely clinical — the app's
+      sharpest differentiator, done carefully.
 
-### TIER B — insight, polish, onboarding
+### TIER B — daily-driver upgrades
 
-- [x] **Stats made personal:** telemetry tiles hide untracked domains; uptime
-      grid → 28 days with tap-for-day-detail; Highlight Reel → 28 days;
-      shields explained in-app.
-- [x] **Directives + Library merge** into one searchable, categorized popout.
-- [x] **Tag hints** at every input where tags work.
-- [x] **Dev mode** (System): fire test pings, fake grants/crits/drops, preview
-      popups — playtest without grinding.
-- [x] **First-run guide + per-feature info screens** (what shields are, tips;
-      pick difficulty, starter directives, units, optional uplink).
+- [ ] **Full exercise DB import** (yuhonas/free-exercise-db, public domain):
+      800+ movements with instructions, offline-bundled behind the existing
+      autocomplete. Michael lifts; this is a direct quality-of-life win.
+- [ ] **Focus timer** attachable to a directive (pomodoro-style, ADHD
+      body-doubling adjacent) — completing a timed session logs the directive.
+- [ ] **Hydration science defaults:** onboarding suggests a goal from weight/
+      activity instead of a flat 2L (8×8 is folklore); user always overrides.
+- [ ] **Accessibility audit:** full axe pass + a real VoiceOver/TalkBack
+      walkthrough. We verified contrast; we have not verified the experience.
 
-### TIER C — infrastructure
+### TIER LT — flavor, reach, and the long game
 
-- [x] **Encrypted vault sync** (approved design): on-device AES-GCM with
-      passphrase-derived key (PBKDF2/Argon2) → random vault id in KV/R2;
-      second device pulls + decrypts. Server sees only ciphertext. No accounts
-      (accounts-first was rejected: privacy, liability, migration gravity).
-      Plus scheduled auto-export via File System Access into any synced folder.
-      SHIPPED addendum: auto-push on every app open (opt-in) via a stored
-      NON-EXTRACTABLE derived key — "scheduled" on the web means on-open, since
-      PWAs can't run closed (no reliable background cron; none at all on iOS).
-      Native ports (Tier LT) would unlock true background sync.
-- [x] **Notification deep links:** tapping a workout ping opens straight into
-      a record-workout popup (SW notificationclick → URL param → modal);
-      client-side slot→kind map; relay stays schedule-blind.
-
-### TIER LT — long-term (research done 2026-07-03; build when ready)
-
-- [x] **Finch feature comparison** — see table below.
-- [ ] **Cyberware progression:** leveling installs visible cyberware on an SVG
-      rig/avatar (arm at LVL 3, optic at LVL 6, spine at LVL 10…). Pure
-      cosmetics, reduced-motion safe, never gates usability. Art is the real
-      work — consider community PRs once the slot system exists.
-- [x] **Native port + pricing research** — see findings below.
-- [ ] **Native iOS/Android build** (Capacitor; after playtest stabilizes).
+- [ ] **Cyberware rig:** SVG avatar gaining visible chrome per level (arm LVL 3,
+      optic LVL 6, spine LVL 10…). Cosmetic only. Art is the bottleneck —
+      build the slot system first, invite community art PRs.
+- [ ] **Google Play native (Capacitor):** $25 one-time, real local
+      notifications (no relay), true background sync, haptics guaranteed.
+      First store target per the pricing research; iOS only if ~120 sales/yr
+      materialize (Apple waiver is free-apps-only — verified).
+- [ ] **Localization scoping** (string extraction cost; the voice is hard to
+      translate — scope before promising).
 - [ ] **Cyber-trainer SMS** (Michael-only, separate private repo).
+- [ ] Watch: Declarative Web Push / Safari releases (each may shrink the
+      native-port motivation).
 
-#### Finch comparison — adopt / adapt / reject
-
-| Finch feature | Call | Our version |
-|---|---|---|
-| Pet that grows with self-care | REJECT | The cutesiness we exist to avoid — our progression is the cyberware rig (cosmetic, no dependent creature to guilt you) |
-| Guided journeys / reflections | ADAPT | Guided journal prompts (evidence-based expressive-writing style) as an optional Journal mode — see research queue |
-| Breathing exercises | ADOPT | "Box breathing" preset exists; add a guided breathing overlay (animated, reduced-motion safe) — cheap, high value |
-| First Aid Kit (crisis moments) | ADAPT | **"Crash Kit"** — offline grounding exercises (5-4-3-2-1, box breathing), your own Highlight Reel as evidence, crisis lines (988). Fits the cyberpsychosis lore perfectly and works with zero signal |
-| Mood quizzes (anxiety/depression) | ADAPT-CAREFULLY | PHQ-9/GAD-7 are public domain; optional self-screeners whose scores feed the Trauma Team export. Needs careful framing — screeners, not diagnoses |
-| Goal tracker + celebrate wins | HAVE | Directives + gigs + crits |
-| Timer for focus | ADOPT | Simple focus timer attachable to a directive (ADHD body-doubling adjacent) |
-| Acts of kindness suggestions | ADAPT | Occasional "good deed gig" suggestion in the gig list — optional, dismissible |
-| Friends / send good vibes | REJECT (park) | Social requires identity — collides with zero-PII. Revisit only as E2E-encrypted share codes, never accounts |
-| First-run guided setup | HAVE | Onboarding + Field Manual |
-
-#### Native port + pricing — findings (verified 2026-07-03)
-
-- **Apple fee waiver: nonprofits/edu/gov ONLY, and only for FREE apps**
-  ([apple.com](https://developer.apple.com/help/account/membership/fee-waivers/)).
-  A 99¢ app can never ride a waiver — even with a nonprofit wrapper. So iOS
-  paid distribution means eating $99/yr; at 99¢ minus Apple's 15% small-business
-  cut (~$0.84 net) that's ~120 sales/yr to break even.
-- **Revised rollout order:** Google Play FIRST ($25 one-time, Michael has an
-  Android test device, Capacitor gives real local notifications + haptics with
-  no relay dependency) → iOS only if Play sales suggest ~120+/yr, or keep iOS
-  as sideload/web-only until then.
-- Web stays free forever; sideload builds published free with each release;
-  store price honestly framed as licensing/hosting recovery. Native apps get
-  true background sync + locally scheduled notifications (no relay at all).
-
-#### RESEARCH QUEUE — things worth studying before building (the research todo)
-
-- [ ] **Implementation intentions / habit stacking** (BJ Fogg, "after I pour
-      coffee, I stretch") → an optional "anchor" field on directives; strongest
-      evidence-based lever we don't use yet.
-- [ ] **Self-compassion vs. streak framing** (Neff et al.) → audit all copy
-      against it; self-compassion predicts habit recovery better than grit.
-- [ ] **Expressive-writing prompts** (Pennebaker protocol) → guided Journal
-      mode with rotating evidence-based prompts (also feeds Finch ADAPT above).
-- [ ] **PHQ-9 / GAD-7 in consumer apps** — licensing (public domain), ethical
-      framing, score trends in the Trauma Team export.
-- [ ] **Crisis UX patterns** for the Crash Kit — 988/crisis-line integration,
-      offline-first grounding exercises, no dark patterns around distress.
-- [ ] **ADHD focus techniques** — body doubling, pomodoro variants → focus
-      timer design.
-- [ ] **Hydration science** — actual evidence-based defaults per body
-      weight/activity vs. the 8×8 myth; smarter goal suggestions at onboarding.
-- [ ] **Full open exercise DB import** (yuhonas/free-exercise-db, wger) —
-      800+ movements with instructions, offline-bundled.
-- [ ] **Declarative Web Push / iOS PWA improvements** — track Safari releases;
-      each one may shrink the native-port motivation.
-- [ ] **Capacitor deep dive** — LocalNotifications scheduling limits, IndexedDB
-      persistence inside the wrapper, Play signing pipeline via CI.
-- [ ] **Accessibility audit** — full axe pass + real screen-reader session;
-      we check contrast but haven't done a VoiceOver/TalkBack walkthrough.
-- [ ] **Localization feasibility** — string extraction cost now vs. later
-      (cyberpunk voice is hard to translate; scope carefully).
+**Explicitly cut from the queue (recorded so it stays cut):** acts-of-kindness
+suggestions (nice, but suggestion fatigue is real and the gig list already
+holds intentions) · friends/social (identity vs zero-PII — parked until an
+E2E share-code design exists) · mood quizzes beyond PHQ-9/GAD-7 (screeners
+yes, quiz-toy content no).
 
 ---
 
