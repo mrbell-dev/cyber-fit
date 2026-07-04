@@ -158,6 +158,42 @@ the data lives. Direction:
 - **Stats becomes overview-only; per-thing charts live on the things** (the ⓘ
   pattern above).
 
+### Post-eval candidates (Claude's picks, 2026-07-04 — NOT committed; revisit
+after Michael's 30-day daily-driver eval, and only after Tiers S–C are done)
+
+- **Quick-log command line.** One always-visible input on Today: type
+  "water 500", "pushups", "mood 4 rough day" → parsed LOCALLY (no AI, a small
+  grammar over the user's own directives/metrics) → logged in one action.
+  The single biggest remaining tap-reduction available; the keyboard-native
+  cousin of the SMS trainer. Highest-conviction pick on this list.
+- **Done-stack collapse on Today.** Completed directives celebrate, then
+  collapse into a one-line "✓ n synced" stack at the bottom. As the directive
+  count grows, the ADHD failure mode is a wall where done and not-done look
+  the same weight. Show what's LEFT; tuck what's finished.
+- **Weekly System Report** (in the original design, never shipped — verified
+  absent). Sunday recap card, positively framed, fully on-device: what ran,
+  what leveled, best day. Doctrine: totals and highlights only — never
+  misses, never week-over-week decline framing.
+- **Honest on-device insights.** After ~6 weeks of data: "on days water hit
+  goal, mood averaged +0.8 (23 days of data)". Correlation stated as
+  correlation, n always shown, no claim below n=14. This is the "real
+  progress data takes over from gamification" pillar becoming a feature.
+  Needs real data volume first — that's why it waits for post-eval.
+- **Backup-age status line.** Local-first's one real danger is device loss.
+  A quiet line in Data Vault + a monthly system ping: "last backup: 34 days
+  ago." System status framing, never guilt framing.
+- **Time-aware Today ordering.** Morning directives float up in the morning,
+  evening + journal after dark. Pure reorder of existing timeOfDay data —
+  cheap, and cuts scanning load exactly when executive function is thinnest.
+- **PWA manifest `shortcuts`** (long-press app icon → "Log water" / "Crash
+  Kit" jump links via the existing ?go= deep-link routing). Android-only in
+  practice; near-zero cost.
+- **Considered and NOT recommended:** voice input (Web Speech API ships audio
+  to Google on Chrome — pillar 1 violation; the command line covers the
+  need) · in-app AI coach (server inference violates pillars; local models
+  can't ship in a PWA; cyber-trainer covers it personally) · calendar
+  integration (OAuth gravity, same verdict as Drive).
+
 **Explicitly cut from the queue (recorded so it stays cut):** acts-of-kindness
 suggestions (nice, but suggestion fatigue is real and the gig list already
 holds intentions) · friends/social (identity vs zero-PII — parked until an
