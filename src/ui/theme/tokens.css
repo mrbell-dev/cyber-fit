@@ -468,7 +468,8 @@ button {
   border-radius: var(--radius);
   color: var(--text);
   font-family: var(--font-body);
-  font-size: 15px;
+  /* ≥16px on all form controls: iOS Safari zooms-and-sticks below that */
+  font-size: 16px;
   flex: 1;
   min-width: 0;
 }
@@ -723,6 +724,7 @@ button {
   display: flex;
   gap: 4px;
   flex: 1;
+  margin-bottom: 10px;
 }
 
 .feeling-row .mood-btn {
@@ -954,7 +956,8 @@ html.theme-ice {
   min-height: 40px;
   padding: 0 8px;
   font-family: var(--font-mono);
-  font-size: 13px;
+  /* 16px floor: sub-16px inputs make iOS zoom on focus and stay zoomed */
+  font-size: 16px;
 }
 
 .num-input-sm {

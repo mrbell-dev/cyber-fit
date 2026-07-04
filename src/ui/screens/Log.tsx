@@ -249,23 +249,24 @@ function SessionForm({ item, onDone }: { item: ReadingItem | null; onDone: () =>
           value={minutes}
           onChange={(e) => setMinutes(e.target.value)}
           placeholder="min"
-          aria-label="Minutes read"
+          aria-label="Session minutes"
         />
-        <div className="feeling-row" role="group" aria-label="How did it land?">
-          {FEELINGS.map((f) => (
-            <button
-              key={f.value}
-              className={feeling === f.value ? "mood-btn on" : "mood-btn"}
-              aria-pressed={feeling === f.value}
-              title={f.label}
-              aria-label={f.label}
-              onClick={() => setFeeling(f.value)}
-            >
-              <span className="mood-glyph" aria-hidden="true">{f.glyph}</span>
-              <span className="mood-label">{f.label}</span>
-            </button>
-          ))}
-        </div>
+        <span className="placeholder">how did it land?</span>
+      </div>
+      <div className="feeling-row" role="group" aria-label="How did it land?">
+        {FEELINGS.map((f) => (
+          <button
+            key={f.value}
+            className={feeling === f.value ? "mood-btn on" : "mood-btn"}
+            aria-pressed={feeling === f.value}
+            title={f.label}
+            aria-label={f.label}
+            onClick={() => setFeeling(f.value)}
+          >
+            <span className="mood-glyph" aria-hidden="true">{f.glyph}</span>
+            <span className="mood-label">{f.label}</span>
+          </button>
+        ))}
       </div>
       <textarea
         className="input note-input"

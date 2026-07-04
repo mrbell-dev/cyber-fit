@@ -13,7 +13,7 @@ export function Highlight({ today }: { today: DayKey }) {
 
   const todays = useLiveQuery(async () => {
     const logs = await db.highlightLogs.where({ dayKey: today }).toArray();
-    return logs.sort((a, b) => b.ts - a.ts)[0];
+    return logs.sort((a, b) => a.ts - b.ts);
   }, [today]);
   const todaysJournal = useLiveQuery(async () => {
     const logs = await db.journalLogs.where({ dayKey: today }).toArray();
@@ -70,9 +70,11 @@ export function Highlight({ today }: { today: DayKey }) {
           ⇄ journal
         </button>
       </div>
-      {todays ? (
+      {todays && todays.length > 0 ? (
         <>
-          <p className="highlight-text">◆ {todays.text}</p>
+          {todays.map((h) => (
+            <p className="highlight-text" key={h.id}>◆ {h.text}</p>
+          ))}
           <p className="placeholder">// captured. one good frame is enough — add another if it was that kind of day</p>
         </>
       ) : (
@@ -85,7 +87,7 @@ export function Highlight({ today }: { today: DayKey }) {
           className="input"
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder={todays ? "Another one? (#tags work)" : "Today's highlight… (#tags work)"}
+          placeholder={todays?.length ? "Another one? (#tags work)" : "Today's highlight… (#tags work)"}
           aria-label="Highlight of the day"
           maxLength={200}
           onKeyDown={(e) => e.key === "Enter" && submit()}
