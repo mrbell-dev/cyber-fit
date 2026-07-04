@@ -55,7 +55,9 @@ export function levelFromXp(
   factor = 1,
 ): { level: number; into: number; next: number } {
   let level = 0;
-  let rest = totalXp;
+  // A non-finite total (e.g. a poisoned snapshot) must degrade to level 0
+  // with sane numbers, never NaN in the UI.
+  let rest = Number.isFinite(totalXp) ? Math.max(0, totalXp) : 0;
   while (rest >= xpToNext(level, factor)) {
     rest -= xpToNext(level, factor);
     level++;
@@ -105,7 +107,10 @@ export function makeGrant(
   weight = 1,
 ): Grant {
   const crit = rollFor(eventId, "crit") < CRIT_CHANCE;
-  const xp = BASE_XP[source] * Math.max(1, Math.min(5, weight)) * (crit ? 2 : 1);
+  // Math.min/max pass NaN through — one NaN weight would poison the whole
+  // XP sum (and zero the level). Sanitize here, at the only entry point.
+  const w = Number.isFinite(weight) ? Math.max(1, Math.min(5, weight)) : 1;
+  const xp = BASE_XP[source] * w * (crit ? 2 : 1);
   let drop: string | undefined;
   if (rollFor(eventId, "drop") < DROP_CHANCE) {
     const pool = AUGMENTS.filter((a) => !owned.includes(a.id));

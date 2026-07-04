@@ -237,3 +237,30 @@ describe("property tests", () => {
     );
   });
 });
+
+describe("NaN poisoning regression (level showed 0 with intact logs)", () => {
+  it("a non-finite habit charge never poisons total XP or level", () => {
+    const cursed: Habit = { ...habit, id: "h2", charge: Number.NaN };
+    const { state } = rebuild(bundle({
+      habits: [habit, cursed],
+      habitLogs: [
+        hlog("a", TODAY, 100),
+        { id: "b", habitId: "h2", dayKey: TODAY, ts: 200, amount: 1, kind: "done" },
+      ],
+    }));
+    expect(Number.isFinite(state.xp)).toBe(true);
+    expect(state.xp).toBeGreaterThan(0);
+    expect(state.level).toBeGreaterThanOrEqual(0);
+  });
+
+  it("levelFromXp degrades non-finite totals to level 0 with sane numbers", async () => {
+    const { levelFromXp } = await import("./rewards.ts");
+    for (const bad of [Number.NaN, Number.POSITIVE_INFINITY, -50]) {
+      const r = levelFromXp(bad);
+      expect(r.level).toBe(0);
+      expect(Number.isFinite(r.into)).toBe(true);
+      expect(Number.isFinite(r.next)).toBe(true);
+    }
+    expect(levelFromXp(100).level).toBe(1);
+  });
+});
