@@ -136,7 +136,10 @@ the data lives. Direction:
       local Ollama; text the bot ("just finished the workout") → it infers
       the Tuesday routine, logs it, and — holding Michael's vault cypher key
       privately — pulls, modifies, re-uploads the encrypted vault. Never in
-      the OSS app.
+      the OSS app. Full design drafted 2026-07-04 (local only, off-repo:
+      `~/Desktop/cyber-trainer/DESIGN.md`). One piece DOES belong in the OSS
+      app when its turn comes: an additive **merge-import** (union by row id
+      through repo.ts) — generally useful, and the trainer's safe write path.
 - [ ] **Localization scoping** (string extraction cost; the voice is hard to
       translate — scope before promising).
 - [ ] Watch: Declarative Web Push / Safari releases (each may shrink the
