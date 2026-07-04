@@ -6,6 +6,7 @@ import { autoVaultPush, writeLinkedBackup } from "./backupFile.ts";
 import { Nav, type Tab } from "./Nav.tsx";
 import { InstallPrompt } from "./Install.tsx";
 import { RewardToast } from "./components/RewardToast.tsx";
+import { CrashKit } from "./components/CrashKit.tsx";
 import { Today } from "./screens/Today.tsx";
 import { Log } from "./screens/Log.tsx";
 import { Stats } from "./screens/Stats.tsx";
@@ -33,6 +34,7 @@ function OffGridChip() {
 
 export function App() {
   const [tab, setTab] = useState<Tab>("today");
+  const [crashKit, setCrashKit] = useState(false);
   const { activeTheme, activeFx } = useSettings();
   useEffect(() => applyTheme(activeTheme), [activeTheme]);
   useEffect(() => applyFx(activeFx ?? []), [activeFx]);
@@ -56,8 +58,14 @@ export function App() {
         <h1 className="app-title">
           CYBER<span className="slash">//</span>FIT
         </h1>
-        <OffGridChip />
+        <span className="header-right">
+          <button className="crash-btn" aria-label="Open crash kit" onClick={() => setCrashKit(true)}>
+            ✚
+          </button>
+          <OffGridChip />
+        </span>
       </header>
+      {crashKit && <CrashKit onClose={() => setCrashKit(false)} />}
 
       <main className="screen">
         <InstallPrompt />

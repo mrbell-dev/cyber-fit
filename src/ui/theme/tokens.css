@@ -1375,3 +1375,43 @@ html.theme-ice {
 .anchor-tag {
   font-style: italic;
 }
+
+/* ---------- crash kit ---------- */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.crash-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--neon-yellow);
+  border-radius: 50%;
+  color: var(--neon-yellow);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.crash-btn:active {
+  box-shadow: 0 0 12px rgba(255, 234, 0, 0.5);
+}
+
+.modal.crash-kit {
+  border-color: var(--neon-yellow);
+  box-shadow: 0 0 18px rgba(255, 234, 0, 0.3);
+}
+
+.crash-option {
+  width: 100%;
+  justify-content: flex-start;
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--font-body);
+  text-decoration: none;
+}
+
+.crash-call {
+  border-color: var(--neon-green);
+  background: rgba(0, 255, 179, 0.08);
+}

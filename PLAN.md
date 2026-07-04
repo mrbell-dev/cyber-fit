@@ -27,7 +27,7 @@ bad-night features outrank the good-day features.)
 
 ### TIER S — the bad-night tier (build first)
 
-- [ ] **Crash Kit.** One tap from anywhere (nav or Today header). Contents:
+- [x] **Crash Kit.** One tap from anywhere (nav or Today header). Contents:
       guided box-breathing overlay (animated, reduced-motion safe), 5-4-3-2-1
       grounding exercise, YOUR OWN Highlight Reel replayed as evidence against
       the spiral ("these good frames are real — you logged them"), and crisis
@@ -35,7 +35,7 @@ bad-night features outrank the good-day features.)
       Finch's First Aid Kit, rebuilt for the cyberpsychosis lore. This is the
       highest-human-value feature the app can add: everything else helps on
       normal days; this one helps on the day that counts.
-- [ ] **Self-compassion copy audit** (with Crash Kit copy written to the same
+- [x] **Self-compassion copy audit** (with Crash Kit copy written to the same
       standard). Research basis: self-compassion predicts habit RECOVERY better
       than grit — and recovery moments are exactly when copy is read most
       closely. Audit every string against "kind at 11pm after a bad week."
