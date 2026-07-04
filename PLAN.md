@@ -91,22 +91,74 @@ push verified on Michael's iPhone.
       a record-workout popup (SW notificationclick → URL param → modal);
       client-side slot→kind map; relay stays schedule-blind.
 
-### TIER LT — long-term / research first
+### TIER LT — long-term (research done 2026-07-03; build when ready)
 
-- [ ] **Finch feature comparison:** inventory Finch (coach, reflections,
-      breathing, town/social) vs ours; adopt/adapt/reject table added here.
-- [ ] **Cyberware progression:** leveling installs visible cyberware on a user
-      avatar/rig — pure cosmetics, never gates usability.
-- [ ] **Native iOS/Android (Capacitor) + pricing:** web free forever
-      (self-host push); sideload builds free; store price ≈ $0.99 one-time
-      (or ~$1/3–6 mo sub only if hosted push costs demand) — honestly framed
-      as licensing/hosting recovery. Research: Apple $99/yr fee waiver covers
-      only nonprofits/edu/gov — a personal app likely doesn't qualify; verify,
-      consider nonprofit wrapper, or eat the fee. Google Play $25 one-time.
-      Native app gains local scheduled notifications (no relay needed).
-- [ ] **Cyber-trainer SMS (Michael-only, separate private repo):** Twilio →
-      tunnel → home box → Ollama with vault-export context. Never in the OSS
-      app (would break zero-PII pillar).
+- [x] **Finch feature comparison** — see table below.
+- [ ] **Cyberware progression:** leveling installs visible cyberware on an SVG
+      rig/avatar (arm at LVL 3, optic at LVL 6, spine at LVL 10…). Pure
+      cosmetics, reduced-motion safe, never gates usability. Art is the real
+      work — consider community PRs once the slot system exists.
+- [x] **Native port + pricing research** — see findings below.
+- [ ] **Native iOS/Android build** (Capacitor; after playtest stabilizes).
+- [ ] **Cyber-trainer SMS** (Michael-only, separate private repo).
+
+#### Finch comparison — adopt / adapt / reject
+
+| Finch feature | Call | Our version |
+|---|---|---|
+| Pet that grows with self-care | REJECT | The cutesiness we exist to avoid — our progression is the cyberware rig (cosmetic, no dependent creature to guilt you) |
+| Guided journeys / reflections | ADAPT | Guided journal prompts (evidence-based expressive-writing style) as an optional Journal mode — see research queue |
+| Breathing exercises | ADOPT | "Box breathing" preset exists; add a guided breathing overlay (animated, reduced-motion safe) — cheap, high value |
+| First Aid Kit (crisis moments) | ADAPT | **"Crash Kit"** — offline grounding exercises (5-4-3-2-1, box breathing), your own Highlight Reel as evidence, crisis lines (988). Fits the cyberpsychosis lore perfectly and works with zero signal |
+| Mood quizzes (anxiety/depression) | ADAPT-CAREFULLY | PHQ-9/GAD-7 are public domain; optional self-screeners whose scores feed the Trauma Team export. Needs careful framing — screeners, not diagnoses |
+| Goal tracker + celebrate wins | HAVE | Directives + gigs + crits |
+| Timer for focus | ADOPT | Simple focus timer attachable to a directive (ADHD body-doubling adjacent) |
+| Acts of kindness suggestions | ADAPT | Occasional "good deed gig" suggestion in the gig list — optional, dismissible |
+| Friends / send good vibes | REJECT (park) | Social requires identity — collides with zero-PII. Revisit only as E2E-encrypted share codes, never accounts |
+| First-run guided setup | HAVE | Onboarding + Field Manual |
+
+#### Native port + pricing — findings (verified 2026-07-03)
+
+- **Apple fee waiver: nonprofits/edu/gov ONLY, and only for FREE apps**
+  ([apple.com](https://developer.apple.com/help/account/membership/fee-waivers/)).
+  A 99¢ app can never ride a waiver — even with a nonprofit wrapper. So iOS
+  paid distribution means eating $99/yr; at 99¢ minus Apple's 15% small-business
+  cut (~$0.84 net) that's ~120 sales/yr to break even.
+- **Revised rollout order:** Google Play FIRST ($25 one-time, Michael has an
+  Android test device, Capacitor gives real local notifications + haptics with
+  no relay dependency) → iOS only if Play sales suggest ~120+/yr, or keep iOS
+  as sideload/web-only until then.
+- Web stays free forever; sideload builds published free with each release;
+  store price honestly framed as licensing/hosting recovery. Native apps get
+  true background sync + locally scheduled notifications (no relay at all).
+
+#### RESEARCH QUEUE — things worth studying before building (the research todo)
+
+- [ ] **Implementation intentions / habit stacking** (BJ Fogg, "after I pour
+      coffee, I stretch") → an optional "anchor" field on directives; strongest
+      evidence-based lever we don't use yet.
+- [ ] **Self-compassion vs. streak framing** (Neff et al.) → audit all copy
+      against it; self-compassion predicts habit recovery better than grit.
+- [ ] **Expressive-writing prompts** (Pennebaker protocol) → guided Journal
+      mode with rotating evidence-based prompts (also feeds Finch ADAPT above).
+- [ ] **PHQ-9 / GAD-7 in consumer apps** — licensing (public domain), ethical
+      framing, score trends in the Trauma Team export.
+- [ ] **Crisis UX patterns** for the Crash Kit — 988/crisis-line integration,
+      offline-first grounding exercises, no dark patterns around distress.
+- [ ] **ADHD focus techniques** — body doubling, pomodoro variants → focus
+      timer design.
+- [ ] **Hydration science** — actual evidence-based defaults per body
+      weight/activity vs. the 8×8 myth; smarter goal suggestions at onboarding.
+- [ ] **Full open exercise DB import** (yuhonas/free-exercise-db, wger) —
+      800+ movements with instructions, offline-bundled.
+- [ ] **Declarative Web Push / iOS PWA improvements** — track Safari releases;
+      each one may shrink the native-port motivation.
+- [ ] **Capacitor deep dive** — LocalNotifications scheduling limits, IndexedDB
+      persistence inside the wrapper, Play signing pipeline via CI.
+- [ ] **Accessibility audit** — full axe pass + real screen-reader session;
+      we check contrast but haven't done a VoiceOver/TalkBack walkthrough.
+- [ ] **Localization feasibility** — string extraction cost now vs. later
+      (cyberpunk voice is hard to translate; scope carefully).
 
 ---
 
