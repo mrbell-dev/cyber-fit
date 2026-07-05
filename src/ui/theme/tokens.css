@@ -1202,6 +1202,11 @@ html.theme-ice {
   border: 1px dashed var(--border);
 }
 
+.emoji-pick.more.on {
+  color: var(--neon-green);
+  border-color: var(--neon-green);
+}
+
 /* ---------- card header with quick-add ---------- */
 .card-header {
   display: flex;
@@ -1271,6 +1276,13 @@ html.theme-ice {
 }
 
 /* ---------- vitals trace ---------- */
+/* Mood note is a bare input in block flow — force it to span the card
+   like the vitals bar above it (a plain <input> is only ~170px otherwise). */
+.mood-note {
+  width: 100%;
+  margin-top: 8px;
+}
+
 .vitals-trace {
   display: flex;
   flex-direction: column;

@@ -50,11 +50,12 @@ export function MoodRow({ today }: { today: DayKey }) {
       </div>
       {showNote ? (
         <input
-          className="input"
+          className="input mood-note"
           value={note}
           onChange={(e) => setNote(e.target.value)}
           placeholder="Optional note — what's running in the background? #tags work"
           aria-label="Mood note"
+          autoFocus
         />
       ) : (
         <button className="link-btn" onClick={() => setShowNote(true)}>
@@ -69,7 +70,8 @@ export function MoodRow({ today }: { today: DayKey }) {
               className={i === readings!.length - 1 ? "vitals-reading latest" : "vitals-reading"}
             >
               {new Date(r.ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}{" "}
-              {MOODS.find((m) => m.rating === r.rating)?.glyph}
+              {MOODS.find((m) => m.rating === r.rating)?.glyph}{" "}
+              {MOODS.find((m) => m.rating === r.rating)?.label}
               {r.note ? ` · ${r.note}` : ""}
             </span>
           ))}

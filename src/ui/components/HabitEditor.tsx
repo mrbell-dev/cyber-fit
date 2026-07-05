@@ -111,7 +111,12 @@ export function HabitEditor({ seed, onClose }: { seed: EditorSeed; onClose: () =
                 {e}
               </button>
             ))}
-            <button className="emoji-pick more" onClick={() => setEmojiOpen(true)} aria-label="More emoji">
+            <button
+              className={emojiOpen ? "emoji-pick more on" : "emoji-pick more"}
+              onClick={() => setEmojiOpen(!emojiOpen)}
+              aria-expanded={emojiOpen}
+              aria-label={emojiOpen ? "Close emoji picker" : "More emoji"}
+            >
               …
             </button>
           </div>
