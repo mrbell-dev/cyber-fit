@@ -29,40 +29,47 @@ outrank broken flows, which outrank ergonomics, which outrank new features.)
 
 ### TIER S — trust-breaking bugs (fix before ANY feature work)
 
-- [ ] **LVL reset to zero after an update, with completed tasks intact.**
-      PlayerState is derived by `rebuild()` folding ALL log tables, so either
-      (a) a log table silently stopped feeding `LogBundle` (check every table
-      added in Dexie v6/v7 is included in the bundle assembled in repo.ts), or
-      (b) a fold change regressed against old events. Reproduce with Michael's
-      real export before touching code. If any log table was actually lost,
-      that is data loss — the single worst bug this app can have. Root-cause
-      before shipping anything else.
-- [ ] **Highlight of the day OVERWRITES instead of keeping a running log.**
-      History must survive — one highlight per day is fine, but yesterday's
-      must never vanish. Check whether the UI upserts over prior rows; logs
-      are supposed to be append-only (rule 2 in CLAUDE.md).
-- [ ] **Data Vault: "relay unreachable" on desktop Chrome.** Vault round-trip
-      was verified live from this machine before — reproduce on desktop
-      Chrome specifically (CORS preflight? extension/shields? http vs https
-      dev origin?). Say what it actually is even if it's browser-side.
-- [ ] **iOS global: page zooms on input focus and STAYS zoomed.** Cause: any
-      input/select/textarea with font-size < 16px triggers Safari zoom. Fix
-      by making all form controls ≥ 16px. Do NOT use `maximum-scale=1` — that
-      disables pinch-zoom and violates the accessibility rule.
+- [~] **LVL reset to zero after an update, with completed tasks intact.**
+      NO DATA LOSS: `refreshPlayer()` folds all 11 log tables (verified — every
+      v6/v7 table is in the bundle), and habit "done" state is derived from
+      habitLogs independently of XP, which is why tasks stayed done while LVL
+      read 0. Fable shipped a defensive fix (commit 0574999): a non-finite XP
+      total or habit `charge` now degrades to level 0-safe numbers instead of
+      NaN-poisoning the whole `xp` sum (NaN made `levelFromXp`'s while-loop exit
+      at level 0). HARDENED but ROOT CAUSE UNCONFIRMED — there is no UI path
+      that produces a NaN charge (chips only emit 1–5), so the actual NaN
+      ingress (corrupt/hand-edited import? an older code path?) was never
+      reproduced. STILL OWED: Michael's real export to confirm, per the
+      original note. If his export folds to a correct level now, close it.
+- [x] **Highlight of the day OVERWRITES instead of keeping a running log.**
+      DONE (2b75300). Data was never lost — highlightLogs is append-only; the
+      CARD only *displayed* the newest row. Now lists all of today's; the
+      28-day reel already showed history.
+- [x] **Data Vault: "relay unreachable" on desktop Chrome.** DONE (dc75b3b).
+      Root cause: single-value CORS `Access-Control-Allow-Origin` matched only
+      the apex origin, so requests from `www.cyberfit.dev` were browser-blocked.
+      Relay now echoes an allowlisted Origin (apex + www) with `Vary: Origin`;
+      verified live for both, and a foreign origin gets the apex fallback.
+- [x] **iOS global: page zooms on input focus and STAYS zoomed.** DONE
+      (2b75300). All form controls now ≥16px (`.input`, `.time-input`); no
+      `maximum-scale` hack, so pinch-zoom still works.
 
 ### TIER A — broken flows
 
-- [ ] **Reading/learning log-session dialog:** the "how you felt" control has
-      no labels, and the session TYPE comes up wrong when opened from the Log
-      button. Two straight bugs in one dialog.
-- [ ] **Physical training form must be dynamic per workout style.** Time and
-      distance only when the style uses them — `WORKOUT_STYLES` already
-      declares per-style `fields`; the form isn't honoring it.
-- [ ] **Directive editor bugs:** emoji dropdown doesn't close when other
-      controls (⋯ etc.) are tapped; the anchor row breaks the editor's layout
-      flow mid-page (stops half-way across with the type-in field).
-- [ ] **Vitals:** a reading must show the metric's NAME with its note, and
-      the note field must span the full card width (still doesn't).
+- [~] **Reading/learning log-session dialog:** feeling labels DONE (2b75300 +
+      1676538 — the feeling row got its own line so labels render). OPEN: "the
+      session TYPE comes up wrong when you click log" is ambiguous from the
+      code (SessionForm has no type field; type lives on the ReadingItem) —
+      NOT guess-patched. Needs a screenshot from Michael of what reads wrong.
+- [x] **Physical training form dynamic per workout style.** Already satisfied:
+      `WorkoutCard` gates score/sets/duration/distance on `styleDef.fields.*`
+      (sets-only for "Sets×reps", duration+distance for cardio, etc.). Michael
+      likely saw a pre-styles build. No code change; verify visually once.
+- [x] **Directive editor bugs.** DONE (1676538): emoji "…" was hardcoded to
+      open — now toggles closed (and closes on pick); the anchor input was a
+      bare `<input>` (~170px) so it "stopped halfway across" — now full-width.
+- [x] **Vitals: reading shows the mood NAME with its note; note spans the
+      card.** DONE (1676538) — verified live (shot: vitals-name-note.png).
 - [ ] **Shields are a mystery in Telemetry.** Nobody can tell what they are
       or how to earn them from the UI. Add a one-tap explainer on the stat
       (earned +1 per 5 active days, cap 3, auto-absorb a miss) linking the

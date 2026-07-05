@@ -279,7 +279,7 @@ export function HabitEditor({ seed, onClose }: { seed: EditorSeed; onClose: () =
         <div className="editor-row">
           <span className="editor-row-label">Anchor — ride an existing routine (optional)</span>
           <input
-            className="input"
+            className="input anchor-input"
             value={anchor}
             onChange={(e) => setAnchor(e.target.value)}
             placeholder="after I pour my morning coffee…"

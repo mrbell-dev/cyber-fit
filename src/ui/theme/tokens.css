@@ -1075,6 +1075,12 @@ html.theme-ice {
   margin-bottom: 14px;
 }
 
+/* Bare inputs in an editor row must span it — a plain <input> is only
+   ~170px in block flow, which read as "the field stops halfway across". */
+.anchor-input {
+  width: 100%;
+}
+
 .editor-row-label {
   display: block;
   font-family: var(--font-mono);
