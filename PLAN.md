@@ -56,11 +56,13 @@ outrank broken flows, which outrank ergonomics, which outrank new features.)
 
 ### TIER A — broken flows
 
-- [~] **Reading/learning log-session dialog:** feeling labels DONE (2b75300 +
-      1676538 — the feeling row got its own line so labels render). OPEN: "the
-      session TYPE comes up wrong when you click log" is ambiguous from the
-      code (SessionForm has no type field; type lives on the ReadingItem) —
-      NOT guess-patched. Needs a screenshot from Michael of what reads wrong.
+- [x] **Reading/learning log-session dialog.** Feeling labels DONE (2b75300 +
+      1676538). "Type wrong" CLARIFIED + DONE: finishing/logging a VIDEO earned
+      XP the toast labelled "reading". The `reading` XP source covers the whole
+      feed (book/article/video/audiobook/class); the toast now labels it
+      "learning" (honest umbrella) instead of "reading". Verified live: a video
+      session toasts "+15 XP — learning". NOTE for Tier B: Stats.tsx still
+      calls the aggregate "Reading" — fold into the stats restructure.
 - [x] **Physical training form dynamic per workout style.** Already satisfied:
       `WorkoutCard` gates score/sets/duration/distance on `styleDef.fields.*`
       (sets-only for "Sets×reps", duration+distance for cardio, etc.). Michael

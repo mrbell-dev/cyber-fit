@@ -19,7 +19,11 @@ function noticeFor(g: Grant): Notice {
   }
   const label =
     g.source === "daily" ? "first sync of the day" :
-    g.source === "combo" ? "ALL SYSTEMS SYNCED" : g.source;
+    g.source === "combo" ? "ALL SYSTEMS SYNCED" :
+    // The "reading" source covers the whole Reading / Learning feed —
+    // books, articles, VIDEOS, audiobooks, classes. Calling a finished
+    // video "reading" reads as a bug; "learning" is the honest umbrella.
+    g.source === "reading" ? "learning" : g.source;
   return {
     id: nextId++,
     text: g.crit ? `CRITICAL SYNC — +${g.xp} XP (${label})` : `+${g.xp} XP — ${label}`,
