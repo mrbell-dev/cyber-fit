@@ -1,116 +1,12 @@
-import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../../db/db.ts";
-import {
-  addDays,
-  diffDays,
-  WEIGHIN_CADENCES,
-  weighinCadenceOf,
-  type BodyLog,
-  type DayKey,
-  type WeighinCadence,
-} from "../../engine/index.ts";
-import { logWeight, saveSettings } from "../../db/repo.ts";
-import { useSettings } from "../hooks.ts";
-import { InfoButton, InfoSheet } from "./InfoSheet.tsx";
+import { addDays, type BodyLog, type DayKey } from "../../engine/index.ts";
 
 export function useBodyLogs(): BodyLog[] | undefined {
   return useLiveQuery(async () => {
     const all = await db.bodyLogs.toArray();
     return all.sort((a, b) => a.ts - b.ts);
   }, []);
-}
-
-/** Weigh-in card. Cadence is the user's call (daily → bimonthly); XP spacing
- *  scales with it, so scans faster than your own rhythm are never incentivized. */
-export function BodyCard({ today }: { today: DayKey }) {
-  const settings = useSettings();
-  const unit = settings.weightUnit ?? "lbs";
-  const cadence = weighinCadenceOf(settings);
-  const [value, setValue] = useState("");
-  const [info, setInfo] = useState(false);
-  const logs = useBodyLogs();
-
-  if (!logs) return null;
-  const last = logs[logs.length - 1];
-  const prev = logs[logs.length - 2];
-  const daysSince = last ? diffDays(last.dayKey, today) : null;
-  const due = daysSince === null || daysSince >= cadence.days;
-  const delta = last && prev && last.unit === prev.unit ? last.weight - prev.weight : null;
-
-  const submit = async () => {
-    const w = Number(value);
-    if (!w) return;
-    await logWeight(w, unit);
-    setValue("");
-  };
-
-  return (
-    <div className="card">
-      <div className="card-header">
-        <h2 className="card-title">Bio-Scan — Weigh-in</h2>
-        {logs.length >= 2 && (
-          <InfoButton onClick={() => setInfo(true)} label="Weight trend + history" />
-        )}
-      </div>
-      {info && (
-        <InfoSheet title="Weight Trend" onClose={() => setInfo(false)}>
-          <WeightChart />
-          <WeightHistory logs={logs} />
-        </InfoSheet>
-      )}
-      <label className="check-label">
-        Cadence
-        <select
-          className="input"
-          value={cadence.id}
-          onChange={(e) => saveSettings({ weighinCadence: e.target.value as WeighinCadence })}
-          aria-label="Weigh-in cadence"
-        >
-          {WEIGHIN_CADENCES.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.label}
-            </option>
-          ))}
-        </select>
-      </label>
-      {last ? (
-        <p>
-          Last scan: <strong>{last.weight} {last.unit}</strong>
-          <span className="off-day-tag"> · {last.dayKey}</span>
-          {delta !== null && (
-            <span className="off-day-tag">
-              {" "}· {delta > 0 ? "+" : ""}{Math.round(delta * 10) / 10} {last.unit} vs prior
-            </span>
-          )}
-        </p>
-      ) : (
-        <p className="placeholder">// no scans yet — set a baseline whenever you're ready</p>
-      )}
-      <p className="placeholder">
-        {due
-          ? `// scan window open — ${cadence.label.toLowerCase()} cadence; the trend is the signal, fluctuations are noise`
-          : `// next check-in ~${last ? addDays(last.dayKey, cadence.days) : ""} — early scans are fine, they just don't earn XP`}
-      </p>
-      <div className="form-row">
-        <input
-          className="input num-input"
-          type="number"
-          inputMode="decimal"
-          step="0.1"
-          min={1}
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          placeholder={unit}
-          aria-label={`Weight in ${unit}`}
-          onKeyDown={(e) => e.key === "Enter" && submit()}
-        />
-        <button className="btn" onClick={submit} disabled={!Number(value)}>
-          Log scan
-        </button>
-      </div>
-    </div>
-  );
 }
 
 /** Single-series weight trend — line + dots, a number over EVERY point,
@@ -162,7 +58,7 @@ export function WeightChart() {
 }
 
 /** Full scan list — the "history" half of the Bio-Scan ⓘ sheet. */
-function WeightHistory({ logs }: { logs: BodyLog[] }) {
+export function WeightHistory({ logs }: { logs: BodyLog[] }) {
   const rows = [...logs].sort((a, b) => b.ts - a.ts);
   return (
     <div className="history-list">

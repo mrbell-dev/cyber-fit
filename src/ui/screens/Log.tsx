@@ -10,8 +10,8 @@ import {
 } from "../../engine/index.ts";
 import { addReadingItem, logReading, logWorkout, setReadingStatus } from "../../db/repo.ts";
 import { useDayKey, useSettings } from "../hooks.ts";
-import { BodyCard, VolumeChart } from "../components/BodyMetrics.tsx";
-import { BioMetricsCard } from "../components/BioMetrics.tsx";
+import { VolumeChart } from "../components/BodyMetrics.tsx";
+import { BioScanCard } from "../components/BioMetrics.tsx";
 import { ScreenerCard } from "../components/Screeners.tsx";
 import { InfoButton, InfoSheet } from "../components/InfoSheet.tsx";
 
@@ -500,8 +500,7 @@ export function Log() {
   return (
     <section aria-label="Log">
       <WorkoutCard />
-      <BodyCard today={today} />
-      <BioMetricsCard />
+      <BioScanCard today={today} />
       <ScreenerCard />
       <ReadingCard />
     </section>

@@ -249,6 +249,9 @@ export interface Settings {
   difficulty?: "easy" | "standard" | "hard";
   /** show the dev test bench in System */
   devMode?: boolean;
+  /** weight is no longer a hardwired metric — it shows once it has data or the
+   *  user adds it from the Bio-Scan "+". */
+  weightTracked?: boolean;
 }
 
 export function difficultyFactor(s: Settings): number {

@@ -327,6 +327,24 @@ export async function logBioReading(metricId: string, value: string): Promise<vo
   await refreshPlayer();
 }
 
+/** Undo the most recent reading of a metric — for the inevitable mistype. */
+export async function undoLastBioReading(metricId: string): Promise<void> {
+  const mine = await db.bioReadings.where({ metricId }).toArray();
+  const last = mine.sort((a, b) => b.ts - a.ts)[0];
+  if (!last) return;
+  await db.bioReadings.delete(last.id);
+  await refreshPlayer();
+}
+
+/** Undo the most recent weigh-in (bodyLogs) — same mistype safety net. */
+export async function undoLastWeight(): Promise<void> {
+  const all = await db.bodyLogs.toArray();
+  const last = all.sort((a, b) => b.ts - a.ts)[0];
+  if (!last) return;
+  await db.bodyLogs.delete(last.id);
+  await refreshPlayer();
+}
+
 /** No XP, no refreshPlayer toast path — screeners are never gamified. */
 export async function logScreening(
   tool: "phq9" | "gad7",

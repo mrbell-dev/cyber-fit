@@ -131,13 +131,23 @@ the data lives. Shipped in 3 chunks via a reusable `InfoSheet`/`InfoButton`
       in-window to when quiet lifts (overnight wrap handled). Master off also
       hides ping options in the directive editor and bio-metric add form
       (shows a "globally off" hint). Engine tests added (5). Verified live.
-- [ ] **Bio-scan generalization — metric library with a + (mirror the
-      directive codex):** weigh-in stops being the hardwired default; presets
-      to pick from (weight, blood pressure, glucose, resting HR, …) plus
-      fully custom; per-metric settings (cadence, pings on/off) saved at add
-      time and editable after; per-metric chart via the ⓘ; UNDO the last
-      reading (mistypes happen); the separate "custom biometrics" section
-      then folds away. Doctor-driven use case: "BP twice a day for my doc."
+- [x] **Bio-scan generalization.** DONE (Tier C, 4). ONE unified `BioScanCard`
+      replaces the separate Weigh-in + Custom-Bio-Metrics cards. A `+` adds a
+      metric from presets (weight, blood pressure, glucose, resting HR, blood
+      oxygen, body temp) or custom. Each row: log field, ⓘ (trend chart with
+      numbers + full history + UNDO last reading), edit (custom → pings on/off
+      + window; weight → cadence). Weight is no longer hardwired — it shows
+      once it has data or is added from the `+` (new `weightTracked` setting);
+      existing users' bodyLogs surface it automatically. Doctor use case ("BP
+      twice a day") is the headline empty-state copy. Undo added for both
+      bodyLogs and bioReadings. Verified live (empty state → add weight → add
+      BP → log reading).
+      DESIGN NOTE (deliberate, transparent): weight stays backed by `bodyLogs`
+      (keeps its cadence-based XP spacing + lbs/kg trend) rather than migrating
+      into `bioReadings`. A storage migration of real weight history with no
+      test export is the one destructive move here for purely-internal tidiness
+      — not worth the risk. Unification is at the UI layer. If we ever want a
+      single store, do it WITH Michael's export in hand.
 - [x] **Reading/learning one-shots.** DONE (Tier C, 3). A "One-time thing"
       checkbox in the add row → creates the item already finished and drops
       straight into a session log (feeling); it never lingers in the feed
