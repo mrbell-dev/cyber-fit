@@ -2,17 +2,105 @@ import { useEffect, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../../db/db.ts";
 import { DEFAULT_REMINDERS, type Reminders } from "../../engine/index.ts";
-import { saveSettings } from "../../db/repo.ts";
+import { saveSettings, setBioMetricPings, updateHabit } from "../../db/repo.ts";
 import { useSettings } from "../hooks.ts";
 import { disablePush, enablePush, pushActive, saveReminders, syncPush, testPush } from "../notify.ts";
+import { InfoSheet } from "./InfoSheet.tsx";
 
 const WEEKDAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
+
+const SYSTEM_PINGS: { key: keyof Reminders & ("morning" | "water" | "workout" | "highlight" | "motivation" | "catchup"); label: string }[] = [
+  { key: "morning", label: "Morning boot" },
+  { key: "water", label: "Hydration" },
+  { key: "workout", label: "Training" },
+  { key: "highlight", label: "Highlight nudge" },
+  { key: "motivation", label: "Motivation" },
+  { key: "catchup", label: "Log catch-up" },
+];
+
+/** One list of every ping that can fire — system, per-directive, per-metric —
+ *  classified and each toggleable. Turning a directive/metric ping off clears
+ *  it (re-enable in its own editor). */
+function NotificationInventory({
+  reminders,
+  update,
+  onClose,
+}: {
+  reminders: Reminders;
+  update: (patch: Partial<Reminders>) => Promise<void>;
+  onClose: () => void;
+}) {
+  const habits = useLiveQuery(
+    () => db.habits.filter((h) => !h.archivedAt && Boolean(h.pings || h.reminderTime)).toArray(),
+    [],
+  );
+  const metrics = useLiveQuery(
+    () => db.bioMetrics.filter((m) => !m.archivedAt && Boolean(m.pings)).toArray(),
+    [],
+  );
+  const clearHabit = async (id: string) => {
+    await updateHabit(id, { pings: undefined, reminderTime: undefined });
+    await syncPush();
+  };
+  const clearMetric = async (id: string) => {
+    await setBioMetricPings(id, undefined);
+    await syncPush();
+  };
+
+  return (
+    <InfoSheet title="All notifications" onClose={onClose}>
+      <p className="placeholder">// every ping that can fire, by source. uncheck to turn one off</p>
+      <h3 className="card-title" style={{ marginTop: 10 }}>System</h3>
+      {SYSTEM_PINGS.map(({ key, label }) => {
+        const cfg = reminders[key] as { on: boolean };
+        return (
+          <label className="check-label" key={key}>
+            <input
+              type="checkbox"
+              checked={cfg.on}
+              onChange={(e) => update({ [key]: { ...cfg, on: e.target.checked } } as Partial<Reminders>)}
+            />
+            {label} <span className="off-day-tag">system</span>
+          </label>
+        );
+      })}
+
+      <h3 className="card-title" style={{ marginTop: 12 }}>Directives</h3>
+      {(habits ?? []).length === 0 ? (
+        <p className="placeholder">// no directive pings set — add one in a directive's editor</p>
+      ) : (
+        (habits ?? []).map((h) => (
+          <label className="check-label" key={h.id}>
+            <input type="checkbox" checked onChange={() => clearHabit(h.id)} />
+            {h.icon} {h.name}{" "}
+            <span className="off-day-tag">
+              directive · {h.pings ? `×${h.pings.times}/day` : `🔔${h.reminderTime}`}
+            </span>
+          </label>
+        ))
+      )}
+
+      <h3 className="card-title" style={{ marginTop: 12 }}>Bio-metrics</h3>
+      {(metrics ?? []).length === 0 ? (
+        <p className="placeholder">// no bio-metric pings set</p>
+      ) : (
+        (metrics ?? []).map((m) => (
+          <label className="check-label" key={m.id}>
+            <input type="checkbox" checked onChange={() => clearMetric(m.id)} />
+            {m.name} <span className="off-day-tag">bio-metric · ×{m.pings?.times}/day</span>
+          </label>
+        ))
+      )}
+    </InfoSheet>
+  );
+}
 
 export function ReminderUplink() {
   const settings = useSettings();
   const [active, setActive] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [showSelfHost, setShowSelfHost] = useState(false);
+  const [inventory, setInventory] = useState(false);
 
   const reminders = useLiveQuery(async () => {
     const row = await db.kv.get("reminders");
@@ -44,7 +132,17 @@ export function ReminderUplink() {
 
   return (
     <div className="card">
-      <h2 className="card-title">Reminder Uplink (Optional)</h2>
+      <div className="card-header">
+        <h2 className="card-title">Reminder Uplink (Optional)</h2>
+        {reminders.enabled && (
+          <button className="link-btn" onClick={() => setInventory(true)}>
+            all pings
+          </button>
+        )}
+      </div>
+      {inventory && (
+        <NotificationInventory reminders={reminders} update={update} onClose={() => setInventory(false)} />
+      )}
       <p className="placeholder">
         // pushes are opt-in. the relay stores only an anonymous push address + time
         slots — your schedule, logs, and identity never leave this device

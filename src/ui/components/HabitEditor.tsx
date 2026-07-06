@@ -3,8 +3,10 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../../db/db.ts";
 import {
   AREAS,
+  PRESETS,
   type Area,
   type Habit,
+  type Preset,
   type Schedule,
   type TimeOfDay,
 } from "../../engine/index.ts";
@@ -94,6 +96,17 @@ export function HabitEditor({ seed, onClose }: { seed: EditorSeed; onClose: () =
   const [charge, setCharge] = useState(h?.charge ?? 1);
   const [anchor, setAnchor] = useState(h?.anchor ?? "");
   const [emojiOpen, setEmojiOpen] = useState(false);
+  const [suggestOpen, setSuggestOpen] = useState(false);
+
+  const applyPreset = (p: Preset) => {
+    setName(p.name);
+    setIcon(p.icon);
+    setArea(p.area);
+    setSchedule(p.schedule);
+    setTimeOfDay(p.timeOfDay);
+    if (p.suggestedReminder) setReminderTime(p.suggestedReminder);
+    setSuggestOpen(false);
+  };
 
   // Anchor suggestions = the user's OWN active directives (minus this one).
   const anchorOptions = useLiveQuery(async () => {
@@ -192,6 +205,37 @@ export function HabitEditor({ seed, onClose }: { seed: EditorSeed; onClose: () =
           aria-label="Directive name"
           autoFocus={!h}
         />
+
+        {!h && (
+          <button className="link-btn" onClick={() => setSuggestOpen(true)}>
+            💡 Need ideas? Browse suggestions
+          </button>
+        )}
+        {suggestOpen && (
+          <div className="overlay" onClick={() => setSuggestOpen(false)}>
+            <div
+              className="modal editor"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Directive suggestions"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="card-header">
+                <h2 className="card-title">Suggestions</h2>
+                <button className="link-btn" onClick={() => setSuggestOpen(false)}>
+                  close
+                </button>
+              </div>
+              <p className="placeholder">// tap one to fill the form — tweak anything after</p>
+              {PRESETS.map((p) => (
+                <button key={p.presetId} className="suggest-item" onClick={() => applyPreset(p)}>
+                  <span>{p.icon} {p.name}</span>
+                  <span className="off-day-tag">{AREAS.find((a) => a.id === p.area)?.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="editor-row">
           <span className="editor-row-label">Area</span>

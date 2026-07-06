@@ -138,14 +138,18 @@ the data lives. Shipped in 3 chunks via a reusable `InfoSheet`/`InfoButton`
       time and editable after; per-metric chart via the ⓘ; UNDO the last
       reading (mistypes happen); the separate "custom biometrics" section
       then folds away. Doctor-driven use case: "BP twice a day for my doc."
-- [ ] **Reading/learning one-shots:** a "this was a one-time thing" checkbox
-      → log the feeling, save, done — it never lingers in the feed waiting
-      for "finish".
-- [ ] **Codex growth:** a handful more general health/wellbeing presets;
-      optional suggestions popup reachable from the add-directive page.
-- [ ] **Notification inventory view:** one list of every ping that can fire —
-      user-defined (per-directive, per-metric) and system (morning boot,
-      motivation) — classified as such, each toggleable from the list.
+- [x] **Reading/learning one-shots.** DONE (Tier C, 3). A "One-time thing"
+      checkbox in the add row → creates the item already finished and drops
+      straight into a session log (feeling); it never lingers in the feed
+      waiting for "finish". Verified live.
+- [x] **Codex growth.** DONE (Tier C, 3). +7 wellbeing presets (water-before-
+      caffeine, meds/vitamins, morning sunlight, move, reach out to a human,
+      reset a space, screens-down). New directive editor has a "💡 Browse
+      suggestions" button → a picker that fills the whole form from a preset.
+- [x] **Notification inventory view.** DONE (Tier C, 3). "all pings" in
+      Reminder Uplink → one sheet listing every ping by source: System (6,
+      real on/off), Directives (per-habit, uncheck clears), Bio-metrics
+      (per-metric, uncheck clears). Verified live.
 
 ### TIER LT — flavor, reach, and the long game (carried forward)
 

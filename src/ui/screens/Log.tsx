@@ -365,6 +365,8 @@ function ReadingCard() {
   const [type, setType] = useState<ReadingItem["type"]>("book");
   const [sessionFor, setSessionFor] = useState<string | null>(null); // item id or "none"
   const [library, setLibrary] = useState(false);
+  const [oneShot, setOneShot] = useState(false);
+  const [oneShotItem, setOneShotItem] = useState<ReadingItem | null>(null);
 
   const items = useLiveQuery(
     () => db.readingItems.where("status").equals("reading").toArray(),
@@ -378,6 +380,15 @@ function ReadingCard() {
 
   const add = async () => {
     if (!title.trim()) return;
+    if (oneShot) {
+      // One-time thing: create it already finished and drop straight into a
+      // session log (feeling) — it never sits in the feed waiting for "finish".
+      const item = await addReadingItem({ title, type });
+      await setReadingStatus(item.id, "finished");
+      setOneShotItem(item);
+      setTitle("");
+      return;
+    }
     await addReadingItem({ title, type });
     setTitle("");
   };
@@ -449,9 +460,22 @@ function ReadingCard() {
             <option value="other">other</option>
           </select>
         </div>
+        <label className="check-label">
+          <input type="checkbox" checked={oneShot} onChange={(e) => setOneShot(e.target.checked)} />
+          One-time thing — log it and done, don't keep it in the feed
+        </label>
         <button className="btn" onClick={add} disabled={!title.trim()}>
-          Add to feed
+          {oneShot ? "Log it & done" : "Add to feed"}
         </button>
+        {oneShotItem && (
+          <SessionForm
+            item={oneShotItem}
+            onDone={() => {
+              setOneShotItem(null);
+              setOneShot(false);
+            }}
+          />
+        )}
       </div>
 
       {(recentLogs ?? []).length > 0 && (

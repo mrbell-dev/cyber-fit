@@ -1152,6 +1152,26 @@ html.theme-ice {
   letter-spacing: 1px;
 }
 
+.suggest-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  padding: 10px;
+  margin-top: 6px;
+  background: var(--bg-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.suggest-item:active {
+  border-color: var(--neon-green);
+}
+
 .editor-row-label {
   display: block;
   font-family: var(--font-mono);

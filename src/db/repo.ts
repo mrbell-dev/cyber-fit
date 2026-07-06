@@ -310,6 +310,14 @@ export async function archiveBioMetric(id: string): Promise<void> {
   await db.bioMetrics.update(id, { archivedAt: Date.now() });
 }
 
+/** Turn a bio-metric's reminder on/off (clearing pings disables it). */
+export async function setBioMetricPings(
+  id: string,
+  pings: { times: number; start: string; end: string } | undefined,
+): Promise<void> {
+  await db.bioMetrics.update(id, { pings });
+}
+
 export async function logBioReading(metricId: string, value: string): Promise<void> {
   const trimmed = value.trim();
   if (!trimmed) return;
