@@ -119,9 +119,11 @@ the data lives. Shipped in 3 chunks via a reusable `InfoSheet`/`InfoButton`
 
 ### TIER C — editor ergonomics & bio-scan generalization
 
-- [ ] **Directive editor controls:** schedule and area become dropdowns;
-      anchor becomes a dropdown of the user's OWN active directives (free
-      text stays as fallback); charge (⚡) becomes a 1–5 slider.
+- [x] **Directive editor controls.** DONE (Tier C, 1). Area + Schedule are
+      dropdowns (schedule sub-controls — weekday toggles / N-per-X inputs —
+      still render below the selected kind); anchor input has a datalist of
+      the user's OWN active directives ("after <name>") with free text as
+      fallback; charge is a 1–5 slider with a ⚡ readout. Verified live.
 - [ ] **Global quiet hours + master notification switch.** When notifications
       are globally off, editors never even SHOW ping options (don't prompt
       for what can't fire). Quiet hours clamp all ping times, push and

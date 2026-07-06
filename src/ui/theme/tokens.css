@@ -1133,6 +1133,25 @@ html.theme-ice {
   width: 100%;
 }
 
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.charge-slider {
+  flex: 1;
+  min-height: var(--tap-min);
+  accent-color: var(--neon-green);
+}
+
+.charge-readout {
+  flex: 0 0 auto;
+  min-width: 62px;
+  font-size: 15px;
+  letter-spacing: 1px;
+}
+
 .editor-row-label {
   display: block;
   font-family: var(--font-mono);

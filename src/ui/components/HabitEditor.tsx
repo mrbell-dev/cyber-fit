@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "../../db/db.ts";
 import {
   AREAS,
   type Area,
@@ -8,6 +10,37 @@ import {
 } from "../../engine/index.ts";
 import { addHabit, updateHabit } from "../../db/repo.ts";
 import { syncPush } from "../notify.ts";
+
+// Schedule kinds as a flat option list (dropdown) — the sub-controls
+// (weekday toggles / N-per-X inputs) still render below the selected kind.
+type SchedOpt = "daily" | "weekdays" | "timesPerWeek" | "weekly" | "monthly" | "yearly" | "nPerX";
+const SCHED_LABELS: { id: SchedOpt; label: string }[] = [
+  { id: "daily", label: "Daily" },
+  { id: "weekdays", label: "Specific days" },
+  { id: "timesPerWeek", label: "N times per week" },
+  { id: "weekly", label: "Weekly" },
+  { id: "monthly", label: "Monthly" },
+  { id: "yearly", label: "Yearly" },
+  { id: "nPerX", label: "N per X days (rolling)" },
+];
+function schedOptOf(s: Schedule): SchedOpt {
+  if (s.kind === "daily") return "daily";
+  if (s.kind === "weekdays") return "weekdays";
+  if (s.kind === "timesPerWeek") return "timesPerWeek";
+  if (s.times === 1 && s.periodDays === 7) return "weekly";
+  if (s.times === 1 && s.periodDays === 30) return "monthly";
+  if (s.times === 1 && s.periodDays === 365) return "yearly";
+  return "nPerX";
+}
+const SCHED_FACTORY: Record<SchedOpt, () => Schedule> = {
+  daily: () => ({ kind: "daily" }),
+  weekdays: () => ({ kind: "weekdays", days: [1, 2, 3, 4, 5] }),
+  timesPerWeek: () => ({ kind: "timesPerWeek", target: 3 }),
+  weekly: () => ({ kind: "nPerX", times: 1, periodDays: 7 }),
+  monthly: () => ({ kind: "nPerX", times: 1, periodDays: 30 }),
+  yearly: () => ({ kind: "nPerX", times: 1, periodDays: 365 }),
+  nPerX: () => ({ kind: "nPerX", times: 2, periodDays: 10 }),
+};
 
 const WEEKDAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 const TIMES: { id: TimeOfDay; name: string; icon: string }[] = [
@@ -61,6 +94,12 @@ export function HabitEditor({ seed, onClose }: { seed: EditorSeed; onClose: () =
   const [charge, setCharge] = useState(h?.charge ?? 1);
   const [anchor, setAnchor] = useState(h?.anchor ?? "");
   const [emojiOpen, setEmojiOpen] = useState(false);
+
+  // Anchor suggestions = the user's OWN active directives (minus this one).
+  const anchorOptions = useLiveQuery(async () => {
+    const all = await db.habits.filter((x) => !x.archivedAt).toArray();
+    return all.filter((x) => x.id !== h?.id).map((x) => x.name);
+  }, [h?.id]);
 
   const save = async () => {
     if (!name.trim()) return;
@@ -151,67 +190,36 @@ export function HabitEditor({ seed, onClose }: { seed: EditorSeed; onClose: () =
 
         <div className="editor-row">
           <span className="editor-row-label">Area</span>
-          <div className="chip-row" role="group" aria-label="Area of focus">
+          <select
+            className="input anchor-input"
+            value={area ?? ""}
+            onChange={(e) => setArea((e.target.value || undefined) as Area | undefined)}
+            aria-label="Area of focus"
+          >
+            <option value="">No area</option>
             {AREAS.map((a) => (
-              <button
-                key={a.id}
-                className={area === a.id ? "chip on" : "chip"}
-                aria-pressed={area === a.id}
-                onClick={() => setArea(area === a.id ? undefined : a.id)}
-              >
+              <option key={a.id} value={a.id}>
                 {a.icon} {a.name}
-              </button>
+              </option>
             ))}
-          </div>
+          </select>
         </div>
 
         <div className="editor-row">
           <span className="editor-row-label">Schedule</span>
-          <div className="chip-row" role="group" aria-label="Schedule">
-            <button
-              className={schedule.kind === "daily" ? "chip on" : "chip"}
-              onClick={() => setSchedule({ kind: "daily" })}
-            >
-              Daily
-            </button>
-            <button
-              className={schedule.kind === "weekdays" ? "chip on" : "chip"}
-              onClick={() => setSchedule({ kind: "weekdays", days: days.length ? days : [1, 2, 3, 4, 5] })}
-            >
-              Specific days
-            </button>
-            <button
-              className={schedule.kind === "timesPerWeek" ? "chip on" : "chip"}
-              onClick={() => setSchedule({ kind: "timesPerWeek", target: 3 })}
-            >
-              N per week
-            </button>
-            <button
-              className={nPerX && nPerX.periodDays === 7 && nPerX.times === 1 ? "chip on" : "chip"}
-              onClick={() => setSchedule({ kind: "nPerX", times: 1, periodDays: 7 })}
-            >
-              Weekly
-            </button>
-            <button
-              className={nPerX && nPerX.periodDays === 30 ? "chip on" : "chip"}
-              onClick={() => setSchedule({ kind: "nPerX", times: 1, periodDays: 30 })}
-            >
-              Monthly
-            </button>
-            <button
-              className={nPerX && nPerX.periodDays === 365 ? "chip on" : "chip"}
-              onClick={() => setSchedule({ kind: "nPerX", times: 1, periodDays: 365 })}
-            >
-              Yearly
-            </button>
-            <button
-              className={nPerX && ![7, 30, 365].includes(nPerX.periodDays) ? "chip on" : "chip"}
-              onClick={() => setSchedule({ kind: "nPerX", times: 2, periodDays: 10 })}
-            >
-              N per X days
-            </button>
-          </div>
-          {nPerX && (
+          <select
+            className="input anchor-input"
+            value={schedOptOf(schedule)}
+            onChange={(e) => setSchedule(SCHED_FACTORY[e.target.value as SchedOpt]())}
+            aria-label="Schedule"
+          >
+            {SCHED_LABELS.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.label}
+              </option>
+            ))}
+          </select>
+          {nPerX && schedOptOf(schedule) === "nPerX" && (
             <label className="check-label">
               <input
                 type="number"
@@ -282,25 +290,33 @@ export function HabitEditor({ seed, onClose }: { seed: EditorSeed; onClose: () =
             className="input anchor-input"
             value={anchor}
             onChange={(e) => setAnchor(e.target.value)}
-            placeholder="after I pour my morning coffee…"
+            placeholder="pick a directive, or type your own trigger…"
             aria-label="Anchor routine"
+            list="anchor-options"
           />
+          <datalist id="anchor-options">
+            {(anchorOptions ?? []).map((n) => (
+              <option key={n} value={`after ${n}`} />
+            ))}
+          </datalist>
           <p className="placeholder">// "after X, I do Y" — the best-proven habit trick there is</p>
         </div>
 
         <div className="editor-row">
           <span className="editor-row-label">Charge — how hard is this for YOU?</span>
-          <div className="chip-row" role="group" aria-label="Charge">
-            {[1, 2, 3, 4, 5].map((c) => (
-              <button
-                key={c}
-                className={charge === c ? "chip on" : "chip"}
-                aria-pressed={charge === c}
-                onClick={() => setCharge(c)}
-              >
-                {"⚡".repeat(c)}
-              </button>
-            ))}
+          <div className="slider-row">
+            <input
+              type="range"
+              className="charge-slider"
+              min={1}
+              max={5}
+              step={1}
+              value={charge}
+              onChange={(e) => setCharge(Number(e.target.value))}
+              aria-label="Charge, 1 to 5"
+              aria-valuetext={`${charge} of 5`}
+            />
+            <span className="charge-readout" aria-hidden="true">{"⚡".repeat(charge)}</span>
           </div>
           <p className="placeholder">// XP scales with charge — your boss fight, your rules</p>
         </div>
