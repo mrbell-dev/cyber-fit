@@ -3,6 +3,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../../db/db.ts";
 import type { DayKey } from "../../engine/index.ts";
 import { logHighlight, logJournal } from "../../db/repo.ts";
+import { InfoSheet } from "./InfoSheet.tsx";
 
 /** Some days you pick one good frame; some days you need to dump the buffer.
  *  Highlight = savoring practice; Journal = catharsis. Both count. */
@@ -100,20 +101,69 @@ export function Highlight({ today }: { today: DayKey }) {
   );
 }
 
-/** Last 28 days of highlights — the reel is the dialectical payoff. */
+/** Full highlight history in a sheet — searchable, since the reel is the
+ *  point: proof the good frames were real. */
+function HighlightArchive() {
+  const [q, setQ] = useState("");
+  const all = useLiveQuery(async () => {
+    const rows = await db.highlightLogs.toArray();
+    return rows.sort((a, b) => b.ts - a.ts);
+  }, []);
+  if (!all) return null;
+  const needle = q.trim().toLowerCase();
+  const shown = needle ? all.filter((h) => h.text.toLowerCase().includes(needle)) : all;
+
+  return (
+    <>
+      <input
+        className="input mood-note"
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        placeholder="Search highlights (try a #tag)…"
+        aria-label="Search highlights"
+      />
+      {shown.length === 0 ? (
+        <p className="placeholder">// no matches</p>
+      ) : (
+        <div className="history-list">
+          {shown.map((h) => (
+            <p className="highlight-text reel" key={h.id}>
+              <span className="off-day-tag">{h.dayKey}</span> ◆ {h.text}
+            </p>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
+/** The reel: last 10 highlights, with a door to the full archive. */
 export function HighlightReel() {
-  const recent = useLiveQuery(async () => {
+  const [archive, setArchive] = useState(false);
+  const data = useLiveQuery(async () => {
     const all = await db.highlightLogs.toArray();
-    const cutoff = Date.now() - 28 * 86_400_000;
-    return all.filter((h) => h.ts >= cutoff).sort((a, b) => b.ts - a.ts).slice(0, 28);
+    const sorted = all.sort((a, b) => b.ts - a.ts);
+    return { recent: sorted.slice(0, 10), total: sorted.length };
   }, []);
 
-  if (!recent || recent.length === 0) return null;
+  if (!data || data.total === 0) return null;
 
   return (
     <div className="card">
-      <h2 className="card-title">Highlight Reel</h2>
-      {recent.map((h) => (
+      <div className="card-header">
+        <h2 className="card-title">Highlight Reel</h2>
+        {data.total > 10 && (
+          <button className="link-btn" onClick={() => setArchive(true)}>
+            view all ({data.total})
+          </button>
+        )}
+      </div>
+      {archive && (
+        <InfoSheet title="Highlight Archive" onClose={() => setArchive(false)}>
+          <HighlightArchive />
+        </InfoSheet>
+      )}
+      {data.recent.map((h) => (
         <p className="highlight-text reel" key={h.id}>
           <span className="off-day-tag">{h.dayKey}</span> ◆ {h.text}
         </p>

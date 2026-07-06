@@ -300,10 +300,71 @@ function SessionForm({ item, onDone }: { item: ReadingItem | null; onDone: () =>
   );
 }
 
+const READING_ICONS: Record<string, string> = {
+  book: "📖", article: "📄", audiobook: "🎧", video: "🎬", studying: "✍️", class: "🎓",
+};
+const readingIcon = (t: string) => READING_ICONS[t] ?? "◈";
+
+const LIBRARY_TYPES: (ReadingItem["type"] | "all")[] = [
+  "all", "book", "audiobook", "video", "article", "studying", "class", "other",
+];
+
+/** The whole shelf — every item ever added, filterable by type, across all
+ *  statuses. The "find that book/movie I wanted to recommend" view. */
+function ReadingLibrary() {
+  const [filter, setFilter] = useState<ReadingItem["type"] | "all">("all");
+  const all = useLiveQuery(async () => {
+    const rows = await db.readingItems.toArray();
+    return rows.sort((a, b) => (b.finishedAt ?? b.createdAt) - (a.finishedAt ?? a.createdAt));
+  }, []);
+  if (!all) return null;
+  const shown = filter === "all" ? all : all.filter((i) => i.type === filter);
+
+  return (
+    <>
+      <div className="chip-row" role="group" aria-label="Filter by type">
+        {LIBRARY_TYPES.filter((t) => t === "all" || all.some((i) => i.type === t)).map((t) => (
+          <button
+            key={t}
+            className={filter === t ? "chip on" : "chip"}
+            aria-pressed={filter === t}
+            onClick={() => setFilter(t)}
+          >
+            {t === "all" ? "all" : `${readingIcon(t)} ${t}`}
+          </button>
+        ))}
+      </div>
+      {shown.length === 0 ? (
+        <p className="placeholder">// nothing here yet — add items from the feed</p>
+      ) : (
+        <div className="history-list">
+          {shown.map((item) => (
+            <div className="row-item" key={item.id}>
+              <span>
+                {readingIcon(item.type)} {item.title}
+                {item.author ? <span className="off-day-tag"> · {item.author}</span> : null}
+              </span>
+              <span className="row-actions">
+                <span className="off-day-tag">{item.status}</span>
+                {item.status !== "reading" && (
+                  <button className="link-btn" onClick={() => setReadingStatus(item.id, "reading")}>
+                    reopen
+                  </button>
+                )}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
 function ReadingCard() {
   const [title, setTitle] = useState("");
   const [type, setType] = useState<ReadingItem["type"]>("book");
   const [sessionFor, setSessionFor] = useState<string | null>(null); // item id or "none"
+  const [library, setLibrary] = useState(false);
 
   const items = useLiveQuery(
     () => db.readingItems.where("status").equals("reading").toArray(),
@@ -323,15 +384,21 @@ function ReadingCard() {
 
   return (
     <div className="card">
-      <h2 className="card-title">Reading / Learning Feed</h2>
+      <div className="card-header">
+        <h2 className="card-title">Reading / Learning Feed</h2>
+        <InfoButton onClick={() => setLibrary(true)} label="Full library" />
+      </div>
+      {library && (
+        <InfoSheet title="Library" onClose={() => setLibrary(false)}>
+          <ReadingLibrary />
+        </InfoSheet>
+      )}
 
       {(items ?? []).map((item) => (
         <div key={item.id}>
           <div className="row-item">
             <span>
-              {{ book: "📖", article: "📄", audiobook: "🎧", video: "🎬", studying: "✍️", class: "🎓" }[
-                item.type as string
-              ] ?? "◈"}{" "}
+              {readingIcon(item.type as string)}{" "}
               {item.title}
             </span>
             <span className="row-actions">
