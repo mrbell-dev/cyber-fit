@@ -1378,8 +1378,21 @@ html.theme-ice {
 }
 
 /* ---------- tier B/C bits ---------- */
+/* The only interactive tile — must read as tappable on a touchscreen (no
+   cursor to lean on), or the shields explainer stays undiscovered. */
 .stat-tile.tappable {
   cursor: pointer;
+  border-color: var(--neon-green);
+  border-style: dashed;
+}
+
+.stat-tile.tappable.on {
+  border-style: solid;
+  box-shadow: var(--glow-green);
+}
+
+.info-dot {
+  color: var(--neon-green);
 }
 
 .day-dot.sel {

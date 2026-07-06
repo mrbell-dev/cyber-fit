@@ -72,10 +72,16 @@ outrank broken flows, which outrank ergonomics, which outrank new features.)
       bare `<input>` (~170px) so it "stopped halfway across" — now full-width.
 - [x] **Vitals: reading shows the mood NAME with its note; note spans the
       card.** DONE (1676538) — verified live (shot: vitals-name-note.png).
-- [ ] **Shields are a mystery in Telemetry.** Nobody can tell what they are
-      or how to earn them from the UI. Add a one-tap explainer on the stat
-      (earned +1 per 5 active days, cap 3, auto-absorb a miss) linking the
-      Field Manual entry.
+- [x] **Shields explainer — made DISCOVERABLE.** DONE (this pass). Root cause
+      wasn't a missing explainer: a tappable "Shields ⓘ" tile + inline text +
+      a full Field Manual "Shields ▣" entry all already existed (0716b43,
+      before the walkthrough). But `.stat-tile.tappable` only set
+      `cursor:pointer` — invisible on a touchscreen, so all 8 tiles looked
+      identical and the tap was never found. Fix: the shields tile now has a
+      green dashed border + green ⓘ (solid + glow when open), `aria-expanded`,
+      and the explainer names the earn rule (+1 per 5 active days, cap 3,
+      auto-absorb) and points to the Field Manual. Verified live (screenshot:
+      shields-explainer.png). **TIER A COMPLETE** except backlogged LVL.
 - [x] **Visual Cortex unlocks now preview.** DONE (this pass): theme tiles
       render the real 5-colour palette swatch strip (kept in sync with the
       html.theme-* packs); FX tiles show a scoped live mini-demo (scanline

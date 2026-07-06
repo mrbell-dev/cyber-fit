@@ -168,9 +168,13 @@ export function Stats() {
             <span className="stat-num">{player?.globalStreak.best ?? 0}</span>
             <span className="stat-label">Best</span>
           </div>
-          <button className="stat-tile tappable" onClick={() => setShieldInfo(!shieldInfo)}>
+          <button
+            className={`stat-tile tappable${shieldInfo ? " on" : ""}`}
+            onClick={() => setShieldInfo(!shieldInfo)}
+            aria-expanded={shieldInfo}
+          >
             <span className="stat-num">▣{player?.freezeTokens ?? 0}</span>
-            <span className="stat-label">Shields ⓘ</span>
+            <span className="stat-label">Shields <span className="info-dot">ⓘ</span></span>
           </button>
           {(data.readingLogs.length > 0 || readStreak > 0) && (
             <div className="stat-tile">
@@ -193,9 +197,11 @@ export function Stats() {
         </div>
         {shieldInfo && (
           <p className="placeholder">
-            // shields bank automatically every 5 active days (max 3). when you miss a
-            day, one absorbs the hit and your streak holds — you never see a "streak
-            lost". untracked domains hide their tiles; this screen shapes itself to you
+            // ▣ SHIELDS: bank one automatically every 5 active days (max 3). miss a
+            day and a shield absorbs it silently — your streak holds, and you never see
+            a "streak lost". run out and the streak reboots to zero (a reboot, not a
+            failure). full rules live in the Field Manual, over in SYSTEM. untracked
+            domains hide their tiles — this screen shapes itself to you
           </p>
         )}
       </div>
