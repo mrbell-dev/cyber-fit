@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_REMINDERS, duePingsToday, localPings, slotBundleFor, slotsFor } from "./reminders.ts";
+import { DEFAULT_REMINDERS, duePingsToday, inQuiet, localPings, slotBundleFor, slotsFor } from "./reminders.ts";
 
 describe("localPings", () => {
   it("water spreads count evenly across the window", () => {
@@ -132,5 +132,49 @@ describe("duePingsToday", () => {
   it("weekday mismatch excludes workout", () => {
     const due = duePingsToday(DEFAULT_REMINDERS, 5, 1200); // Friday 20:00
     expect(due.map((d) => d.kind)).not.toContain("workout");
+  });
+});
+
+describe("master switch + quiet hours", () => {
+  it("enabled:false produces no pings", () => {
+    expect(localPings({ ...DEFAULT_REMINDERS, enabled: false })).toHaveLength(0);
+    expect(slotsFor({ ...DEFAULT_REMINDERS, enabled: false }, 0)).toHaveLength(0);
+  });
+
+  it("quiet hours defer an in-window ping to when quiet lifts", () => {
+    // catchup 21:30 (1290) inside 22:00? no. Use a late catchup at 23:00.
+    const r = {
+      ...DEFAULT_REMINDERS,
+      morning: { on: false, time: "08:00" },
+      water: { on: false, count: 0, start: "09:00", end: "21:00" },
+      workout: { on: false, days: [], time: "17:30" },
+      highlight: { on: false, time: "19:00" },
+      catchup: { on: true, time: "23:00" }, // inside quiet 22:00–07:00
+      quiet: { on: true, start: "22:00", end: "07:00" },
+    };
+    const catchup = localPings(r).filter((p) => p.kind === "catchup");
+    expect(catchup).toHaveLength(1);
+    expect(catchup[0].minutes).toBe(7 * 60); // deferred to 07:00
+  });
+
+  it("quiet hours leave out-of-window pings untouched", () => {
+    const r = {
+      ...DEFAULT_REMINDERS,
+      morning: { on: true, time: "08:00" }, // outside 22:00–07:00
+      water: { on: false, count: 0, start: "09:00", end: "21:00" },
+      workout: { on: false, days: [], time: "17:30" },
+      catchup: { on: false, time: "21:30" },
+      quiet: { on: true, start: "22:00", end: "07:00" },
+    };
+    const morning = localPings(r).filter((p) => p.kind === "morning");
+    expect(morning[0].minutes).toBe(8 * 60);
+  });
+
+  it("inQuiet handles overnight wrap and same-day windows", () => {
+    expect(inQuiet(23 * 60, 22 * 60, 7 * 60)).toBe(true); // 23:00 in 22–07
+    expect(inQuiet(6 * 60, 22 * 60, 7 * 60)).toBe(true); // 06:00 in 22–07
+    expect(inQuiet(12 * 60, 22 * 60, 7 * 60)).toBe(false); // noon not quiet
+    expect(inQuiet(13 * 60, 13 * 60, 14 * 60)).toBe(true); // same-day nap window
+    expect(inQuiet(14 * 60, 13 * 60, 14 * 60)).toBe(false); // end is exclusive
   });
 });

@@ -73,6 +73,45 @@ export function ReminderUplink() {
         <label className="check-label">
           <input
             type="checkbox"
+            checked={reminders.enabled}
+            onChange={(e) => update({ enabled: e.target.checked })}
+          />
+          <strong>Notifications</strong>
+          <span className="off-day-tag">master switch — off hides every ping option</span>
+        </label>
+        {reminders.enabled && (
+          <label className="check-label">
+            <input
+              type="checkbox"
+              checked={reminders.quiet.on}
+              onChange={(e) => update({ quiet: { ...reminders.quiet, on: e.target.checked } })}
+            />
+            Quiet hours
+            <input
+              type="time"
+              className="input time-input"
+              value={reminders.quiet.start}
+              onChange={(e) => update({ quiet: { ...reminders.quiet, start: e.target.value } })}
+              aria-label="Quiet hours start"
+            />
+            –
+            <input
+              type="time"
+              className="input time-input"
+              value={reminders.quiet.end}
+              onChange={(e) => update({ quiet: { ...reminders.quiet, end: e.target.value } })}
+              aria-label="Quiet hours end"
+            />
+            <span className="off-day-tag">pings here wait until it lifts</span>
+          </label>
+        )}
+      </div>
+
+      {reminders.enabled && (
+      <div className="form-block">
+        <label className="check-label">
+          <input
+            type="checkbox"
             checked={reminders.morning.on}
             onChange={(e) => update({ morning: { ...reminders.morning, on: e.target.checked } })}
           />
@@ -232,6 +271,7 @@ export function ReminderUplink() {
           <span className="off-day-tag">"Sync your logs before lights out."</span>
         </label>
       </div>
+      )}
 
       <button className="link-btn" onClick={() => setShowSelfHost(!showSelfHost)}>
         {showSelfHost ? "hide" : "self-hosting?"} — point at your own relay

@@ -124,10 +124,13 @@ the data lives. Shipped in 3 chunks via a reusable `InfoSheet`/`InfoButton`
       still render below the selected kind); anchor input has a datalist of
       the user's OWN active directives ("after <name>") with free text as
       fallback; charge is a 1–5 slider with a ⚡ readout. Verified live.
-- [ ] **Global quiet hours + master notification switch.** When notifications
-      are globally off, editors never even SHOW ping options (don't prompt
-      for what can't fire). Quiet hours clamp all ping times, push and
-      in-app.
+- [x] **Global quiet hours + master notification switch.** DONE (Tier C, 2).
+      `Reminders` gained `enabled` (master) + `quiet {on,start,end}`. Gated/
+      clamped inside `localPings` — the single ping source — so push AND
+      in-app inherit it: master off → zero pings; quiet hours DEFER any ping
+      in-window to when quiet lifts (overnight wrap handled). Master off also
+      hides ping options in the directive editor and bio-metric add form
+      (shows a "globally off" hint). Engine tests added (5). Verified live.
 - [ ] **Bio-scan generalization — metric library with a + (mirror the
       directive codex):** weigh-in stops being the hardwired default; presets
       to pick from (weight, blood pressure, glucose, resting HR, …) plus

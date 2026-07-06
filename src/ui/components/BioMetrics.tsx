@@ -14,6 +14,10 @@ export function BioMetricsCard() {
   const [values, setValues] = useState<Record<string, string>>({});
 
   const metrics = useLiveQuery(() => db.bioMetrics.filter((m) => !m.archivedAt).toArray(), []);
+  const notifOn = useLiveQuery(async () => {
+    const row = await db.kv.get("reminders");
+    return (row?.value as { enabled?: boolean } | undefined)?.enabled !== false;
+  }, []);
   const readings = useLiveQuery(async () => {
     const all = await db.bioReadings.toArray();
     return all.sort((a, b) => a.ts - b.ts);
@@ -119,19 +123,21 @@ export function BioMetricsCard() {
             aria-label="Metric unit"
           />
         </div>
-        <label className="check-label">
-          Remind me
-          <input
-            type="number"
-            className="input num-input-sm"
-            min={0}
-            max={6}
-            value={times}
-            onChange={(e) => setTimes(Math.max(0, Math.min(6, Number(e.target.value) || 0)))}
-            aria-label="Reminders per day (0 = none)"
-          />
-          ×/day (0 = no pings)
-        </label>
+        {notifOn !== false && (
+          <label className="check-label">
+            Remind me
+            <input
+              type="number"
+              className="input num-input-sm"
+              min={0}
+              max={6}
+              value={times}
+              onChange={(e) => setTimes(Math.max(0, Math.min(6, Number(e.target.value) || 0)))}
+              aria-label="Reminders per day (0 = none)"
+            />
+            ×/day (0 = no pings)
+          </label>
+        )}
         <button className="btn" onClick={add} disabled={!name.trim()}>
           Track metric
         </button>

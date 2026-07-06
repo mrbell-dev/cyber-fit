@@ -100,6 +100,11 @@ export function HabitEditor({ seed, onClose }: { seed: EditorSeed; onClose: () =
     const all = await db.habits.filter((x) => !x.archivedAt).toArray();
     return all.filter((x) => x.id !== h?.id).map((x) => x.name);
   }, [h?.id]);
+  // Master notification switch — off hides ping options entirely.
+  const notifOn = useLiveQuery(async () => {
+    const row = await db.kv.get("reminders");
+    return (row?.value as { enabled?: boolean } | undefined)?.enabled !== false;
+  }, []);
 
   const save = async () => {
     if (!name.trim()) return;
@@ -337,6 +342,11 @@ export function HabitEditor({ seed, onClose }: { seed: EditorSeed; onClose: () =
           </div>
         </div>
 
+        {notifOn === false ? (
+          <div className="editor-row">
+            <p className="placeholder">// notifications are globally off — turn them on in Reminder Uplink (SYSTEM) to set pings</p>
+          </div>
+        ) : (
         <div className="editor-row">
           <label className="check-label">
             <input type="checkbox" checked={remindOn} onChange={(e) => setRemindOn(e.target.checked)} />
@@ -391,6 +401,7 @@ export function HabitEditor({ seed, onClose }: { seed: EditorSeed; onClose: () =
             </>
           )}
         </div>
+        )}
 
         <div className="install-actions">
           <button className="btn ghost" onClick={onClose}>

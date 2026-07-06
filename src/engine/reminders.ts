@@ -5,6 +5,12 @@
 import type { BioMetric, Habit } from "./types.ts";
 
 export interface Reminders {
+  /** master switch — off = no pings anywhere (push or in-app), and editors
+   *  hide their ping options entirely. Default on. */
+  enabled: boolean;
+  /** quiet hours — any ping landing inside the window is deferred to when it
+   *  lifts (never fires during quiet). Applies to push AND in-app nudges. */
+  quiet: { on: boolean; start: string; end: string };
   morning: { on: boolean; time: string }; // "HH:MM" local
   water: { on: boolean; count: number; start: string; end: string };
   workout: { on: boolean; days: number[]; time: string }; // 0=Sun … 6=Sat
@@ -15,6 +21,8 @@ export interface Reminders {
 }
 
 export const DEFAULT_REMINDERS: Reminders = {
+  enabled: true,
+  quiet: { on: false, start: "22:00", end: "07:00" },
   morning: { on: true, time: "08:00" },
   water: { on: true, count: 5, start: "09:00", end: "21:00" },
   workout: { on: true, days: [2, 3, 4], time: "17:30" }, // Tue/Wed/Thu
@@ -23,7 +31,24 @@ export const DEFAULT_REMINDERS: Reminders = {
   motivation: { on: false, count: 2, start: "09:00", end: "21:00" },
 };
 
-export type PingKind = keyof Reminders | "habit" | "bio";
+/** Is a local minute-of-day inside the quiet window? Handles overnight wrap
+ *  (start > end, e.g. 22:00→07:00). A zero-width window is never quiet. */
+export function inQuiet(minutes: number, startMin: number, endMin: number): boolean {
+  if (startMin === endMin) return false;
+  return startMin < endMin
+    ? minutes >= startMin && minutes < endMin
+    : minutes >= startMin || minutes < endMin;
+}
+
+/** Defer a ping out of quiet hours to the moment quiet lifts (its end). */
+function clampToQuiet(minutes: number, quiet: Reminders["quiet"]): number {
+  if (!quiet.on) return minutes;
+  const s = parseTime(quiet.start);
+  const e = parseTime(quiet.end);
+  return inQuiet(minutes, s, e) ? e : minutes;
+}
+
+export type PingKind = Exclude<keyof Reminders, "enabled" | "quiet"> | "habit" | "bio";
 
 /** Themed copy shown by the app (in-app pings + self-hosted relays). */
 export const REMINDER_COPY: Record<PingKind, string> = {
@@ -63,6 +88,7 @@ function habitDays(habit: Habit): number[] {
 
 /** Expand the schedule + per-habit + per-bio-metric reminders into local ping times. */
 export function localPings(r: Reminders, habits: Habit[] = [], metrics: BioMetric[] = []): LocalPing[] {
+  if (r.enabled === false) return []; // master switch off → nothing fires anywhere
   const pings: LocalPing[] = [];
   if (r.morning.on) pings.push({ kind: "morning", minutes: parseTime(r.morning.time), days: ALL_DAYS });
   if (r.catchup.on) pings.push({ kind: "catchup", minutes: parseTime(r.catchup.time), days: ALL_DAYS });
@@ -103,6 +129,8 @@ export function localPings(r: Reminders, habits: Habit[] = [], metrics: BioMetri
       { label: m.name },
     );
   }
+  // Quiet hours defer every ping (system, habit, bio) out of the window.
+  if (r.quiet?.on) return pings.map((p) => ({ ...p, minutes: clampToQuiet(p.minutes, r.quiet) }));
   return pings;
 }
 
