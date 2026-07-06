@@ -7,3 +7,4 @@ coverage/
 .wrangler/
 .DS_Store
 security-audit.md
+BUG-INTAKE.md
