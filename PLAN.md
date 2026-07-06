@@ -161,34 +161,28 @@ the data lives. Shipped in 3 chunks via a reusable `InfoSheet`/`InfoButton`
       real on/off), Directives (per-habit, uncheck clears), Bio-metrics
       (per-metric, uncheck clears). Verified live.
 
-### TIER D — bullet-journal / gig upgrades (new feedback 2026-07-06)
+### TIER D — bullet-journal / gig upgrades (new feedback 2026-07-06) — COMPLETE
 
-- [ ] **Gig migration popup (the BuJo carry-over ritual).** Today unfinished
-      gigs auto-carry: they just stay on the board tagged "carried over."
-      Michael wants the real bullet-journal *migration* instead — on the first
-      open of a new day, if prior-day gigs are still open, a popup lists them
-      with checkboxes; SELECT which to pull into today, the rest retire. The
-      friction is the feature: re-choosing forces intentionality and stops a
-      stale pile from accreting. Doctrine guardrails: frame it forgivingly
-      ("Fresh sheet — pull over what still matters", never "you didn't finish
-      these"); one-tap "carry all" and "skip" escape hatches; it rides
-      alongside DailyBoot (the existing morning popup), not as a second nag.
-      Consider a setting to keep the current silent auto-carry for users who
-      prefer it (progressive disclosure).
-      IMPLEMENTATION NOTE: retiring a gig without completing it needs a way to
-      drop it from the board WITHOUT deleting (no-delete doctrine) — add a
-      `retiredDay?` (or `migratedDay?`) field to Gig; the board shows gigs that
-      are `!doneTs && !retiredDay`. That's a Dexie version bump (append vN+1)
-      + export/import coverage + the rebuild `activeDays`/gig-XP logic stays
-      keyed on completion only (retiring earns nothing, costs nothing).
-- [ ] **Gig templates (quick-add dropdown).** A dropdown/list of saved gig
-      templates so recurring one-offs ("do the dishes", "take out trash") are
-      one tap, not retyped. Lightest version: a datalist on the gig input
-      (type or pick) seeded from the user's own past gig text. Fuller version:
-      a managed template list (save a gig as a template / remove) stored in kv
-      or a `gigTemplates` table. Start with the datalist (zero schema, ADHD-
-      simple), offer the managed list only if it earns its keep. Keep it out
-      of the way of the 1–2-tap add path.
+- [x] **Gig migration popup (the BuJo carry-over ritual).** DONE. New
+      `GigMigration` modal (`components/GigMigration.tsx`): on the first open
+      of a new day, AFTER the boot greeting (gated on `lastBootDay===today` so
+      the two never stack) and once per day (`gigMigratedDay` kv), any gigs
+      still open from prior days come up with checkboxes — carry-all by
+      default, uncheck to "let go". "Carry N forward" retires the unchecked;
+      "Keep them all for now" is the escape hatch. Forgiving copy ("Fresh
+      sheet, choom… let the rest go, no guilt"). No Dexie bump needed —
+      `retiredDay?` is an un-indexed field; board filter is
+      `!retiredDay && (!doneTs || doneDay===today)`; export covers it (gigs
+      table already exported); retiring earns/costs no XP. Verified live.
+      NOTE: left the current silent auto-carry setting OUT for now (no config
+      knob before a real user complains it's naggy — the escape hatch covers
+      it). The ✕ button still hard-deletes (explicit user intent); migration
+      "let go" is the non-destructive path.
+- [x] **Gig templates (quick-add dropdown).** DONE — datalist-first, zero
+      schema: the gig input has a `<datalist>` seeded from the user's distinct
+      past gig text, so "do the dishes" is one pick after the first type. A
+      managed/curated template list stays deferred until it earns its keep.
+      Verified live.
 
 ### TIER LT — flavor, reach, and the long game (carried forward)
 

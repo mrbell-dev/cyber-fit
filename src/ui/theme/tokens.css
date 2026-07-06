@@ -1391,6 +1391,23 @@ html.theme-ice {
   overflow: hidden;
 }
 
+.migrate-row {
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  margin: 4px 0;
+}
+
+.migrate-row .gig-text {
+  flex: 1;
+}
+
+.gig-text.let-go {
+  text-decoration: line-through;
+  color: var(--text-dim);
+}
+
 /* ---------- boot modal ---------- */
 .modal.boot-modal {
   text-align: center;

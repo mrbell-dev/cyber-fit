@@ -18,6 +18,7 @@ import { MoodRow } from "../components/MoodRow.tsx";
 import { MissedPing } from "../components/MissedPing.tsx";
 import { Highlight } from "../components/Highlight.tsx";
 import { DailyBoot } from "../components/DailyBoot.tsx";
+import { GigMigration } from "../components/GigMigration.tsx";
 import { HabitEditor, type EditorSeed } from "../components/HabitEditor.tsx";
 import { GigList } from "../components/GigList.tsx";
 import { Onboarding } from "../components/Onboarding.tsx";
@@ -71,6 +72,7 @@ export function Today() {
     <section aria-label="Today">
       <Onboarding />
       <DailyBoot today={today} />
+      <GigMigration today={today} />
       <MissedPing today={today} />
       <XpBar />
       {editorSeed && <HabitEditor seed={editorSeed} onClose={() => setEditorSeed(null)} />}

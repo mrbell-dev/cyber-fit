@@ -292,6 +292,12 @@ export async function deleteGig(id: string): Promise<void> {
   await refreshPlayer();
 }
 
+/** Retire a gig via the daily migration — drops it off the board but keeps the
+ *  row (no-delete doctrine). Retiring earns/loses no XP, so no re-fold needed. */
+export async function retireGig(id: string): Promise<void> {
+  await db.gigs.update(id, { retiredDay: await currentDayKey() });
+}
+
 export async function addBioMetric(input: {
   name: string;
   unit: string;

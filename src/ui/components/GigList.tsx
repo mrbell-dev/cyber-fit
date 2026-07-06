@@ -12,11 +12,19 @@ export function GigList({ today }: { today: DayKey }) {
 
   const gigs = useLiveQuery(async () => {
     const all = await db.gigs.toArray();
-    // Open gigs from any day + gigs completed today; older completions retire.
+    // Board = open gigs (not retired) from any day + gigs completed today;
+    // older completions and migrated-away gigs drop off.
     return all
-      .filter((g) => !g.doneTs || g.doneDay === today)
+      .filter((g) => !g.retiredDay && (!g.doneTs || g.doneDay === today))
       .sort((a, b) => Number(Boolean(a.doneTs)) - Number(Boolean(b.doneTs)) || a.ts - b.ts);
   }, [today]);
+
+  // Quick-add templates: the user's own distinct past gig text ("do the dishes"
+  // shows up after the first time you type it). Zero schema, ADHD-simple.
+  const templates = useLiveQuery(async () => {
+    const all = await db.gigs.toArray();
+    return [...new Set(all.map((g) => g.text))].slice(0, 50);
+  }, []);
 
   const submit = async () => {
     await addGig(text);
@@ -50,10 +58,16 @@ export function GigList({ today }: { today: DayKey }) {
           className="input"
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="New gig… (one-off job, not a habit)"
+          placeholder="New gig — type or pick a template…"
           aria-label="New gig"
+          list="gig-templates"
           onKeyDown={(e) => e.key === "Enter" && submit()}
         />
+        <datalist id="gig-templates">
+          {(templates ?? []).map((t) => (
+            <option key={t} value={t} />
+          ))}
+        </datalist>
         <button className="btn" onClick={submit} disabled={!text.trim()}>
           Add
         </button>

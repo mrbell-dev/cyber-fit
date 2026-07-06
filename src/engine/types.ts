@@ -126,6 +126,9 @@ export interface Gig {
   ts: number;
   doneTs?: number;
   doneDay?: DayKey;
+  /** retired via the daily migration (dropped from the board without being
+   *  completed) — kept for history, never deleted. */
+  retiredDay?: DayKey;
 }
 
 /** User-defined bio metric beyond weight (BP, resting HR, glucose…). */
