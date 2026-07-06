@@ -93,30 +93,29 @@ outrank broken flows, which outrank ergonomics, which outrank new features.)
       theme actually applying without granting it; the apply mechanism is
       unchanged from v0.9, only the preview is new.
 
-### TIER B — the ⓘ restructure (the Stats verdict)
+### TIER B — the ⓘ restructure (the Stats verdict) — COMPLETE 2026-07-05
 
 Michael asked for an honest read: he's right, not obtuse. Stats-as-destination
 is a failed pattern here — nobody commutes to a stats tab; charts belong where
-the data lives. Direction:
+the data lives. Shipped in 3 chunks via a reusable `InfoSheet`/`InfoButton`
+(ⓘ in a card-header opens a detail sheet).
 
-- [ ] **Every measurable card (Log/Today) gets an ⓘ top-right** opening that
-      thing's history + chart in a popup: weight trend (WITH numbers on the
-      data points) moves to bio-scan's ⓘ · hydration chart to hydration's ⓘ ·
-      reading/learning ⓘ = the full library, filterable by type (find the
-      book/video you want to recommend to a friend) · journal entries always
-      openable to review/edit.
-- [ ] **Highlight Reel: show last 10, truncate, "view all" → filterable
-      full-history view.** (Pairs with the running-log fix in Tier S.)
-- [ ] **Stats slims down to an overview:** uptime grid, level/streak
-      telemetry, screener trends, exports. Telemetry goes DYNAMIC — only
-      sources the user actually tracks appear (someone who can't work out
-      must never stare at a permanent zero. Forgiveness applies to layout
-      too).
-- [ ] **Drop the Tag Explorer screen.** Agreed and recorded: the screen isn't
-      earning its tab. KEEP #tag parsing in free text (zero-cost, feeds
-      export and any future search); delete only the explorer UI.
-- [ ] **Journal polish:** spacing between entries; long entries truncate with
-      … and open in a review/edit popup.
+- [x] **Every measurable card gets an ⓘ.** DONE. Bio-Scan ⓘ → weight trend
+      with a NUMBER ON EVERY POINT + full scan history w/ deltas · Hydration ⓘ
+      → 14-day intake vs goal · Physical Training ⓘ → training volume (8 wk) ·
+      Reading/Learning ⓘ → full library filterable by type (find the
+      book/movie to recommend) · Journal entries tap → review/edit/delete sheet.
+- [x] **Highlight Reel: last 10 + "view all (N)" → searchable archive.** DONE.
+- [x] **Stats slimmed to an overview:** charts moved to their cards; what
+      remains = telemetry tiles, weekly System Report, uptime grid, Trauma
+      Team export, highlight reel. Telemetry was ALREADY dynamic (workout/
+      reading/learning tiles hide when untracked; core level/XP/streak/shield
+      stay). Nobody stares at a permanent zero.
+- [x] **Tag Explorer screen dropped.** Component deleted; #tag PARSING kept in
+      the engine (feeds export + the new library/archive search).
+- [x] **Journal polish:** entries are tappable cards with spacing, long ones
+      clamp to 3 lines with ellipsis, tap opens the review/edit/delete sheet
+      (edit changes text only — ts/dayKey/XP untouched; delete re-folds).
 
 ### TIER C — editor ergonomics & bio-scan generalization
 

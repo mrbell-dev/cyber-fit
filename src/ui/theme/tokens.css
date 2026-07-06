@@ -1323,6 +1323,35 @@ html.theme-ice {
   margin-top: 6px;
 }
 
+/* Journal entries — tappable cards, long ones clamp to 3 lines with an
+   ellipsis; the whole card opens the review/edit sheet. */
+.journal-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  text-align: left;
+  margin-top: 10px;
+  padding: 10px;
+  background: var(--bg-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.journal-entry:active {
+  border-color: var(--neon-green);
+}
+
+.journal-clip {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 /* ---------- boot modal ---------- */
 .modal.boot-modal {
   text-align: center;

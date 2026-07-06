@@ -256,6 +256,20 @@ export async function logJournal(text: string): Promise<void> {
   await refreshPlayer();
 }
 
+/** Edit an entry's TEXT only — ts/dayKey are untouched, so the XP fold is
+ *  unaffected (journal XP is per-day-first-entry, not text-derived). */
+export async function updateJournal(id: string, text: string): Promise<void> {
+  const trimmed = text.trim();
+  if (!trimmed) return;
+  await db.journalLogs.update(id, { text: trimmed });
+}
+
+/** Deleting can remove a day's only journal entry → re-fold to keep XP honest. */
+export async function deleteJournal(id: string): Promise<void> {
+  await db.journalLogs.delete(id);
+  await refreshPlayer();
+}
+
 export async function addGig(text: string): Promise<void> {
   const trimmed = text.trim();
   if (!trimmed) return;

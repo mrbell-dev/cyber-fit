@@ -1,9 +1,48 @@
 import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../../db/db.ts";
-import type { DayKey } from "../../engine/index.ts";
-import { logHighlight, logJournal } from "../../db/repo.ts";
+import type { DayKey, JournalLog } from "../../engine/index.ts";
+import { deleteJournal, logHighlight, logJournal, updateJournal } from "../../db/repo.ts";
 import { InfoSheet } from "./InfoSheet.tsx";
+
+/** Review / edit / delete a single journal entry. Editing changes only the
+ *  text (the entry's day + XP are untouched); delete re-folds. */
+function JournalEntryModal({ entry, onClose }: { entry: JournalLog; onClose: () => void }) {
+  const [text, setText] = useState(entry.text);
+  const [confirmDel, setConfirmDel] = useState(false);
+
+  const save = async () => {
+    await updateJournal(entry.id, text);
+    onClose();
+  };
+
+  return (
+    <InfoSheet title={`Entry · ${entry.dayKey}`} onClose={onClose}>
+      <textarea
+        className="input note-input"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        aria-label="Edit journal entry"
+        rows={8}
+        autoFocus
+      />
+      <div className="form-row">
+        <button className="btn" onClick={save} disabled={!text.trim()}>
+          Save
+        </button>
+        {confirmDel ? (
+          <button className="btn ghost danger" onClick={async () => { await deleteJournal(entry.id); onClose(); }}>
+            confirm delete
+          </button>
+        ) : (
+          <button className="btn ghost" onClick={() => setConfirmDel(true)}>
+            Delete
+          </button>
+        )}
+      </div>
+    </InfoSheet>
+  );
+}
 
 /** Some days you pick one good frame; some days you need to dump the buffer.
  *  Highlight = savoring practice; Journal = catharsis. Both count. */
@@ -11,6 +50,7 @@ export function Highlight({ today }: { today: DayKey }) {
   const [mode, setMode] = useState<"highlight" | "journal">("highlight");
   const [text, setText] = useState("");
   const [journalText, setJournalText] = useState("");
+  const [editEntry, setEditEntry] = useState<JournalLog | null>(null);
 
   const todays = useLiveQuery(async () => {
     const logs = await db.highlightLogs.where({ dayKey: today }).toArray();
@@ -51,13 +91,14 @@ export function Highlight({ today }: { today: DayKey }) {
         <button className="btn" onClick={submitJournal} disabled={!journalText.trim()}>
           Commit entry
         </button>
+        {editEntry && <JournalEntryModal entry={editEntry} onClose={() => setEditEntry(null)} />}
         {(todaysJournal ?? []).map((j) => (
-          <p className="highlight-text reel" key={j.id}>
+          <button className="journal-entry" key={j.id} onClick={() => setEditEntry(j)}>
             <span className="off-day-tag">
-              {new Date(j.ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-            </span>{" "}
-            {j.text}
-          </p>
+              {new Date(j.ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} · tap to edit
+            </span>
+            <span className="journal-clip">{j.text}</span>
+          </button>
         ))}
       </div>
     );
