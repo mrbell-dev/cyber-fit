@@ -12,6 +12,7 @@ import {
 } from "../../engine/index.ts";
 import { logWeight, saveSettings } from "../../db/repo.ts";
 import { useSettings } from "../hooks.ts";
+import { InfoButton, InfoSheet } from "./InfoSheet.tsx";
 
 export function useBodyLogs(): BodyLog[] | undefined {
   return useLiveQuery(async () => {
@@ -27,6 +28,7 @@ export function BodyCard({ today }: { today: DayKey }) {
   const unit = settings.weightUnit ?? "lbs";
   const cadence = weighinCadenceOf(settings);
   const [value, setValue] = useState("");
+  const [info, setInfo] = useState(false);
   const logs = useBodyLogs();
 
   if (!logs) return null;
@@ -45,7 +47,18 @@ export function BodyCard({ today }: { today: DayKey }) {
 
   return (
     <div className="card">
-      <h2 className="card-title">Bio-Scan — Weigh-in</h2>
+      <div className="card-header">
+        <h2 className="card-title">Bio-Scan — Weigh-in</h2>
+        {logs.length >= 2 && (
+          <InfoButton onClick={() => setInfo(true)} label="Weight trend + history" />
+        )}
+      </div>
+      {info && (
+        <InfoSheet title="Weight Trend" onClose={() => setInfo(false)}>
+          <WeightChart />
+          <WeightHistory logs={logs} />
+        </InfoSheet>
+      )}
       <label className="check-label">
         Cadence
         <select
@@ -100,16 +113,17 @@ export function BodyCard({ today }: { today: DayKey }) {
   );
 }
 
-/** Single-series weight trend — line + dots, latest value direct-labeled,
- *  y-domain padded around the data (never forced to zero for weight). */
+/** Single-series weight trend — line + dots, a number over EVERY point,
+ *  y-domain padded around the data (never forced to zero for weight).
+ *  Renders bare (no card) — it lives inside the Bio-Scan ⓘ sheet. */
 export function WeightChart() {
   const logs = useBodyLogs();
   if (!logs || logs.length < 2) return null;
 
   const recent = logs.slice(-12);
   const W = 320;
-  const H = 96;
-  const PAD = { top: 14, right: 44, bottom: 8, left: 8 };
+  const H = 104;
+  const PAD = { top: 22, right: 14, bottom: 10, left: 14 };
   const ws = recent.map((l) => l.weight);
   const min = Math.min(...ws);
   const max = Math.max(...ws);
@@ -121,8 +135,7 @@ export function WeightChart() {
   const lastLog = recent[recent.length - 1];
 
   return (
-    <div className="card">
-      <h2 className="card-title">Weight Trend — last {recent.length} scans</h2>
+    <>
       <svg
         viewBox={`0 0 ${W} ${H}`}
         className="chart-svg"
@@ -133,15 +146,43 @@ export function WeightChart() {
         <line x1={PAD.left} x2={W - PAD.right} y1={y(max)} y2={y(max)} className="chart-grid" />
         <path d={path} className="chart-line" />
         {recent.map((l, i) => (
-          <circle key={l.id} cx={x(i)} cy={y(l.weight)} r="3.5" className="chart-dot">
-            <title>{`${l.dayKey}: ${l.weight} ${l.unit}`}</title>
-          </circle>
+          <g key={l.id}>
+            <circle cx={x(i)} cy={y(l.weight)} r="3.5" className="chart-dot">
+              <title>{`${l.dayKey}: ${l.weight} ${l.unit}`}</title>
+            </circle>
+            <text x={x(i)} y={y(l.weight) - 7} className="chart-point-label" textAnchor="middle">
+              {l.weight}
+            </text>
+          </g>
         ))}
-        <text x={x(recent.length - 1) + 8} y={y(lastLog.weight) + 4} className="chart-label">
-          {lastLog.weight}
-        </text>
       </svg>
-      <p className="placeholder">// monthly signal, not daily noise</p>
+      <p className="placeholder">// {lastLog.unit} · monthly signal, not daily noise</p>
+    </>
+  );
+}
+
+/** Full scan list — the "history" half of the Bio-Scan ⓘ sheet. */
+function WeightHistory({ logs }: { logs: BodyLog[] }) {
+  const rows = [...logs].sort((a, b) => b.ts - a.ts);
+  return (
+    <div className="history-list">
+      {rows.map((l, i) => {
+        const prior = rows[i + 1];
+        const d = prior && prior.unit === l.unit ? l.weight - prior.weight : null;
+        return (
+          <div className="row-item" key={l.id}>
+            <span>
+              <strong>{l.weight} {l.unit}</strong>
+              {d !== null && (
+                <span className="off-day-tag">
+                  {" "}· {d > 0 ? "+" : ""}{Math.round(d * 10) / 10}
+                </span>
+              )}
+            </span>
+            <span className="off-day-tag">{l.dayKey}</span>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -161,8 +202,8 @@ export function VolumeChart({ today }: { today: DayKey }) {
   const maxCount = Math.max(1, ...weeks.map((w) => w.count));
 
   return (
-    <div className="card">
-      <h2 className="card-title">Training Volume — sessions / week</h2>
+    <>
+      <p className="placeholder">// sessions per week — last 8 weeks</p>
       <div className="volume-week" role="img" aria-label="Workouts per week, last 8 weeks">
         {weeks.map((w, i) => (
           <div className="water-day" key={i}>
@@ -175,6 +216,6 @@ export function VolumeChart({ today }: { today: DayKey }) {
           </div>
         ))}
       </div>
-    </div>
+    </>
   );
 }

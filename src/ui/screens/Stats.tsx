@@ -13,8 +13,6 @@ import {
 import { useState } from "react";
 import { useDayKey, useSettings } from "../hooks.ts";
 import { HighlightReel } from "../components/Highlight.tsx";
-import { VolumeChart, WeightChart } from "../components/BodyMetrics.tsx";
-import { TagExplorer } from "../components/TagExplorer.tsx";
 import { CareTeamExport } from "../components/CareTeamExport.tsx";
 
 const GRID_DAYS = 28; // 14-wide rows, GitHub-style intensity; tap a day for detail
@@ -124,18 +122,6 @@ export function Stats() {
   for (const l of data.highlightLogs) bump(l.dayKey);
 
   const gridDays = Array.from({ length: GRID_DAYS }, (_, i) => addDays(today, i - (GRID_DAYS - 1)));
-
-  // Water bars, last 7 days.
-  const waterByDay = new Map<string, number>();
-  for (const l of data.waterLogs) {
-    waterByDay.set(l.dayKey, (waterByDay.get(l.dayKey) ?? 0) + l.ml);
-  }
-  const waterDaysList = Array.from({ length: 7 }, (_, i) => {
-    const day = addDays(today, i - 6);
-    const logs = data.waterLogs.filter((l) => l.dayKey === day);
-    return { day, total: waterTotal(logs) };
-  });
-  const maxWater = Math.max(settings.waterGoalMl, ...waterDaysList.map((d) => d.total));
 
   const readStreak = daySetStreak(readingDays(data.readingLogs), today);
   const learnStreak = daySetStreak(
@@ -259,29 +245,7 @@ export function Stats() {
 
       <CareTeamExport />
 
-      <WeightChart />
-
-      <VolumeChart today={today} />
-
-      <TagExplorer />
-
       <HighlightReel />
-
-      <div className="card">
-        <h2 className="card-title">Hydration — last 7 days</h2>
-        <div className="water-week" role="img" aria-label="Water intake, last 7 days">
-          {waterDaysList.map(({ day, total }) => (
-            <div className="water-day" key={day}>
-              <div
-                className={total >= settings.waterGoalMl ? "water-col met" : "water-col"}
-                style={{ height: `${Math.max(4, Math.round((total / maxWater) * 72))}px` }}
-                title={`${day}: ${total} ml`}
-              />
-              <span className="water-day-label">{day.slice(8)}</span>
-            </div>
-          ))}
-        </div>
-      </div>
     </section>
   );
 }

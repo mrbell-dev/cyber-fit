@@ -122,7 +122,7 @@ export function Today() {
         )}
       </div>
 
-      <WaterGauge logs={waterLogs} goalMl={settings.waterGoalMl} unit={settings.waterUnit ?? "ml"} />
+      <WaterGauge logs={waterLogs} goalMl={settings.waterGoalMl} unit={settings.waterUnit ?? "ml"} today={today} />
 
       <GigList today={today} />
 

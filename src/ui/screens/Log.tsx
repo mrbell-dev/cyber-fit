@@ -10,9 +10,10 @@ import {
 } from "../../engine/index.ts";
 import { addReadingItem, logReading, logWorkout, setReadingStatus } from "../../db/repo.ts";
 import { useDayKey, useSettings } from "../hooks.ts";
-import { BodyCard } from "../components/BodyMetrics.tsx";
+import { BodyCard, VolumeChart } from "../components/BodyMetrics.tsx";
 import { BioMetricsCard } from "../components/BioMetrics.tsx";
 import { ScreenerCard } from "../components/Screeners.tsx";
+import { InfoButton, InfoSheet } from "../components/InfoSheet.tsx";
 
 type SetRow = { reps: string; weight: string };
 
@@ -24,6 +25,7 @@ function WorkoutCard() {
   const [score, setScore] = useState("");
   const [sets, setSets] = useState<SetRow[]>([{ reps: "", weight: "" }]);
   const [templated, setTemplated] = useState(false);
+  const [info, setInfo] = useState(false);
   const today = useDayKey();
   const settings = useSettings();
   const distanceUnit = settings.distanceUnit ?? "mi";
@@ -84,9 +86,19 @@ function WorkoutCard() {
     setTemplated(false);
   };
 
+  const hasHistory = (history ?? []).length > 0;
+
   return (
     <div className="card">
-      <h2 className="card-title">Physical Training</h2>
+      <div className="card-header">
+        <h2 className="card-title">Physical Training</h2>
+        {hasHistory && <InfoButton onClick={() => setInfo(true)} label="Training volume + history" />}
+      </div>
+      {info && (
+        <InfoSheet title="Training Volume" onClose={() => setInfo(false)}>
+          <VolumeChart today={today} />
+        </InfoSheet>
+      )}
       <div className="form-row">
         <input
           className="input"

@@ -1288,6 +1288,41 @@ html.theme-ice {
   box-shadow: var(--glow-magenta);
 }
 
+/* ⓘ button — opens a card's detail/history sheet. Recessive (green outline)
+   so it reads as "more info", distinct from the magenta + add action. */
+.card-info {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--neon-green);
+  border-radius: 8px;
+  color: var(--neon-green);
+  background: rgba(0, 255, 179, 0.08);
+  font-size: 15px;
+  line-height: 1;
+}
+
+.card-info:active {
+  box-shadow: var(--glow-green);
+}
+
+.modal.info-sheet {
+  max-height: 86dvh;
+  overflow-y: auto;
+}
+
+.chart-point-label {
+  fill: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 8px;
+}
+
+.history-list {
+  max-height: 44dvh;
+  overflow-y: auto;
+  margin-top: 6px;
+}
+
 /* ---------- boot modal ---------- */
 .modal.boot-modal {
   text-align: center;
