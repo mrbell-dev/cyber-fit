@@ -938,6 +938,58 @@ html.theme-ice {
   opacity: 0.4;
 }
 
+/* ---------- Visual Cortex preview tiles (themes + fx) ---------- */
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.preview-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  text-align: left;
+  background: var(--bg-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+.preview-tile.on {
+  border-color: var(--neon-green);
+  color: var(--text);
+  box-shadow: var(--glow-green);
+}
+
+.preview-tile.locked {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.swatch-strip {
+  display: flex;
+  height: 34px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.swatch-dot {
+  flex: 1;
+}
+
+.preview-name {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.preview-tag {
+  color: var(--neon-green);
+}
+
 .about-links {
   display: flex;
   gap: 14px;

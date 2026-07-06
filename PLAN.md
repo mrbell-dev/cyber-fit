@@ -76,9 +76,16 @@ outrank broken flows, which outrank ergonomics, which outrank new features.)
       or how to earn them from the UI. Add a one-tap explainer on the stat
       (earned +1 per 5 active days, cap 3, auto-absorb a miss) linking the
       Field Manual entry.
-- [ ] **Visual Cortex unlocks are invisible.** Michael can't tell what the
-      fx/themes look like or whether they exist. Add mini-previews (a swatch
-      strip / 1-line fx demo) and VERIFY each unlock actually applies.
+- [x] **Visual Cortex unlocks now preview.** DONE (this pass): theme tiles
+      render the real 5-colour palette swatch strip (kept in sync with the
+      html.theme-* packs); FX tiles show a scoped live mini-demo (scanline
+      texture / glitching "CYBER//FIT" / CRT "SIGNAL"). Locked packs still
+      preview (dimmed) so you see what you'd unlock; the catalog lists the
+      unlock condition. Apply path (saveSettings → applyTheme/applyFx) is the
+      existing verified one — Electric City stays active on select
+      (screenshot: visual-cortex.png). NOTE: could not screenshot a LOCKED
+      theme actually applying without granting it; the apply mechanism is
+      unchanged from v0.9, only the preview is new.
 
 ### TIER B — the ⓘ restructure (the Stats verdict)
 

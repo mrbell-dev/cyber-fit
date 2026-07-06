@@ -8,13 +8,20 @@ export interface ThemeDef {
   name: string;
   /** augment id required to use it (null = free) */
   augment: string | null;
+  /** [bg, magenta, green, purple, yellow] — for the preview swatch strip.
+   *  Kept in sync with the html.theme-* palettes in tokens.css. */
+  swatch: [string, string, string, string, string];
 }
 
 export const THEMES: ThemeDef[] = [
-  { id: "electric-city", name: "Electric City", augment: null },
-  { id: "acid", name: "Acid Rain", augment: "theme-acid" },
-  { id: "ember", name: "Ember District", augment: "theme-ember" },
-  { id: "ice", name: "Cryo Sector", augment: "theme-ice" },
+  { id: "electric-city", name: "Electric City", augment: null,
+    swatch: ["#1b1b2a", "#ff007a", "#00ffb3", "#a700ff", "#ffea00"] },
+  { id: "acid", name: "Acid Rain", augment: "theme-acid",
+    swatch: ["#141a12", "#aaff00", "#d8ff4a", "#4dff88", "#f4ff5e"] },
+  { id: "ember", name: "Ember District", augment: "theme-ember",
+    swatch: ["#201014", "#ff3d00", "#ffb347", "#ff0055", "#ffd166"] },
+  { id: "ice", name: "Cryo Sector", augment: "theme-ice",
+    swatch: ["#101722", "#4dc3ff", "#9bf0ff", "#7a8cff", "#d6faff"] },
 ];
 
 export function applyTheme(id: string): void {

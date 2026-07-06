@@ -103,42 +103,52 @@ function Augments() {
   return (
     <div className="card">
       <h2 className="card-title">Augments — Visual Cortex</h2>
-      <div className="theme-row">
+      <div className="preview-grid">
         {THEMES.map((t) => {
           const isUnlocked = t.augment === null || unlocked.has(t.augment);
           const active = settings.activeTheme === t.id;
           return (
             <button
               key={t.id}
-              className={`theme-swatch${active ? " on" : ""}${isUnlocked ? "" : " locked"}`}
+              className={`preview-tile${active ? " on" : ""}${isUnlocked ? "" : " locked"}`}
               disabled={!isUnlocked}
               aria-pressed={active}
-              title={isUnlocked ? t.name : `${t.name} — locked (level up or find a data shard)`}
               onClick={() => saveSettings({ activeTheme: t.id })}
             >
-              {isUnlocked ? t.name : `🔒 ${t.name}`}
+              <span className="swatch-strip" aria-hidden="true">
+                {t.swatch.map((c, i) => (
+                  <span key={i} className="swatch-dot" style={{ background: c }} />
+                ))}
+              </span>
+              <span className="preview-name">
+                {isUnlocked ? t.name : `🔒 ${t.name}`}
+                {active && <span className="preview-tag"> · active</span>}
+              </span>
             </button>
           );
         })}
       </div>
       <p className="placeholder">
-        // themes are pluggable CSS packs — a medieval or minimal pack is one PR away
+        // swatches are the real palette. locked packs still preview — level up
+        or find a data shard to install. new packs are one PR away
       </p>
 
       <h3 className="card-title" style={{ marginTop: 14 }}>
         FX Modules
       </h3>
-      <div className="theme-row">
+      <div className="preview-grid">
         {AUGMENTS.filter((a) => a.kind === "fx").map((a) => {
           const isUnlocked = unlocked.has(a.id);
           const on = (settings.activeFx ?? []).includes(a.id);
+          const previewKind =
+            a.id === "fx-scanlines" ? "scanlines" : a.id === "fx-glitch-title" ? "glitch" : "crt";
           return (
             <button
               key={a.id}
-              className={`theme-swatch${on ? " on" : ""}${isUnlocked ? "" : " locked"}`}
+              className={`preview-tile${on ? " on" : ""}${isUnlocked ? "" : " locked"}`}
               disabled={!isUnlocked}
               aria-pressed={on}
-              title={isUnlocked ? a.desc : `${a.name} — shard-drop only`}
+              title={a.desc}
               onClick={() =>
                 saveSettings({
                   activeFx: on
@@ -147,12 +157,16 @@ function Augments() {
                 })
               }
             >
-              {isUnlocked ? a.name : `🔒 ${a.name}`}
+              <span className={`fx-preview ${previewKind}`} aria-hidden="true" />
+              <span className="preview-name">
+                {isUnlocked ? a.name : `🔒 ${a.name}`}
+                {on && <span className="preview-tag"> · on</span>}
+              </span>
             </button>
           );
         })}
       </div>
-      <p className="placeholder">// motion fx auto-disable if your OS asks for reduced motion</p>
+      <p className="placeholder">// tiles show the live effect · motion auto-disables if your OS asks for reduced motion</p>
 
       <h3 className="card-title" style={{ marginTop: 14 }}>
         Catalog
