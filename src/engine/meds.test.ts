@@ -15,8 +15,8 @@ const weekly: Habit = {
   ...daily, id: "m2", name: "Weekly shot", schedule: { kind: "weekdays", days: [5] },
   med: { dueTime: "18:00", remindEveryMin: 120, windowMin: 1440 },
 };
-const done = (ts: number): HabitLog =>
-  ({ id: "l", habitId: "m1", dayKey: "x", ts, amount: 1, kind: "done" });
+const done = (ts: number, dayKey = "x"): HabitLog =>
+  ({ id: "l", habitId: "m1", dayKey, ts, amount: 1, kind: "done" });
 
 describe("medWindow", () => {
   it("null for non-med habits", () => {
@@ -48,5 +48,21 @@ describe("medWindow", () => {
     expect(medWindow(weekly, local(2026, 7, 11, 18, 1), OFF, [])!.state).toBe("closed");
     // Wednesday, nowhere near the slot → upcoming toward Friday
     expect(medWindow(weekly, local(2026, 7, 8, 10), OFF, [])!.state).toBe("upcoming");
+  });
+  it("post-close undo (anchor dayKey, real ts after close) reopens the window", () => {
+    const logs = [
+      done(local(2026, 7, 8, 9, 30), "2026-07-08"), // taken, inside window
+      { ...done(local(2026, 7, 8, 14, 0), "2026-07-08"), amount: -1 }, // undo tapped after 13:00 close
+    ];
+    expect(medWindow(daily, local(2026, 7, 8, 14, 10), OFF, logs)!.state).toBe("closed");
+  });
+  it("an early dose logged before the window opens still counts as taken", () => {
+    const logs = [done(local(2026, 7, 8, 7, 0), "2026-07-08")]; // 7am tap for a 9am med
+    expect(medWindow(daily, local(2026, 7, 8, 8), OFF, logs)!.state).toBe("taken");
+    expect(medWindow(daily, local(2026, 7, 8, 10), OFF, logs)!.state).toBe("taken");
+  });
+  it("weekly: a log with the anchor dayKey inside the window still counts (regression guard)", () => {
+    const logs = [{ ...done(local(2026, 7, 11, 10), "2026-07-10"), habitId: "m2" }]; // Sat 10:00, anchored to Fri 07-10
+    expect(medWindow(weekly, local(2026, 7, 11, 10), OFF, logs)!.state).toBe("taken");
   });
 });
