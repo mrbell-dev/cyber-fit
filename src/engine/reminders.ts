@@ -73,6 +73,8 @@ export interface LocalPing {
   habitId?: string;
   /** in-app nudges go quiet once the habit is done for the day */
   untilDone?: boolean;
+  /** push relay excludes these; only in-app reminders fire */
+  inAppOnly?: boolean;
 }
 
 const ALL_DAYS = [0, 1, 2, 3, 4, 5, 6];
@@ -101,6 +103,23 @@ export function localPings(r: Reminders, habits: Habit[] = [], metrics: BioMetri
 
   for (const habit of habits) {
     if (habit.archivedAt) continue;
+    if (habit.med) {
+      const start = parseTime(habit.med.dueTime);
+      const days = habitDays(habit);
+      for (let t = 0; t < habit.med.windowMin; t += habit.med.remindEveryMin) {
+        const minutes = start + t;
+        pings.push({
+          kind: "habit",
+          minutes: minutes % 1440,
+          days: minutes < 1440 ? [...days] : days.map((d) => (d + 1) % 7),
+          label: habit.name,
+          habitId: habit.id,
+          untilDone: true,
+          ...(t > 0 ? { inAppOnly: true } : {}),
+        });
+      }
+      continue; // med reminders replace manual pings/reminderTime for this habit
+    }
     if (habit.pings && habit.pings.times > 0) {
       spread(
         pings,
@@ -179,8 +198,8 @@ export function slotBundleFor(
 ): { slots: number[]; motivationSlots: number[] } {
   const pings = localPings(r, habits, metrics);
   return {
-    slots: toSlots(pings.filter((p) => p.kind !== "motivation"), tzOffsetMinutes),
-    motivationSlots: toSlots(pings.filter((p) => p.kind === "motivation"), tzOffsetMinutes),
+    slots: toSlots(pings.filter((p) => p.kind !== "motivation" && !p.inAppOnly), tzOffsetMinutes),
+    motivationSlots: toSlots(pings.filter((p) => p.kind === "motivation" && !p.inAppOnly), tzOffsetMinutes),
   };
 }
 

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_REMINDERS, duePingsToday, inQuiet, localPings, slotBundleFor, slotsFor } from "./reminders.ts";
+import type { Habit } from "./types.ts";
 
 describe("localPings", () => {
   it("water spreads count evenly across the window", () => {
@@ -115,6 +116,50 @@ describe("multi-ping habits + motivation slots", () => {
     expect(bundle.slots).not.toContain(600);
     // motivation off by default → empty
     expect(slotBundleFor(DEFAULT_REMINDERS, 0).motivationSlots).toEqual([]);
+  });
+});
+
+describe("med habits", () => {
+  it("med habits: escalation pings are in-app only; push gets one dueTime slot", () => {
+    const med: Habit = {
+      id: "m",
+      name: "Allergy pill",
+      icon: "💊",
+      schedule: { kind: "daily" },
+      domain: "general",
+      target: 1,
+      createdAt: 0,
+      order: 1,
+      area: "meds",
+      med: { dueTime: "09:00", remindEveryMin: 60, windowMin: 240 },
+    };
+    const pings = localPings(DEFAULT_REMINDERS, [med]);
+    const mine = pings.filter((p) => p.habitId === "m");
+    // 09:00,10:00,11:00,12:00 — every remindEveryMin across the window
+    expect(mine.map((p) => p.minutes)).toEqual([540, 600, 660, 720]);
+    expect(mine.every((p) => p.untilDone)).toBe(true);
+    expect(mine.filter((p) => !p.inAppOnly).map((p) => p.minutes)).toEqual([540]); // push: dueTime only
+    const { slots } = slotBundleFor(DEFAULT_REMINDERS, 0, [med]);
+    const medSlots = slots.filter((s) => s % 1440 === 540); // 09:00 UTC each day
+    expect(medSlots.length).toBe(7); // one per day, not four
+  });
+
+  it("med window crossing midnight puts overflow pings on the next weekday", () => {
+    const shot: Habit = {
+      id: "s",
+      name: "Weekly booster",
+      icon: "💉",
+      schedule: { kind: "weekdays", days: [5] },
+      domain: "general",
+      target: 1,
+      createdAt: 0,
+      order: 1,
+      area: "meds",
+      med: { dueTime: "18:00", remindEveryMin: 720, windowMin: 1440 },
+    };
+    const mine = localPings(DEFAULT_REMINDERS, [shot]).filter((p) => p.habitId === "s");
+    // 18:00 Fri, 06:00 Sat (1080+720=1800 → 360 on day+1), 18:00 Sat would equal close → excluded
+    expect(mine.map((p) => [p.days[0], p.minutes])).toEqual([[5, 1080], [6, 360]]);
   });
 });
 
