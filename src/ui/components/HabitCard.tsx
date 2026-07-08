@@ -40,7 +40,16 @@ export function HabitCard({
     ? medWindow(habit, Date.now(), new Date().getTimezoneOffset(), recentLogs ?? [])
     : null;
 
+  // A dose logged under a past anchorDayKey (cross-midnight window) is
+  // invisible to today's dayKey bucketing, so for med cards the window
+  // state — not status.done — is the truth for done/undo.
+  const medTaken = med?.state === "taken";
+  const showDone = status.done || medTaken;
+
   const tap = async () => {
+    if (medTaken) {
+      return void (await undoHabit(habit.id, med.anchorDayKey !== today ? med.anchorDayKey : undefined));
+    }
     if (status.done && habit.target === 1) return void (await undoHabit(habit.id));
     if (med && (med.state === "open" || med.state === "closed") && med.anchorDayKey !== today) {
       return void (await logHabit(habit.id, { dayKey: med.anchorDayKey }));
@@ -50,7 +59,7 @@ export function HabitCard({
 
   const cls = [
     "habit-card",
-    status.done ? "done" : "",
+    showDone ? "done" : "",
     status.skipped ? "skipped" : "",
     !scheduledToday ? "off-day" : "",
   ]
@@ -59,7 +68,7 @@ export function HabitCard({
 
   return (
     <div className={cls}>
-      <button className="habit-main" onClick={tap} aria-pressed={status.done}>
+      <button className="habit-main" onClick={tap} aria-pressed={showDone}>
         <span className="habit-icon" aria-hidden="true">
           {habit.icon}
         </span>
@@ -81,6 +90,7 @@ export function HabitCard({
               {med && med.state === "open" && (
                 <span className="off-day-tag"> · window closes {formatTime(med.closesAt)}</span>
               )}
+              {medTaken && !status.done && <span className="off-day-tag"> · taken</span>}
             </>
           )}
         </span>
@@ -91,8 +101,8 @@ export function HabitCard({
               {status.count}/{habit.target}
             </span>
           ) : (
-            <span className={status.done ? "checkbox on" : "checkbox"} aria-hidden="true">
-              {status.done ? "✓" : ""}
+            <span className={showDone ? "checkbox on" : "checkbox"} aria-hidden="true">
+              {showDone ? "✓" : ""}
             </span>
           )}
         </span>
