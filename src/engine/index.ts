@@ -5,6 +5,7 @@
 export * from "./time.ts";
 export * from "./types.ts";
 export * from "./habits.ts";
+export * from "./goals.ts";
 export * from "./water.ts";
 export * from "./rng.ts";
 export * from "./rewards.ts";

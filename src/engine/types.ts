@@ -62,6 +62,22 @@ export interface Habit {
   order: number;
 }
 
+/** A lens over existing logs — derives progress toward a target, never writes.
+ *  Public repo: keep example names generic ("Deep talks", "Pages"). */
+export interface Goal {
+  id: string;
+  name: string;
+  horizon: "week" | "month" | "year";
+  target: number;
+  source:
+    | { kind: "habits"; habitIds: string[] }
+    | { kind: "readingPages" }
+    | { kind: "workouts" };
+  createdAt: number;
+  archivedAt?: number;
+  order: number;
+}
+
 // ---------- event logs (append-only) ----------
 
 export interface HabitLog {
@@ -197,6 +213,8 @@ export interface ReadingLog {
   ts: number;
   itemId?: string;
   minutes?: number;
+  /** pages read this session — feeds pages goals */
+  pages?: number;
   /** post-reading reflection — what it said, how it landed */
   note?: string;
   feeling?: 1 | 2 | 3 | 4 | 5;
