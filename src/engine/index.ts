@@ -15,3 +15,4 @@ export * from "./presets.ts";
 export * from "./exercises.ts";
 export * from "./tags.ts";
 export * from "./screeners.ts";
+export { medWindow, type MedWindow } from "./meds.ts";

@@ -12,7 +12,7 @@ export type Schedule =
 export type HabitDomain = "general" | "learning";
 
 /** Area of focus — grouping, color, and (for "learning") streak wiring. */
-export type Area = "mind" | "body" | "health" | "sleep" | "nutrition" | "learning" | "grounding";
+export type Area = "mind" | "body" | "health" | "sleep" | "nutrition" | "learning" | "grounding" | "meds";
 
 export const AREAS: { id: Area; name: string; icon: string }[] = [
   { id: "mind", name: "Mind", icon: "🧠" },
@@ -22,6 +22,7 @@ export const AREAS: { id: Area; name: string; icon: string }[] = [
   { id: "nutrition", name: "Nutrition", icon: "🥗" },
   { id: "learning", name: "Learning", icon: "📖" },
   { id: "grounding", name: "Grounding", icon: "🧘" },
+  { id: "meds", name: "Meds", icon: "💊" },
 ];
 
 export type TimeOfDay = "morning" | "day" | "evening" | "anytime";
@@ -52,6 +53,10 @@ export interface Habit {
   anchor?: string;
   /** set when installed from the Directive Library (enables clean re-install) */
   presetId?: string;
+  /** medication semantics: a dose window that opens at dueTime and closes
+   *  windowMin later; in-app/SMS reminders repeat every remindEveryMin until
+   *  taken or closed. Push stays a single generic dueTime ping. */
+  med?: { nickname?: string; dueTime: string; remindEveryMin: number; windowMin: number };
   createdAt: number;
   archivedAt?: number;
   order: number;
