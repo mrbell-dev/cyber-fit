@@ -186,6 +186,10 @@ the data lives. Shipped in 3 chunks via a reusable `InfoSheet`/`InfoButton`
 
 ### TIER LT — flavor, reach, and the long game (carried forward)
 
+- [ ] **Goals system (captured 2026-07-08, needs brainstorm before build):**
+      viewable general goals with progress + pace-aware reminders that fire on
+      the days you'd otherwise coast (inverse of the fixed-day workout ping).
+      Raw capture + open design questions in `TODO.md` — scope it there first.
 - [ ] **Accessibility audit:** full axe pass + a real VoiceOver/TalkBack
       walkthrough (carried from v2 — needs a human session, still owed).
 - [ ] **Cyberware rig:** SVG avatar gaining visible chrome per level (arm LVL 3,
