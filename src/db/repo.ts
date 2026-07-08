@@ -90,6 +90,7 @@ export async function addHabit(input: {
   reminderTime?: string;
   pings?: Habit["pings"];
   presetId?: string;
+  med?: Habit["med"];
 }): Promise<Habit> {
   const order = (await db.habits.count()) + 1;
   const habit: Habit = {
@@ -109,6 +110,7 @@ export async function addHabit(input: {
     ...(input.reminderTime ? { reminderTime: input.reminderTime } : {}),
     ...(input.pings ? { pings: input.pings } : {}),
     ...(input.presetId ? { presetId: input.presetId } : {}),
+    ...(input.med ? { med: input.med } : {}),
   };
   await db.habits.add(habit);
   return habit;

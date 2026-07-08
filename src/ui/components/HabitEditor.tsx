@@ -97,6 +97,10 @@ export function HabitEditor({ seed, onClose }: { seed: EditorSeed; onClose: () =
   const [anchor, setAnchor] = useState(h?.anchor ?? "");
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [suggestOpen, setSuggestOpen] = useState(false);
+  const [medNickname, setMedNickname] = useState(h?.med?.nickname ?? "");
+  const [medDue, setMedDue] = useState(h?.med?.dueTime ?? "08:00");
+  const [medEvery, setMedEvery] = useState(h?.med?.remindEveryMin ?? 30);
+  const [medWindowH, setMedWindowH] = useState(h?.med ? h.med.windowMin / 60 : 4);
 
   const applyPreset = (p: Preset) => {
     setName(p.name);
@@ -135,6 +139,10 @@ export function HabitEditor({ seed, onClose }: { seed: EditorSeed; onClose: () =
         ? { times: pingTimes, start: reminderTime, end: pingTimes > 1 ? pingEnd : reminderTime, untilDone }
         : undefined,
       domain: area === "learning" ? ("learning" as const) : ("general" as const),
+      med: area === "meds"
+        ? { ...(medNickname.trim() ? { nickname: medNickname.trim() } : {}),
+            dueTime: medDue, remindEveryMin: medEvery, windowMin: medWindowH * 60 }
+        : undefined,
     };
     if (h) await updateHabit(h.id, fields);
     else await addHabit({ ...fields, presetId: seed.presetId });
@@ -385,6 +393,55 @@ export function HabitEditor({ seed, onClose }: { seed: EditorSeed; onClose: () =
             ))}
           </div>
         </div>
+
+        {area === "meds" && (
+          <div className="editor-row">
+            <span className="editor-row-label">Meds — dose window</span>
+            <input
+              className="input anchor-input"
+              value={medNickname}
+              onChange={(e) => setMedNickname(e.target.value)}
+              placeholder="what texts call it — optional"
+              aria-label="Med nickname"
+            />
+            <label className="check-label">
+              Due
+              <input
+                type="time"
+                className="input time-input"
+                value={medDue}
+                onChange={(e) => setMedDue(e.target.value)}
+                aria-label="Due time"
+              />
+            </label>
+            <label className="check-label">
+              Remind every
+              <select
+                className="input anchor-input"
+                value={medEvery}
+                onChange={(e) => setMedEvery(Number(e.target.value))}
+                aria-label="Remind every"
+              >
+                {[15, 30, 45, 60, 90, 120].map((m) => (
+                  <option key={m} value={m}>{m} min</option>
+                ))}
+              </select>
+            </label>
+            <label className="check-label">
+              Take within
+              <select
+                className="input anchor-input"
+                value={medWindowH}
+                onChange={(e) => setMedWindowH(Number(e.target.value))}
+                aria-label="Take within"
+              >
+                {[2, 4, 6, 8, 12, 24].map((h) => (
+                  <option key={h} value={h}>{h} h</option>
+                ))}
+              </select>
+            </label>
+          </div>
+        )}
 
         {notifOn === false ? (
           <div className="editor-row">
