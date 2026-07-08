@@ -5,6 +5,7 @@ import {
   dayKeyFor,
   rebuild,
   type DayKey,
+  type Goal,
   type Habit,
   type HabitLog,
   type MoodLog,
@@ -220,6 +221,7 @@ export async function setReadingStatus(id: string, status: ReadingItem["status"]
 export async function logReading(input: {
   itemId?: string;
   minutes?: number;
+  pages?: number;
   note?: string;
   feeling?: ReadingLog["feeling"];
 }): Promise<ReadingLog> {
@@ -229,12 +231,37 @@ export async function logReading(input: {
     ts: Date.now(),
     ...(input.itemId ? { itemId: input.itemId } : {}),
     ...(input.minutes ? { minutes: input.minutes } : {}),
+    ...(input.pages ? { pages: input.pages } : {}),
     ...(input.note?.trim() ? { note: input.note.trim() } : {}),
     ...(input.feeling ? { feeling: input.feeling } : {}),
   };
   await db.readingLogs.add(entry);
   await refreshPlayer();
   return entry;
+}
+
+// ---------- goals ----------
+
+export async function addGoal(
+  input: Omit<Goal, "id" | "createdAt" | "order">,
+): Promise<Goal> {
+  const order = (await db.goals.count()) + 1;
+  const goal: Goal = {
+    ...input,
+    id: crypto.randomUUID(),
+    createdAt: Date.now(),
+    order,
+  };
+  await db.goals.add(goal);
+  return goal;
+}
+
+export async function updateGoal(id: string, patch: Partial<Omit<Goal, "id">>): Promise<void> {
+  await db.goals.update(id, patch);
+}
+
+export async function archiveGoal(id: string): Promise<void> {
+  await db.goals.update(id, { archivedAt: Date.now() });
 }
 
 export async function logWeight(weight: number, unit: "lbs" | "kg"): Promise<void> {

@@ -3,7 +3,7 @@
 import { db } from "./db.ts";
 import { refreshPlayer } from "./repo.ts";
 
-export const EXPORT_VERSION = 7;
+export const EXPORT_VERSION = 8;
 
 const TABLES = [
   "habits",
@@ -20,6 +20,7 @@ const TABLES = [
   "bioMetrics",
   "bioReadings",
   "screenings",
+  "goals",
   "kv",
 ] as const;
 
