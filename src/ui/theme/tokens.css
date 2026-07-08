@@ -333,6 +333,10 @@ button {
   font-family: var(--font-mono);
 }
 
+.med-closed {
+  font-style: italic;
+}
+
 .habit-right {
   display: flex;
   align-items: center;

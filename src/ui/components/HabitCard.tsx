@@ -1,9 +1,14 @@
 import { useState } from "react";
+import { useLiveQuery } from "dexie-react-hooks";
 import { BreathingOverlay } from "./Breathing.tsx";
 import { FocusTimer } from "./FocusTimer.tsx";
 import type { DayKey, DayStatus, Habit } from "../../engine/index.ts";
-import { addDays } from "../../engine/index.ts";
+import { addDays, medWindow } from "../../engine/index.ts";
+import { db } from "../../db/db.ts";
 import { logHabit, undoHabit } from "../../db/repo.ts";
+
+const formatTime = (ms: number) =>
+  new Date(ms).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 
 export function HabitCard({
   habit,
@@ -22,9 +27,25 @@ export function HabitCard({
   const [breathing, setBreathing] = useState(false);
   const [timer, setTimer] = useState(false);
 
+  const recentLogs = useLiveQuery(
+    () =>
+      db.habitLogs
+        .where({ habitId: habit.id })
+        .filter((l) => l.ts >= Date.now() - 2 * 86_400_000)
+        .toArray(),
+    [habit.id],
+  );
+
+  const med = habit.med
+    ? medWindow(habit, Date.now(), new Date().getTimezoneOffset(), recentLogs ?? [])
+    : null;
+
   const tap = async () => {
-    if (status.done && habit.target === 1) await undoHabit(habit.id);
-    else await logHabit(habit.id);
+    if (status.done && habit.target === 1) return void (await undoHabit(habit.id));
+    if (med && (med.state === "open" || med.state === "closed") && med.anchorDayKey !== today) {
+      return void (await logHabit(habit.id, { dayKey: med.anchorDayKey }));
+    }
+    await logHabit(habit.id);
   };
 
   const cls = [
@@ -44,9 +65,24 @@ export function HabitCard({
         </span>
         <span className="habit-name">
           {habit.name}
-          {habit.anchor && <span className="off-day-tag anchor-tag"> · after {habit.anchor.replace(/^after /i, "")}</span>}
-          {!scheduledToday && <span className="off-day-tag"> · off-day</span>}
-          {status.skipped && <span className="off-day-tag"> · rest</span>}
+          {med && med.state === "closed" && !status.done ? (
+            <span className="off-day-tag med-closed">
+              {" "}
+              Window closed — skip today's dose. Fresh start tomorrow.
+            </span>
+          ) : (
+            <>
+              {habit.anchor && (
+                <span className="off-day-tag anchor-tag"> · after {habit.anchor.replace(/^after /i, "")}</span>
+              )}
+              {!scheduledToday && <span className="off-day-tag"> · off-day</span>}
+              {status.skipped && <span className="off-day-tag"> · rest</span>}
+              {med && med.state === "upcoming" && <span className="off-day-tag"> · due {formatTime(med.opensAt)}</span>}
+              {med && med.state === "open" && (
+                <span className="off-day-tag"> · window closes {formatTime(med.closesAt)}</span>
+              )}
+            </>
+          )}
         </span>
         <span className="habit-right">
           {streak > 0 && <span className="streak-chip">⚡{streak}</span>}
