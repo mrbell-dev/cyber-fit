@@ -238,6 +238,7 @@ const FEELINGS: { value: NonNullable<ReadingLog["feeling"]>; glyph: string; labe
 
 function SessionForm({ item, onDone }: { item: ReadingItem | null; onDone: () => void }) {
   const [minutes, setMinutes] = useState("");
+  const [pages, setPages] = useState("");
   const [note, setNote] = useState("");
   const [feeling, setFeeling] = useState<ReadingLog["feeling"]>();
 
@@ -245,6 +246,7 @@ function SessionForm({ item, onDone }: { item: ReadingItem | null; onDone: () =>
     await logReading({
       itemId: item?.id,
       minutes: Number(minutes) || undefined,
+      pages: Number(pages) || undefined,
       note,
       feeling,
     });
@@ -262,6 +264,15 @@ function SessionForm({ item, onDone }: { item: ReadingItem | null; onDone: () =>
           onChange={(e) => setMinutes(e.target.value)}
           placeholder="min"
           aria-label="Session minutes"
+        />
+        <input
+          className="input num-input"
+          type="number"
+          min={1}
+          value={pages}
+          onChange={(e) => setPages(e.target.value)}
+          placeholder="pages"
+          aria-label="Pages read"
         />
         <span className="placeholder">how did it land?</span>
       </div>

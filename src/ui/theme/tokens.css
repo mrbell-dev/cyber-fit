@@ -704,7 +704,8 @@ button {
     animation: none;
   }
   .xp-fill,
-  .water-fill {
+  .water-fill,
+  .goal-fill {
     transition: none;
   }
 }
@@ -1055,6 +1056,75 @@ html.theme-ice {
   font-size: 12px;
   letter-spacing: 0.08em;
   color: var(--neon-yellow);
+}
+
+/* ---------- goals ---------- */
+.goal-row {
+  display: block;
+  width: 100%;
+  padding: 8px 0;
+  border: none;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  min-height: var(--tap-min);
+}
+
+.goal-row + .goal-row {
+  border-top: 1px solid var(--border);
+}
+
+.goal-row-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.goal-name {
+  font-size: 15px;
+}
+
+.goal-chip {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.goal-chip.ahead,
+.goal-chip.done {
+  color: var(--neon-green);
+  border-color: var(--neon-green);
+}
+
+.goal-bar {
+  height: 8px;
+  background: var(--bg-sunken);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.goal-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--neon-magenta), var(--neon-purple));
+  transition: width 0.4s ease;
+}
+
+.goal-meta {
+  display: block;
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
 }
 
 /* ---------- system report ---------- */

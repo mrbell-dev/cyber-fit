@@ -16,6 +16,7 @@ import { WaterGauge } from "../components/WaterGauge.tsx";
 import { XpBar } from "../components/XpBar.tsx";
 import { MoodRow } from "../components/MoodRow.tsx";
 import { MissedPing } from "../components/MissedPing.tsx";
+import { GoalBanner } from "../components/GoalBanner.tsx";
 import { Highlight } from "../components/Highlight.tsx";
 import { DailyBoot } from "../components/DailyBoot.tsx";
 import { GigMigration } from "../components/GigMigration.tsx";
@@ -74,6 +75,7 @@ export function Today() {
       <DailyBoot today={today} />
       <GigMigration today={today} />
       <MissedPing today={today} />
+      <GoalBanner today={today} />
       <XpBar />
       {editorSeed && <HabitEditor seed={editorSeed} onClose={() => setEditorSeed(null)} />}
 

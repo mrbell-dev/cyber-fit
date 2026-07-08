@@ -67,6 +67,8 @@ export interface Habit {
 export interface Goal {
   id: string;
   name: string;
+  /** single emoji/glyph shown next to the name */
+  icon?: string;
   horizon: "week" | "month" | "year";
   target: number;
   source:

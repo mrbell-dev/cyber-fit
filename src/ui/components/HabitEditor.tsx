@@ -12,6 +12,7 @@ import {
 } from "../../engine/index.ts";
 import { addHabit, updateHabit } from "../../db/repo.ts";
 import { syncPush } from "../notify.ts";
+import { IconPicker } from "./IconPicker.tsx";
 
 // Schedule kinds as a flat option list (dropdown) — the sub-controls
 // (weekday toggles / N-per-X inputs) still render below the selected kind.
@@ -52,19 +53,6 @@ const TIMES: { id: TimeOfDay; name: string; icon: string }[] = [
   { id: "anytime", name: "Anytime", icon: "∞" },
 ];
 
-const EMOJI_SUGGESTIONS = ["⚡", "🧘", "🦾", "📖", "🧠", "🚶", "🥗", "🌙", "🫁", "💊", "🎸", "🐣"];
-
-// The web can't switch the OS keyboard to emoji, so we ship our own picker.
-const EMOJI_GRID = [
-  "⚡", "🔥", "💪", "🦾", "🦿", "🧠", "🫀", "🫁", "👁️", "🤖", "👾", "🕶️",
-  "🧘", "🏃", "🚶", "🏋️", "🤸", "🚴", "🏊", "🥊", "⛰️", "🧗", "🛹", "⚽",
-  "📖", "📚", "✍️", "🎓", "🧪", "💻", "🎯", "♟️", "🧩", "🎨", "🎸", "🎹",
-  "🥗", "🍎", "🥦", "🍳", "🥑", "🍵", "💧", "🚰", "☕", "🥤", "🍽️", "🧂",
-  "🌙", "😴", "🛏️", "🌅", "☀️", "🌆", "🌃", "⭐", "🌧️", "🌿", "🌵", "🌸",
-  "💊", "🩺", "🦷", "🧼", "🛁", "🧴", "❤️", "💚", "💜", "🖤", "✨", "🐣",
-  "🦎", "🐕", "🐈", "🌊", "🔋", "📵", "🎮", "🗡️", "🛡️", "💾", "📡", "🔧",
-];
-
 export interface EditorSeed {
   habit?: Habit; // present = editing
   // preset fields for "install from library" (or blank for brand-new)
@@ -95,7 +83,6 @@ export function HabitEditor({ seed, onClose }: { seed: EditorSeed; onClose: () =
   const [untilDone, setUntilDone] = useState(h?.pings?.untilDone ?? false);
   const [charge, setCharge] = useState(h?.charge ?? 1);
   const [anchor, setAnchor] = useState(h?.anchor ?? "");
-  const [emojiOpen, setEmojiOpen] = useState(false);
   const [suggestOpen, setSuggestOpen] = useState(false);
   const [medNickname, setMedNickname] = useState(h?.med?.nickname ?? "");
   const [medDue, setMedDue] = useState(h?.med?.dueTime ?? "08:00");
@@ -162,48 +149,7 @@ export function HabitEditor({ seed, onClose }: { seed: EditorSeed; onClose: () =
         aria-label={h ? "Edit directive" : "New directive"}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="editor-icon-row">
-          <input
-            className="input editor-icon"
-            value={icon}
-            onChange={(e) => setIcon(e.target.value)}
-            aria-label="Emoji"
-            maxLength={4}
-          />
-          <div className="emoji-strip" role="group" aria-label="Emoji suggestions">
-            {EMOJI_SUGGESTIONS.map((e) => (
-              <button key={e} className="emoji-pick" onClick={() => setIcon(e)} aria-label={`Use ${e}`}>
-                {e}
-              </button>
-            ))}
-            <button
-              className={emojiOpen ? "emoji-pick more on" : "emoji-pick more"}
-              onClick={() => setEmojiOpen(!emojiOpen)}
-              aria-expanded={emojiOpen}
-              aria-label={emojiOpen ? "Close emoji picker" : "More emoji"}
-            >
-              …
-            </button>
-          </div>
-        </div>
-
-        {emojiOpen && (
-          <div className="emoji-grid" role="group" aria-label="Emoji picker">
-            {EMOJI_GRID.map((e) => (
-              <button
-                key={e}
-                className="emoji-pick"
-                onClick={() => {
-                  setIcon(e);
-                  setEmojiOpen(false);
-                }}
-                aria-label={`Use ${e}`}
-              >
-                {e}
-              </button>
-            ))}
-          </div>
-        )}
+        <IconPicker icon={icon} onPick={setIcon} />
 
         <input
           className="input editor-name"

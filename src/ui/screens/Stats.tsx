@@ -14,6 +14,7 @@ import { useState } from "react";
 import { useDayKey, useSettings } from "../hooks.ts";
 import { HighlightReel } from "../components/Highlight.tsx";
 import { CareTeamExport } from "../components/CareTeamExport.tsx";
+import { GoalsPanel } from "../components/GoalsPanel.tsx";
 
 const GRID_DAYS = 28; // 14-wide rows, GitHub-style intensity; tap a day for detail
 
@@ -135,6 +136,8 @@ export function Stats() {
 
   return (
     <section aria-label="Stats">
+      <GoalsPanel today={today} />
+
       <div className="card">
         <h2 className="card-title">Telemetry (Local Only)</h2>
         <div className="stat-tiles">
