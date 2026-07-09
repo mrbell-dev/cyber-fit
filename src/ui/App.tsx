@@ -34,6 +34,7 @@ function OffGridChip() {
 
 export function App() {
   const [tab, setTab] = useState<Tab>("today");
+  const [menuOpen, setMenuOpen] = useState(false);
   const [crashKit, setCrashKit] = useState(false);
   const { activeTheme, activeFx } = useSettings();
   useEffect(() => applyTheme(activeTheme), [activeTheme]);
@@ -56,9 +57,19 @@ export function App() {
   return (
     <>
       <header className="app-header">
-        <h1 className="app-title">
-          CYBER<span className="slash">//</span>FIT
-        </h1>
+        <span className="header-left">
+          <button
+            className="menu-btn"
+            aria-label="Open menu"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen(true)}
+          >
+            ☰
+          </button>
+          <h1 className="app-title">
+            CYBER<span className="slash">//</span>FIT
+          </h1>
+        </span>
         <span className="header-right">
           <button className="crash-btn" aria-label="Open crash kit" onClick={() => setCrashKit(true)}>
             ✚
@@ -77,7 +88,7 @@ export function App() {
       </main>
 
       <RewardToast />
-      <Nav tab={tab} onChange={setTab} />
+      <Nav open={menuOpen} tab={tab} onChange={setTab} onClose={() => setMenuOpen(false)} />
     </>
   );
 }
