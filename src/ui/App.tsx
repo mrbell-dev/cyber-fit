@@ -11,6 +11,7 @@ import { Today } from "./screens/Today.tsx";
 import { Training } from "./screens/Training.tsx";
 import { Bio } from "./screens/Bio.tsx";
 import { Feed } from "./screens/Feed.tsx";
+import { Goals } from "./screens/Goals.tsx";
 import { Stats } from "./screens/Stats.tsx";
 import { System } from "./screens/System.tsx";
 
@@ -51,7 +52,9 @@ export function App() {
     // Notification deep link: ?go=workout|bio|water|… → land on the right screen.
     const go = new URLSearchParams(location.search).get("go");
     if (go) {
-      setTab(go === "workout" ? "training" : go === "bio" ? "bio" : "directives");
+      setTab(
+        go === "workout" ? "training" : go === "bio" ? "bio" : go === "goal" ? "goals" : "directives",
+      );
       history.replaceState(null, "", location.pathname);
     }
   }, []);
@@ -87,6 +90,7 @@ export function App() {
         {tab === "training" && <Training />}
         {tab === "bio" && <Bio />}
         {tab === "feed" && <Feed />}
+        {tab === "goals" && <Goals />}
         {tab === "telemetry" && <Stats />}
         {tab === "system" && <System />}
       </main>

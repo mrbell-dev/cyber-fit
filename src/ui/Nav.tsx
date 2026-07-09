@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export type Tab = "directives" | "training" | "bio" | "feed" | "telemetry" | "system";
+export type Tab = "directives" | "training" | "bio" | "feed" | "goals" | "telemetry" | "system";
 
 type Item = { id: Tab; label: string; glyph: string };
 
@@ -8,6 +8,7 @@ const GRIND_ITEMS: Item[] = [
   { id: "training", label: "Training", glyph: "⚔" },
   { id: "bio", label: "Bio", glyph: "⌬" },
   { id: "feed", label: "Feed", glyph: "▤" },
+  { id: "goals", label: "Goals", glyph: "◎" },
 ];
 
 const GRIND_OPEN_KEY = "nav-grind-open";
@@ -29,7 +30,7 @@ function useOnline() {
 }
 
 /** Slide-in drawer opened by the header hamburger. Sections: Directives up
- *  top, the Grind group (Training / Bio / Feed) collapsible in the middle,
+ *  top, the Grind group (Training / Bio / Feed / Goals) collapsible in the middle,
  *  Telemetry + System below, version footer at the bottom. */
 export function Nav({
   open,

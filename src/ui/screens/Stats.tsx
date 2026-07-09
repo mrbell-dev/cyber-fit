@@ -4,17 +4,18 @@ import {
   addDays,
   daySetStreak,
   difficultyFactor,
+  goalProgress,
   learningDays,
   levelFromXp,
   readingDays,
   waterTotal,
+  type DayKey,
   type PlayerState,
 } from "../../engine/index.ts";
 import { useState } from "react";
 import { useDayKey, useSettings } from "../hooks.ts";
 import { HighlightReel } from "../components/Highlight.tsx";
 import { CareTeamExport } from "../components/CareTeamExport.tsx";
-import { GoalsPanel } from "../components/GoalsPanel.tsx";
 
 const GRID_DAYS = 28; // 14-wide rows, GitHub-style intensity; tap a day for detail
 
@@ -79,6 +80,49 @@ function WeeklyReport({
   );
 }
 
+/** Read-only glance at active goals — management lives in GRIND ▸ GOALS. */
+function ObjectivesStrip({ today }: { today: DayKey }) {
+  const data = useLiveQuery(async () => {
+    const [goals, habitLogs, readingLogs, workoutLogs] = await Promise.all([
+      db.goals.filter((g) => !g.archivedAt).sortBy("order"),
+      db.habitLogs.toArray(),
+      db.readingLogs.toArray(),
+      db.workoutLogs.toArray(),
+    ]);
+    return { goals, tables: { habitLogs, readingLogs, workoutLogs } };
+  }, []);
+
+  if (!data || data.goals.length === 0) return null;
+
+  return (
+    <div className="card">
+      <h2 className="card-title">Objectives</h2>
+      {data.goals.map((g) => {
+        const p = goalProgress(g, data.tables, today);
+        const pct = Math.min(100, p.target > 0 ? (p.value / p.target) * 100 : 0);
+        const done = p.value >= p.target;
+        return (
+          <div key={g.id} className="goal-row" aria-label={`Goal ${g.name}`}>
+            <div className="goal-row-top">
+              <span className="goal-name">
+                {g.icon ? `${g.icon} ` : ""}
+                {g.name}
+              </span>
+              <span className={done ? "goal-chip done" : `goal-chip ${p.pace}`}>
+                {done ? "✔ done" : `${Math.round(pct)}%`}
+              </span>
+            </div>
+            <div className="goal-bar" aria-hidden="true">
+              <div className="goal-fill" style={{ width: `${pct}%` }} />
+            </div>
+          </div>
+        );
+      })}
+      <p className="placeholder">// manage objectives in GRIND ▸ GOALS</p>
+    </div>
+  );
+}
+
 function intensityLevel(count: number): 0 | 1 | 2 | 3 | 4 {
   if (count <= 0) return 0;
   if (count === 1) return 1;
@@ -136,7 +180,7 @@ export function Stats() {
 
   return (
     <section aria-label="Stats">
-      <GoalsPanel today={today} />
+      <ObjectivesStrip today={today} />
 
       <div className="card">
         <h2 className="card-title">Telemetry (Local Only)</h2>
