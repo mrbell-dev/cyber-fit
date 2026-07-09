@@ -125,10 +125,20 @@ export async function archiveHabit(id: string): Promise<void> {
   await db.habits.update(id, { archivedAt: Date.now() });
 }
 
+/** Every real deletion leaves a tombstone so merge-import (vault sync) never
+ *  resurrects the row from an older snapshot. */
+async function tombstone(table: string, ...ids: string[]): Promise<void> {
+  const ts = Date.now();
+  await db.tombstones.bulkPut(ids.map((id) => ({ id, table, ts })));
+}
+
 export async function deleteHabit(id: string): Promise<void> {
-  await db.transaction("rw", db.habits, db.habitLogs, async () => {
+  await db.transaction("rw", db.habits, db.habitLogs, db.tombstones, async () => {
+    const logIds = (await db.habitLogs.where({ habitId: id }).primaryKeys()) as string[];
     await db.habitLogs.where({ habitId: id }).delete();
     await db.habits.delete(id);
+    await tombstone("habitLogs", ...logIds);
+    await tombstone("habits", id);
   });
 }
 
@@ -296,6 +306,7 @@ export async function updateJournal(id: string, text: string): Promise<void> {
 /** Deleting can remove a day's only journal entry → re-fold to keep XP honest. */
 export async function deleteJournal(id: string): Promise<void> {
   await db.journalLogs.delete(id);
+  await tombstone("journalLogs", id);
   await refreshPlayer();
 }
 
@@ -318,6 +329,7 @@ export async function toggleGig(id: string, done: boolean): Promise<void> {
 
 export async function deleteGig(id: string): Promise<void> {
   await db.gigs.delete(id);
+  await tombstone("gigs", id);
   await refreshPlayer();
 }
 
@@ -368,6 +380,7 @@ export async function undoLastBioReading(metricId: string): Promise<void> {
   const last = mine.sort((a, b) => b.ts - a.ts)[0];
   if (!last) return;
   await db.bioReadings.delete(last.id);
+  await tombstone("bioReadings", last.id);
   await refreshPlayer();
 }
 
@@ -377,6 +390,7 @@ export async function undoLastWeight(): Promise<void> {
   const last = all.sort((a, b) => b.ts - a.ts)[0];
   if (!last) return;
   await db.bodyLogs.delete(last.id);
+  await tombstone("bodyLogs", last.id);
   await refreshPlayer();
 }
 

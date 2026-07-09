@@ -25,6 +25,14 @@ export interface KvRow {
   value: unknown;
 }
 
+/** A deletion, remembered. id = the deleted row's id (UUIDs never collide
+ *  across tables, but `table` is kept so merge knows where to delete). */
+export interface Tombstone {
+  id: string;
+  table: string;
+  ts: number;
+}
+
 export const db = new Dexie("cyber-fit") as Dexie & {
   habits: EntityTable<Habit, "id">;
   habitLogs: EntityTable<HabitLog, "id">;
@@ -42,6 +50,7 @@ export const db = new Dexie("cyber-fit") as Dexie & {
   screenings: EntityTable<Screening, "id">;
   kv: EntityTable<KvRow, "key">;
   goals: EntityTable<Goal, "id">;
+  tombstones: EntityTable<Tombstone, "id">;
 };
 
 db.version(1).stores({
@@ -82,4 +91,8 @@ db.version(6).stores({
 
 db.version(8).stores({
   goals: "id, order",
+});
+
+db.version(9).stores({
+  tombstones: "id, table",
 });

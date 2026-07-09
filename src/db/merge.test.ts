@@ -70,6 +70,43 @@ describe("planMerge — union by id, local wins", () => {
     expect(plan.gigPatches).toEqual([]);
   });
 
+  it("a local tombstone blocks the vault from resurrecting the deleted row", () => {
+    const local = {
+      gigs: [],
+      tombstones: [{ id: "g1", table: "gigs", ts: 100 }],
+    };
+    const incoming = vaultFile({
+      gigs: [{ id: "g1", text: "deleted on the phone", createdDay: "2026-07-08", ts: 1 }],
+    });
+    const plan = planMerge(local, incoming);
+    expect(plan.adds.gigs ?? []).toEqual([]);
+    expect(plan.removes).toEqual([]);
+  });
+
+  it("an incoming tombstone deletes the matching local row and syncs the tombstone", () => {
+    const local = {
+      gigs: [{ id: "g1", text: "deleted elsewhere", createdDay: "2026-07-08", ts: 1 }],
+      tombstones: [],
+    };
+    const incoming = vaultFile({
+      gigs: [],
+      tombstones: [{ id: "g1", table: "gigs", ts: 100 }],
+    });
+    const plan = planMerge(local, incoming);
+    expect(plan.removes).toEqual([{ table: "gigs", id: "g1" }]);
+    expect(plan.adds.tombstones).toEqual([{ id: "g1", table: "gigs", ts: 100 }]);
+  });
+
+  it("old vault without a tombstones table still merges (nothing removed)", () => {
+    const local = { gigs: [{ id: "g1", text: "alive", createdDay: "2026-07-08", ts: 1 }] };
+    const incoming = vaultFile({
+      gigs: [{ id: "g2", text: "new from vault", createdDay: "2026-07-09", ts: 9 }],
+    });
+    const plan = planMerge(local, incoming);
+    expect(plan.adds.gigs).toEqual([incoming.tables.gigs[0]]);
+    expect(plan.removes).toEqual([]);
+  });
+
   it("rejects files that aren't a cyber-fit backup or are from a newer schema", () => {
     expect(() => planMerge({}, { app: "other", schemaVersion: 7, tables: {} })).toThrow();
     expect(() => planMerge({}, vaultFile({}) && { ...vaultFile({}), schemaVersion: 999 })).toThrow();

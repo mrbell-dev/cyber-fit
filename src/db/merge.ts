@@ -27,6 +27,7 @@ const MERGE_TABLES = [
   "bioReadings",
   "screenings",
   "goals",
+  "tombstones",
 ] as const;
 
 type Row = { id: string } & Record<string, unknown>;
@@ -34,6 +35,8 @@ type Row = { id: string } & Record<string, unknown>;
 export interface MergePlan {
   adds: Partial<Record<(typeof MERGE_TABLES)[number], Row[]>>;
   gigPatches: { id: string; patch: Record<string, unknown> }[];
+  /** Local rows a synced tombstone says were deleted elsewhere. */
+  removes: { table: (typeof MERGE_TABLES)[number]; id: string }[];
 }
 
 /** Pure: decide what a vault file adds to the local tables. Throws the same
@@ -47,14 +50,37 @@ export function planMerge(local: Record<string, Row[] | undefined>, file: unknow
     throw new Error("Backup is from a newer app version — update the app first.");
   }
 
-  const plan: MergePlan = { adds: {}, gigPatches: [] };
+  const plan: MergePlan = { adds: {}, gigPatches: [], removes: [] };
+
+  // Deletions beat union: a tombstone on either side means the row is dead.
+  // Without this, deleting on the phone and then merging the vault (or vice
+  // versa) resurrects the row from the older snapshot.
+  const dead = new Set<string>();
+  for (const t of local["tombstones"] ?? []) dead.add(t.id);
+  const incomingTombs = f.tables["tombstones"];
+  if (incomingTombs !== undefined && !Array.isArray(incomingTombs)) {
+    throw new Error("Corrupt table: tombstones");
+  }
+  for (const t of (incomingTombs as Row[] | undefined) ?? []) {
+    if (t.id) dead.add(t.id);
+  }
+
   for (const name of MERGE_TABLES) {
     const incoming = f.tables[name];
     if (incoming === undefined) continue; // absent table (older schema) — leave local alone
     if (!Array.isArray(incoming)) throw new Error(`Corrupt table: ${name}`);
     const mine = new Map((local[name] ?? []).map((r) => [r.id, r]));
-    const adds = (incoming as Row[]).filter((r) => r.id && !mine.has(r.id));
+    const adds = (incoming as Row[]).filter(
+      (r) => r.id && !mine.has(r.id) && (name === "tombstones" || !dead.has(r.id)),
+    );
     if (adds.length) plan.adds[name] = adds;
+
+    // A tombstone that arrived from the vault kills the matching local row.
+    if (name !== "tombstones") {
+      for (const r of local[name] ?? []) {
+        if (dead.has(r.id)) plan.removes.push({ table: name, id: r.id });
+      }
+    }
 
     if (name === "gigs") {
       for (const r of incoming as Row[]) {
@@ -89,11 +115,12 @@ export async function mergeJson(raw: string): Promise<number> {
 
   const tables = Object.keys(plan.adds) as (keyof MergePlan["adds"])[];
   const added = tables.reduce((n, t) => n + (plan.adds[t]?.length ?? 0), 0);
-  if (!added && !plan.gigPatches.length) return 0;
+  if (!added && !plan.gigPatches.length && !plan.removes.length) return 0;
 
   await db.transaction("rw", MERGE_TABLES.map((t) => db.table(t)), async () => {
     for (const t of tables) await db.table(t).bulkAdd(plan.adds[t]!);
     for (const { id, patch } of plan.gigPatches) await db.gigs.update(id, patch);
+    for (const { table, id } of plan.removes) await db.table(table).delete(id);
   });
   await refreshPlayer();
   return added;
