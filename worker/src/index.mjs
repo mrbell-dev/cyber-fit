@@ -7,7 +7,7 @@
 //   * TLS is mandatory (workers.dev / custom domains are HTTPS-only).
 
 import { buildPushHTTPRequest } from "@pushforge/builder";
-import { deleteSub, listSubs, putSub, slotOf, validateRecord } from "./store.mjs";
+import { deleteSub, getVault, listSubs, putSub, putVault, slotOf, validateRecord } from "./store.mjs";
 
 // ALLOWED_ORIGIN is a comma-separated allowlist (a single ACAO value can't
 // cover both cyberfit.dev and www) — echo the request's Origin iff listed.
@@ -45,8 +45,8 @@ export default {
     if (url.pathname === "/vault" && request.method === "GET") {
       const id = url.searchParams.get("id") ?? "";
       if (!/^[0-9a-f]{32}$/.test(id)) return json({ error: "bad id" }, 400, headers);
-      const blob = await env.SUBS.get(`vault:${id}`);
-      return blob ? json({ blob }, 200, headers) : json({ error: "not found" }, 404, headers);
+      const vault = await getVault(env.SUBS, id);
+      return vault ? json(vault, 200, headers) : json({ error: "not found" }, 404, headers);
     }
 
     if (request.method !== "POST") return json({ error: "POST only" }, 405, headers);
@@ -81,13 +81,17 @@ export default {
     }
 
     if (url.pathname === "/vault") {
-      const { id, blob } = body ?? {};
+      const { id, blob, baseVersion } = body ?? {};
       if (!/^[0-9a-f]{32}$/.test(id ?? "")) return json({ error: "bad id" }, 400, headers);
       if (typeof blob !== "string" || blob.length > 400_000 || !/^[A-Za-z0-9+/=]+$/.test(blob)) {
         return json({ error: "bad blob" }, 400, headers);
       }
-      await env.SUBS.put(`vault:${id}`, blob, { expirationTtl: 120 * 86400 });
-      return json({ ok: true }, 200, headers);
+      if (baseVersion !== undefined && typeof baseVersion !== "number") {
+        return json({ error: "bad baseVersion" }, 400, headers);
+      }
+      const res = await putVault(env.SUBS, id, blob, baseVersion);
+      if (res.stale) return json({ error: "stale", v: res.v }, 409, headers);
+      return json({ ok: true, v: res.v }, 200, headers);
     }
 
     return json({ error: "not found" }, 404, headers);

@@ -42,6 +42,32 @@ export async function listSubs(kv) {
   return out;
 }
 
+/**
+ * Vault blob with an optimistic-concurrency version (kept in KV metadata so
+ * old blobs read as v0). A POST that states the version it built on gets 409
+ * when someone else wrote first — the client pulls, merges, retries. A POST
+ * without baseVersion is the legacy unconditional write (old app builds).
+ * Honest limit: KV read-modify-write isn't atomic across colos, so two writes
+ * in the same second can still both land; this catches the real-world case
+ * (stale writer minutes behind), not the same-instant pathological one.
+ */
+const VAULT_TTL = { expirationTtl: 120 * 86400 };
+
+export async function getVault(kv, id) {
+  const { value, metadata } = await kv.getWithMetadata(`vault:${id}`);
+  return value === null ? null : { blob: value, v: metadata?.v ?? 0 };
+}
+
+/** Returns {ok, v} on success or {stale: true, v} for a version conflict. */
+export async function putVault(kv, id, blob, baseVersion) {
+  const cur = await getVault(kv, id);
+  const curV = cur?.v ?? 0;
+  if (baseVersion !== undefined && baseVersion !== curV) return { stale: true, v: curV };
+  const v = curV + 1;
+  await kv.put(`vault:${id}`, blob, { ...VAULT_TTL, metadata: { v } });
+  return { ok: true, v };
+}
+
 /** Which 15-min week-slot a Date falls in (UTC, floored). */
 export function slotOf(date) {
   const weekMin = date.getUTCDay() * 1440 + date.getUTCHours() * 60 + date.getUTCMinutes();
