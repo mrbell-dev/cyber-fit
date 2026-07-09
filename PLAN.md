@@ -207,6 +207,14 @@ the data lives. Shipped in 3 chunks via a reusable `InfoSheet`/`InfoButton`
       `~/Desktop/cyber-trainer/DESIGN.md`). One piece DOES belong in the OSS
       app when its turn comes: an additive **merge-import** (union by row id
       through repo.ts) — generally useful, and the trainer's safe write path.
+      → **SHIPPED 2026-07-09** (`src/db/merge.ts`): pull now compare-and-merges
+      (local wins on id conflict; vault-side gig completion/retire fills in;
+      kv never syncs; absent tables left alone). New System toggle "pull +
+      merge on every app open" (order on open: pull+merge, then push).
+      Manual Pull full-replaces only onto an empty device. No separate inbox
+      blob needed — merging the main vault covers it; trainer unchanged.
+      Known edge (accepted): a row deleted locally between pushes can be
+      resurrected once by a vault blob that still carries it.
 - [ ] **Localization scoping** (string extraction cost; the voice is hard to
       translate — scope before promising).
 - [ ] Watch: Declarative Web Push / Safari releases (each may shrink the

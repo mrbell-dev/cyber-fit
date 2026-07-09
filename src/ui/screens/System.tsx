@@ -4,9 +4,10 @@ import { db } from "../../db/db.ts";
 import { AREAS, AUGMENTS, mlToOz, ozToMl, type PlayerState } from "../../engine/index.ts";
 import { archiveHabit, deleteHabit, saveSettings } from "../../db/repo.ts";
 import { downloadExport, exportJson, importJson } from "../../db/export.ts";
-import { decryptVault, deriveStoredKey, encryptVault, randomVaultId } from "../../db/vault.ts";
+import { mergeJson } from "../../db/merge.ts";
+import { blobSalt, decryptVault, deriveStoredKey, encryptVault, randomVaultId } from "../../db/vault.ts";
 import { relayConfig } from "../notify.ts";
-import { autoVaultPush, writeLinkedBackup } from "../backupFile.ts";
+import { autoVaultSync, vaultAutoRecord, writeLinkedBackup } from "../backupFile.ts";
 import { THEMES } from "../theme/themes.ts";
 import { ReminderUplink } from "../components/ReminderUplink.tsx";
 import { HabitEditor, type EditorSeed } from "../components/HabitEditor.tsx";
@@ -194,20 +195,46 @@ function VaultSync() {
     async () => (await db.kv.get("vaultSync"))?.value as { id: string } | undefined,
     [],
   );
-  const auto = useLiveQuery(async () => Boolean((await db.kv.get("vaultAuto"))?.value), []);
+  const auto = useLiveQuery(vaultAutoRecord, []);
 
-  const toggleAuto = async (on: boolean) => {
-    if (!on) {
-      await db.kv.delete("vaultAuto");
-      return setMsg("auto-sync off — manual push still works");
+  /** Flip one auto-sync direction. First enable derives + stores the key —
+   *  from the CURRENT blob's salt when one exists, so the stored key can read
+   *  blobs other clients wrote by re-using that salt (the trainer does). */
+  const toggleAuto = async (flag: "push" | "pull", on: boolean) => {
+    if (auto) {
+      const next = { ...auto, [flag]: on };
+      if (!next.push && !next.pull) {
+        await db.kv.delete("vaultAuto");
+        return setMsg("auto-sync off — manual push/pull still work");
+      }
+      await db.kv.put({ key: "vaultAuto", value: next });
+      if (flag === "pull" && on) await autoVaultSync();
+      return setMsg(`auto ${flag} ${on ? "on" : "off"}`);
     }
+    if (!on) return;
     if (pass.length < 8) return setMsg("enter your passphrase first to enable auto-sync");
+    const relay = await relayConfig();
+    if (!relay.url) return setMsg("no relay configured");
     const id = sync?.id ?? randomVaultId();
-    const { key, salt } = await deriveStoredKey(pass);
-    await db.kv.put({ key: "vaultAuto", value: { id, key, salt: salt.buffer } });
+    const res = await fetch(`${relay.url.replace(/\/$/, "")}/vault?id=${id}`).catch(() => null);
+    let salt: Uint8Array | undefined;
+    if (res?.ok) {
+      const { blob } = await res.json();
+      try {
+        await decryptVault(blob, pass); // verify before trusting the passphrase for auto mode
+      } catch {
+        return setMsg("that passphrase doesn't open the existing vault — not enabling auto-sync");
+      }
+      salt = blobSalt(blob);
+    }
+    const derived = await deriveStoredKey(pass, salt);
+    await db.kv.put({
+      key: "vaultAuto",
+      value: { id, key: derived.key, salt: derived.salt.buffer, push: flag === "push", pull: flag === "pull" },
+    });
     await db.kv.put({ key: "vaultSync", value: { id, lastPush: Date.now() } });
-    await autoVaultPush();
-    setMsg(`auto-sync on — pushes fresh ciphertext on every app open. vault id: ${id}`);
+    await autoVaultSync();
+    setMsg(`auto ${flag} on — runs on every app open. vault id: ${id}`);
   };
 
   const push = async () => {
@@ -233,9 +260,18 @@ function VaultSync() {
     if (!res?.ok) return setMsg("vault not found on relay");
     try {
       const { blob } = await res.json();
-      await importJson(await decryptVault(blob, pass));
+      const json = await decryptVault(blob, pass);
+      // Empty device → full restore. Anything local → compare-and-merge, so a
+      // pull can never eat data logged here since the vault was written.
+      const hasLocal = (await db.habits.count()) + (await db.gigs.count()) + (await db.waterLogs.count()) > 0;
+      if (hasLocal) {
+        const added = await mergeJson(json);
+        setMsg(added ? `merged — ${added} new row${added === 1 ? "" : "s"} from the vault` : "merged — nothing new in the vault");
+      } else {
+        await importJson(json);
+        setMsg("pulled + decrypted — everything restored");
+      }
       await db.kv.put({ key: "vaultSync", value: { id, lastPush: Date.now() } });
-      setMsg("pulled + decrypted — everything restored");
     } catch {
       setMsg("decryption failed — wrong passphrase (no recovery exists, by design)");
     }
@@ -279,12 +315,23 @@ function VaultSync() {
       <label className="check-label">
         <input
           type="checkbox"
-          checked={auto ?? false}
-          onChange={(e) => toggleAuto(e.target.checked)}
+          checked={auto?.push ?? false}
+          onChange={(e) => toggleAuto("push", e.target.checked)}
         />
         auto-push on every app open
         <span className="off-day-tag">
           keeps a non-exportable key on this device — the relay still sees only ciphertext
+        </span>
+      </label>
+      <label className="check-label">
+        <input
+          type="checkbox"
+          checked={auto?.pull ?? false}
+          onChange={(e) => toggleAuto("pull", e.target.checked)}
+        />
+        pull + merge on every app open
+        <span className="off-day-tag">
+          compare-and-merge, never replace — new rows from other writers land, local data always wins
         </span>
       </label>
       {msg && <p className="placeholder">// {msg}</p>}

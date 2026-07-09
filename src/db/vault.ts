@@ -61,9 +61,34 @@ export async function encryptVault(plaintext: string, passphrase: string): Promi
  *  nothing more sensitive than what's already here. */
 export async function deriveStoredKey(
   passphrase: string,
+  salt: Uint8Array = crypto.getRandomValues(new Uint8Array(16)),
 ): Promise<{ key: CryptoKey; salt: Uint8Array }> {
-  const salt = crypto.getRandomValues(new Uint8Array(16));
   return { key: await deriveKey(passphrase, salt), salt };
+}
+
+/** The salt a blob was encrypted under. Deriving the stored key from the
+ *  CURRENT vault blob's salt (instead of a fresh one) is what lets auto-pull
+ *  keep decrypting blobs written by other clients that re-use the salt they
+ *  read (the trainer does). */
+export function blobSalt(blob: string): Uint8Array {
+  return fromB64(blob).slice(0, 16);
+}
+
+/** Decrypt with the stored non-extractable key. Throws when the blob was
+ *  encrypted under a different salt (the key can't apply) or fails GCM auth. */
+export async function decryptWithKey(blob: string, key: CryptoKey, salt: Uint8Array): Promise<string> {
+  const bytes = fromB64(blob);
+  if (bytes.slice(0, 16).some((b, i) => b !== salt[i])) {
+    throw new Error("Vault was re-keyed by another device — pull once with the passphrase.");
+  }
+  const iv = bytes.slice(16, 28);
+  const ct = bytes.slice(28);
+  const pt = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv: iv as BufferSource },
+    key,
+    ct as BufferSource,
+  );
+  return dec.decode(pt);
 }
 
 /** Throws on wrong passphrase or corrupt blob (GCM authenticates). */
