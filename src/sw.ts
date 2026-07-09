@@ -22,7 +22,7 @@ const PING_COPY: Record<string, { title: string; body: string }> = {
   catchup: { title: "End-of-Day Sync", body: "Log the day before lights out." },
   highlight: { title: "One Good Frame", body: "Capture today's highlight — anything real counts." },
   habit: { title: "Directive Window", body: "A directive is ready when you are." },
-  bio: { title: "Bio-Scan Window", body: "Time to log your reading." },
+  bio: { title: "Bio-Scan Window", body: "Run a bio-scan — weight, sleep, vitals. Jack in." },
 };
 
 self.addEventListener("push", (event) => {

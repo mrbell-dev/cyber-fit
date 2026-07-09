@@ -139,7 +139,8 @@ button {
   margin: 0;
 }
 
-.app-title .slash {
+.app-title .slash,
+.nav-drawer-title .slash {
   color: var(--neon-magenta);
   text-shadow: var(--glow-magenta);
 }
@@ -195,7 +196,7 @@ button {
 
 .nav-drawer-title {
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 700;
   letter-spacing: 0.08em;
   color: var(--text);
@@ -228,6 +229,39 @@ button {
 .nav-drawer .glyph {
   font-size: 18px;
   line-height: 1;
+}
+
+.nav-divider {
+  height: 1px;
+  margin: 6px 12px;
+  background: var(--border);
+}
+
+.nav-drawer button.nav-group {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.nav-group .nav-caret {
+  margin-left: auto;
+  color: var(--text-dim);
+}
+
+.nav-drawer button.nav-sub {
+  margin-left: 18px;
+  min-height: calc(var(--tap-min) - 4px);
+}
+
+.nav-footer {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 12px 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
 }
 
 /* ---------- cards & common bits ---------- */

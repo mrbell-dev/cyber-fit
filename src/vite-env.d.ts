@@ -7,3 +7,6 @@ interface ImportMetaEnv {
   /** VAPID public key matching the shared relay */
   readonly VITE_VAPID_PUBLIC_KEY?: string;
 }
+
+/** App version injected at build time (vite define). */
+declare const __APP_VERSION__: string;

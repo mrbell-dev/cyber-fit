@@ -8,7 +8,9 @@ import { InstallPrompt } from "./Install.tsx";
 import { RewardToast } from "./components/RewardToast.tsx";
 import { CrashKit } from "./components/CrashKit.tsx";
 import { Today } from "./screens/Today.tsx";
-import { Log } from "./screens/Log.tsx";
+import { Training } from "./screens/Training.tsx";
+import { Bio } from "./screens/Bio.tsx";
+import { Feed } from "./screens/Feed.tsx";
 import { Stats } from "./screens/Stats.tsx";
 import { System } from "./screens/System.tsx";
 
@@ -33,7 +35,7 @@ function OffGridChip() {
 }
 
 export function App() {
-  const [tab, setTab] = useState<Tab>("today");
+  const [tab, setTab] = useState<Tab>("directives");
   const [menuOpen, setMenuOpen] = useState(false);
   const [crashKit, setCrashKit] = useState(false);
   const { activeTheme, activeFx } = useSettings();
@@ -49,7 +51,7 @@ export function App() {
     // Notification deep link: ?go=workout|bio|water|… → land on the right screen.
     const go = new URLSearchParams(location.search).get("go");
     if (go) {
-      setTab(go === "workout" || go === "bio" ? "log" : "today");
+      setTab(go === "workout" ? "training" : go === "bio" ? "bio" : "directives");
       history.replaceState(null, "", location.pathname);
     }
   }, []);
@@ -81,9 +83,11 @@ export function App() {
 
       <main className="screen">
         <InstallPrompt />
-        {tab === "today" && <Today />}
-        {tab === "log" && <Log />}
-        {tab === "stats" && <Stats />}
+        {tab === "directives" && <Today />}
+        {tab === "training" && <Training />}
+        {tab === "bio" && <Bio />}
+        {tab === "feed" && <Feed />}
+        {tab === "telemetry" && <Stats />}
         {tab === "system" && <System />}
       </main>
 
