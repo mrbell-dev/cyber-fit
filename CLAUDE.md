@@ -195,3 +195,7 @@ knob before its first real user.
   script files, not inline one-liners.
 - `addHabit` takes an explicit input shape — when adding Habit fields, update it
   AND the editor save path AND export (this bit us once; see git log).
+- **`PARITY.md` (local-only, gitignored — same handling as security-audit.md):**
+  if present on this machine, it tracks external coverage of engine/db behavior.
+  Keep it updated whenever you change `src/engine/` semantics, `src/db/`
+  (vault/repo/export), the schema version, or the table set. Never commit it.
