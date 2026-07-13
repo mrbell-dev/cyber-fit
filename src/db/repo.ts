@@ -439,3 +439,17 @@ export async function logMood(
   await refreshPlayer();
   return entry;
 }
+
+// ---------- layout persistence ----------
+
+import { defaultLayout, type LayoutConfig } from "../ui/layout";
+
+/** Single write path for the layout row. Nothing else writes kv key "layout". */
+export async function setLayout(cfg: LayoutConfig): Promise<void> {
+  await db.kv.put({ key: "layout", value: cfg });
+}
+
+export async function getLayout(): Promise<LayoutConfig> {
+  const row = await db.kv.get("layout");
+  return ((row?.value as LayoutConfig | undefined) ?? defaultLayout());
+}
