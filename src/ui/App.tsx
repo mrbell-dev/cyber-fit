@@ -3,10 +3,12 @@ import { useSettings } from "./hooks.ts";
 import { applyFx, applyTheme } from "./theme/themes.ts";
 import { syncPush } from "./notify.ts";
 import { autoVaultSync, registerLiveSync, writeLinkedBackup } from "./backupFile.ts";
-import { Nav, type Tab } from "./Nav.tsx";
+import { Nav } from "./Nav.tsx";
 import { InstallPrompt } from "./Install.tsx";
 import { RewardToast } from "./components/RewardToast.tsx";
 import { CrashKit } from "./components/CrashKit.tsx";
+import { Dashboard } from "./components/Dashboard.tsx";
+import { useLayout } from "./useLayout.ts";
 import { Today } from "./screens/Today.tsx";
 import { Training } from "./screens/Training.tsx";
 import { Bio } from "./screens/Bio.tsx";
@@ -36,9 +38,10 @@ function OffGridChip() {
 }
 
 export function App() {
-  const [tab, setTab] = useState<Tab>("directives");
+  const [tab, setTab] = useState<string>("directives");
   const [menuOpen, setMenuOpen] = useState(false);
   const [crashKit, setCrashKit] = useState(false);
+  const layout = useLayout();
   const { activeTheme, activeFx } = useSettings();
   useEffect(() => applyTheme(activeTheme), [activeTheme]);
   useEffect(() => applyFx(activeFx ?? []), [activeFx]);
@@ -93,6 +96,7 @@ export function App() {
         {tab === "goals" && <Goals />}
         {tab === "telemetry" && <Stats />}
         {tab === "system" && <System />}
+        {layout.pages.some((p) => p.id === tab) && <Dashboard pageId={tab} />}
       </main>
 
       <RewardToast />
