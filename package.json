@@ -13,6 +13,8 @@
     "test:watch": "vitest",
     "icons": "node scripts/icons.mjs",
     "shots": "node scripts/shoot.mjs",
+    "seed:demo": "node scripts/seed-demo.mjs",
+    "shoot:demo": "npm run build && node scripts/shoot-demo.mjs",
     "check:offline": "node scripts/offline-check.mjs",
     "check:persist": "node scripts/persist-check.mjs",
     "check:vault": "node scripts/vault-check.mjs",

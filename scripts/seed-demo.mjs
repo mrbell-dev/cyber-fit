@@ -191,6 +191,8 @@ export function buildDemoExport(now = Date.now()) {
   const kv = [
     { key: "onboarded", value: true },
     { key: "lastBootDay", value: keyOf(now) },
+    { key: "gigMigratedDay", value: keyOf(now) }, // suppress carry-over-gigs modal
+
     { key: "settings", value: { waterGoalMl: 2900, waterUnit: "oz", difficulty: "standard" } },
   ];
 
