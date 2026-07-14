@@ -32,30 +32,43 @@ const dismissOnboarding = async () => {
   );
   await page.reload({ waitUntil: "networkidle" });
   await page.waitForTimeout(300);
+  // Daily boot greeting shows once onboarded — dismiss it so it can't
+  // intercept clicks (its button also persists lastBootDay in kv).
+  const jackIn = page.getByRole("button", { name: "Jack in" });
+  if (await jackIn.count()) {
+    await jackIn.click();
+    await page.waitForTimeout(200);
+  }
 };
 
 await page.goto("http://localhost:4177/", { waitUntil: "networkidle" });
 await dismissOnboarding();
 
+// Nav lives in a drawer since Slice 2 — open it via the header hamburger first.
+const nav = async (name) => {
+  await page.getByRole("button", { name: "Open menu" }).click();
+  await page.getByRole("navigation", { name: "Main" }).getByRole("button", { name, exact: true }).click();
+};
+
 // Seed: habit + log + water + workout + goal.
-await page.getByRole("button", { name: "System" }).click();
+await nav("System");
 await page.getByRole("button", { name: "+ New directive" }).click();
 await page.getByLabel("Directive name").fill("Vault test");
 await page.getByRole("button", { name: "Install directive" }).click();
-await page.getByRole("button", { name: "Today" }).click();
+await nav("Directives");
 await page.getByRole("button", { name: /Vault test/ }).first().click();
 await page.getByRole("button", { name: "+500" }).click();
-await page.getByRole("button", { name: "Log", exact: true }).click();
+await nav("Training");
 await page.getByLabel("Workout name").fill("Deadlifts");
 await page.getByRole("button", { name: "Log workout" }).click();
-await page.getByRole("button", { name: "Stats" }).click();
+await nav("Goals");
 await page.getByRole("button", { name: "New goal" }).click();
 await page.getByLabel("Goal name").fill("Vault goal");
 await page.getByRole("button", { name: "Set goal" }).click();
 await page.waitForTimeout(400);
 
 // Export (capture the download).
-await page.getByRole("button", { name: "System" }).click();
+await nav("System");
 const [download] = await Promise.all([
   page.waitForEvent("download"),
   page.getByRole("button", { name: "Export backup" }).click(),
@@ -72,11 +85,11 @@ await page.waitForTimeout(400);
 await dismissOnboarding();
 
 // Confirm it's actually gone.
-await page.getByRole("button", { name: "Today" }).click();
+await nav("Directives");
 if (await page.getByRole("button", { name: /Vault test/ }).count()) fail("wipe did not clear data");
 
 // Import.
-await page.getByRole("button", { name: "System" }).click();
+await nav("System");
 await page.locator('input[type="file"]').setInputFiles(path);
 await page.waitForTimeout(1200);
 const sysText = await page.textContent("body");
@@ -85,15 +98,15 @@ if (!sysText.includes("Backup restored")) {
 }
 
 // Verify everything came back.
-await page.getByRole("button", { name: "Today" }).click();
+await nav("Directives");
 const habit = page.getByRole("button", { name: /Vault test/ }).first();
 if ((await habit.getAttribute("aria-pressed")) !== "true") fail("habit state lost");
 const water = await page.textContent(".water-label");
 if (!/^500\b/.test(water ?? "")) fail(`water lost: ${water}`);
-await page.getByRole("button", { name: "Log", exact: true }).click();
+await nav("Training");
 await page.waitForTimeout(500);
 if (!(await page.textContent("body")).includes("Deadlifts")) fail("workout lost");
-await page.getByRole("button", { name: "Stats" }).click();
+await nav("Goals");
 await page.waitForTimeout(500);
 if (!(await page.textContent("body")).includes("Vault goal")) fail("goal lost");
 

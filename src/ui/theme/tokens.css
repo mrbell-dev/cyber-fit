@@ -1784,3 +1784,31 @@ html.theme-ice {
   border-color: var(--neon-green);
   background: rgba(0, 255, 179, 0.08);
 }
+
+/* ---- nav edit mode (custom dashboards slice 2) ---- */
+
+.nav-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-group-pick {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 18px;
+}
+
+.nav-new-page {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+}
+
+.nav-drawer button.classified,
+.classified {
+  color: var(--text-dim);
+  letter-spacing: 2px;
+}
