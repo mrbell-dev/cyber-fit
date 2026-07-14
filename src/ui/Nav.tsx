@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { useLayout } from "./useLayout";
-import { visibleNav, hiddenNav, navLabel, navGlyph, type NavEntry } from "./layout";
+import {
+  visibleNav, hiddenNav, navLabel, navGlyph, renameNavEntry, setNavHidden, setNavGroup,
+  moveNavEntry, type NavEntry,
+} from "./layout";
+import { setLayout } from "../db/repo";
 
 export type Tab = string;
 
@@ -55,6 +59,10 @@ export function Nav({ open, tab, onChange, onClose }: {
   const online = useOnline();
   const cfg = useLayout();
   const [classifiedOpen, setClassifiedOpen] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [renaming, setRenaming] = useState<string | null>(null);   // entry id
+  const [grouping, setGrouping] = useState<string | null>(null);   // entry id
+  const [newDrawer, setNewDrawer] = useState("");
 
   useEffect(() => {
     if (!open) return;
@@ -64,6 +72,10 @@ export function Nav({ open, tab, onChange, onClose }: {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
+
+  useEffect(() => {
+    if (!open) { setEditing(false); setRenaming(null); setGrouping(null); }
+  }, [open]);
 
   if (!open) return null;
 
@@ -76,19 +88,88 @@ export function Nav({ open, tab, onChange, onClose }: {
     </button>
   );
 
-  // Entries in order; a drawer renders at its first member's position.
   const vis = visibleNav(cfg);
+  const hidden = hiddenNav(cfg);
+
+  const editRow = (e: NavEntry, inClassified = false) => {
+    const sibs = (inClassified ? hidden : vis).filter(
+      (m) => (m.group ?? "") === (e.group ?? ""));
+    const pos = sibs.findIndex((m) => m.id === e.id);
+    const drawers = [...new Set(vis.map((m) => m.group).filter((g): g is string => !!g))];
+    return (
+      <div key={e.id} className="nav-edit-row">
+        <span className="glyph" aria-hidden="true">{navGlyph(e)}</span>
+        {renaming === e.id ? (
+          <input autoFocus defaultValue={e.label ?? ""} placeholder={navLabel({ ...e, label: undefined })}
+            aria-label={`Rename ${navLabel(e)}`}
+            onBlur={(ev) => { setLayout(renameNavEntry(cfg, e.id, ev.target.value)); setRenaming(null); }}
+            onKeyDown={(ev) => { if (ev.key === "Enter") (ev.target as HTMLInputElement).blur(); }} />
+        ) : (
+          <button style={{ minHeight: 48, flex: 1, textAlign: "left" }}
+            aria-label={`Rename ${navLabel(e)}`} onClick={() => setRenaming(e.id)}>
+            {navLabel(e)}
+          </button>
+        )}
+        <button aria-label={`Move ${navLabel(e)} up`} disabled={pos <= 0}
+          style={{ minHeight: 48, minWidth: 48 }}
+          onClick={() => setLayout(moveNavEntry(cfg, e.id, -1))}>▲</button>
+        <button aria-label={`Move ${navLabel(e)} down`} disabled={pos === sibs.length - 1}
+          style={{ minHeight: 48, minWidth: 48 }}
+          onClick={() => setLayout(moveNavEntry(cfg, e.id, 1))}>▼</button>
+        {inClassified ? (
+          <button aria-label={`Restore ${navLabel(e)}`} style={{ minHeight: 48 }}
+            onClick={() => setLayout(setNavHidden(cfg, e.id, false))}>Restore</button>
+        ) : (
+          <>
+            <button aria-label={`Stash ${navLabel(e)} in CLASSIFIED`} style={{ minHeight: 48 }}
+              onClick={() => setLayout(setNavHidden(cfg, e.id, true))}>Stash</button>
+            <button aria-label={`Choose drawer for ${navLabel(e)}`} style={{ minHeight: 48 }}
+              onClick={() => setGrouping(grouping === e.id ? null : e.id)}>Drawer…</button>
+          </>
+        )}
+        {grouping === e.id && (
+          <div role="group" aria-label={`Drawer options for ${navLabel(e)}`} className="nav-group-pick">
+            {drawers.map((g) => (
+              <button key={g} style={{ minHeight: 48 }}
+                onClick={() => { setLayout(setNavGroup(cfg, e.id, g)); setGrouping(null); }}>{g}</button>
+            ))}
+            <input placeholder="New drawer…" aria-label="New drawer name" value={newDrawer}
+              onChange={(ev) => setNewDrawer(ev.target.value)}
+              onKeyDown={(ev) => {
+                if (ev.key === "Enter" && newDrawer.trim()) {
+                  setLayout(setNavGroup(cfg, e.id, newDrawer)); setNewDrawer(""); setGrouping(null);
+                }
+              }} />
+            <button style={{ minHeight: 48 }}
+              onClick={() => { setLayout(setNavGroup(cfg, e.id, undefined)); setGrouping(null); }}>No drawer</button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Entries in order; a drawer renders at its first member's position.
   const rendered = new Set<string>();
   const rows: JSX.Element[] = [];
   for (const e of vis) {
-    if (!e.group) { rows.push(navBtn(e)); continue; }
+    if (!e.group) { rows.push(editing ? editRow(e) : navBtn(e)); continue; }
     if (rendered.has(e.group)) continue;
     rendered.add(e.group);
     const members = vis.filter((m) => m.group === e.group);
-    rows.push(<DrawerSection key={`g:${e.group}`} name={e.group} entries={members} navBtn={navBtn} />);
+    rows.push(
+      editing ? (
+        <div key={`g:${e.group}`}>
+          <div className="nav-group" aria-hidden="true">
+            <span className="glyph" aria-hidden="true">◢</span>
+            {e.group}
+          </div>
+          {members.map((m) => editRow(m))}
+        </div>
+      ) : (
+        <DrawerSection key={`g:${e.group}`} name={e.group} entries={members} navBtn={navBtn} />
+      ),
+    );
   }
-
-  const hidden = hiddenNav(cfg);
 
   return (
     <div className="nav-overlay" onClick={onClose}>
@@ -98,12 +179,12 @@ export function Nav({ open, tab, onChange, onClose }: {
         {hidden.length > 0 && (
           <>
             <button className="nav-group classified" onClick={() => setClassifiedOpen(!classifiedOpen)}
-              aria-expanded={classifiedOpen}>
+              aria-expanded={editing || classifiedOpen}>
               <span className="glyph" aria-hidden="true">▚</span>
               CLASSIFIED
-              <span className="nav-caret" aria-hidden="true">{classifiedOpen ? "▾" : "▸"}</span>
+              <span className="nav-caret" aria-hidden="true">{editing || classifiedOpen ? "▾" : "▸"}</span>
             </button>
-            {classifiedOpen && hidden.map((e) => navBtn(e, true))}
+            {(editing || classifiedOpen) && hidden.map((e) => (editing ? editRow(e, true) : navBtn(e, true)))}
           </>
         )}
         <div className="nav-divider" role="separator" />
@@ -112,6 +193,12 @@ export function Nav({ open, tab, onChange, onClose }: {
           <span className="glyph" aria-hidden="true">⚙</span>
           System
         </button>
+        <button style={{ minHeight: 48, width: "100%" }}
+          aria-label={editing ? "Done reconfiguring nav" : "Reconfig nav"}
+          onClick={() => { setEditing(!editing); setRenaming(null); setGrouping(null); }}>
+          {editing ? "Done" : "⧉ Reconfig"}
+        </button>
+        {editing && <p className="dim">Stashed pages wait in CLASSIFIED — nothing is deleted.</p>}
         <div className="nav-footer">
           <span>v{VERSION}</span>
           <span className={online ? "status-chip" : "status-chip offgrid"}>
