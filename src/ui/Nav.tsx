@@ -74,7 +74,7 @@ export function Nav({ open, tab, onChange, onClose }: {
   }, [open, onClose]);
 
   useEffect(() => {
-    if (!open) { setEditing(false); setRenaming(null); setGrouping(null); }
+    if (!open) { setEditing(false); setRenaming(null); setGrouping(null); setNewDrawer(""); }
   }, [open]);
 
   if (!open) return null;
@@ -195,7 +195,7 @@ export function Nav({ open, tab, onChange, onClose }: {
         </button>
         <button style={{ minHeight: 48, width: "100%" }}
           aria-label={editing ? "Done reconfiguring nav" : "Reconfig nav"}
-          onClick={() => { setEditing(!editing); setRenaming(null); setGrouping(null); }}>
+          onClick={() => { setEditing(!editing); setRenaming(null); setGrouping(null); setNewDrawer(""); }}>
           {editing ? "Done" : "⧉ Reconfig"}
         </button>
         {editing && <p className="dim">Stashed pages wait in CLASSIFIED — nothing is deleted.</p>}
