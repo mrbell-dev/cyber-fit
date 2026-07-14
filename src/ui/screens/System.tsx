@@ -2,11 +2,12 @@ import { useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../../db/db.ts";
 import { AREAS, AUGMENTS, mlToOz, ozToMl, type PlayerState } from "../../engine/index.ts";
-import { archiveHabit, deleteHabit, saveSettings } from "../../db/repo.ts";
+import { archiveHabit, deleteHabit, saveSettings, setLayout } from "../../db/repo.ts";
 import { downloadExport, exportJson, importJson } from "../../db/export.ts";
 import { mergeJson } from "../../db/merge.ts";
 import { blobSalt, decryptVault, deriveStoredKey, encryptVault, randomVaultId } from "../../db/vault.ts";
 import { relayConfig } from "../notify.ts";
+import { defaultLayout } from "../layout.ts";
 import { autoVaultSync, vaultAutoRecord, writeLinkedBackup } from "../backupFile.ts";
 import { THEMES } from "../theme/themes.ts";
 import { ReminderUplink } from "../components/ReminderUplink.tsx";
@@ -442,6 +443,7 @@ function About() {
 
 export function System() {
   const settings = useSettings();
+  const [resetArmed, setResetArmed] = useState(false);
 
   return (
     <section aria-label="System">
@@ -533,6 +535,24 @@ export function System() {
         <p className="placeholder">
           // logs before the rollover hour count as the previous day — night owls stay safe
         </p>
+      </div>
+
+      <div className="card">
+        <h2 className="card-title">Layout</h2>
+        <p className="dim">Rebuilds the stock dashboard and nav. Custom pages' layouts are discarded — your logged data is untouched.</p>
+        {resetArmed ? (
+          <div role="group" aria-label="Confirm layout reset">
+            <button style={{ minHeight: 48 }}
+              onClick={async () => { await setLayout(defaultLayout()); setResetArmed(false); }}>
+              Confirm reset
+            </button>
+            <button style={{ minHeight: 48 }} onClick={() => setResetArmed(false)}>Cancel</button>
+          </div>
+        ) : (
+          <button style={{ minHeight: 48 }} onClick={() => setResetArmed(true)}>
+            Reset layout to default
+          </button>
+        )}
       </div>
 
       {settings.devMode && <DevPanel />}
