@@ -1,0 +1,2408 @@
+{
+  "app": "cyber-fit",
+  "schemaVersion": 9,
+  "exportedAt": "2026-07-14T22:50:25.457Z",
+  "tables": {
+    "habits": [
+      {
+        "id": "2b617423-ddbf-4ee1-8a05-9db0ff428786",
+        "name": "Morning meds",
+        "icon": "💊",
+        "schedule": {
+          "kind": "daily"
+        },
+        "domain": "general",
+        "target": 1,
+        "area": "health",
+        "timeOfDay": "morning",
+        "createdAt": 1781960400000,
+        "order": 0
+      },
+      {
+        "id": "381947ef-00c4-40aa-b406-2d339505d4ff",
+        "name": "Grounding ritual — 10 min offline",
+        "icon": "🧘",
+        "schedule": {
+          "kind": "daily"
+        },
+        "domain": "general",
+        "target": 1,
+        "area": "grounding",
+        "presetId": "grounding",
+        "createdAt": 1781960400000,
+        "order": 1
+      },
+      {
+        "id": "64da24e4-f7ad-4782-944f-e269ea862c2d",
+        "name": "Morning stretch",
+        "icon": "🦾",
+        "schedule": {
+          "kind": "weekdays",
+          "days": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        "domain": "general",
+        "target": 1,
+        "area": "body",
+        "presetId": "stretch",
+        "createdAt": 1781960400000,
+        "order": 2
+      },
+      {
+        "id": "0582da6e-b95a-4eea-ad4e-1541d86e047b",
+        "name": "Feed the wetware — read",
+        "icon": "📖",
+        "schedule": {
+          "kind": "daily"
+        },
+        "domain": "learning",
+        "target": 1,
+        "area": "learning",
+        "presetId": "read",
+        "createdAt": 1781960400000,
+        "order": 3
+      },
+      {
+        "id": "c14880ee-7565-4ccb-b892-40ed6795da20",
+        "name": "Eat a real vegetable",
+        "icon": "🥗",
+        "schedule": {
+          "kind": "timesPerWeek",
+          "target": 4
+        },
+        "domain": "general",
+        "target": 1,
+        "area": "nutrition",
+        "presetId": "veg",
+        "createdAt": 1781960400000,
+        "order": 4
+      },
+      {
+        "id": "0b95850c-7ae6-414c-bec6-208b9b9e3917",
+        "name": "Touch grass — walk outside",
+        "icon": "🚶",
+        "schedule": {
+          "kind": "daily"
+        },
+        "domain": "general",
+        "target": 1,
+        "area": "grounding",
+        "presetId": "walk",
+        "createdAt": 1781960400000,
+        "order": 5
+      }
+    ],
+    "habitLogs": [
+      {
+        "id": "e505452f-ae09-4b93-b0ac-dab6c6743b5c",
+        "dayKey": "2026-07-14",
+        "ts": 1784030400000,
+        "habitId": "2b617423-ddbf-4ee1-8a05-9db0ff428786",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "0638214c-e046-4ab7-8a8d-f4ad40fca1ba",
+        "dayKey": "2026-07-13",
+        "ts": 1783944000000,
+        "habitId": "2b617423-ddbf-4ee1-8a05-9db0ff428786",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "3e63d2d5-5d29-4672-b7b0-30ebdf8a7279",
+        "dayKey": "2026-07-12",
+        "ts": 1783857600000,
+        "habitId": "2b617423-ddbf-4ee1-8a05-9db0ff428786",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "a61c14f2-3bfd-4112-a160-26047ec9d4e3",
+        "dayKey": "2026-07-11",
+        "ts": 1783771200000,
+        "habitId": "2b617423-ddbf-4ee1-8a05-9db0ff428786",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "10058718-082d-4c30-bf64-6b741bfc4a96",
+        "dayKey": "2026-07-10",
+        "ts": 1783684800000,
+        "habitId": "2b617423-ddbf-4ee1-8a05-9db0ff428786",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "88cd94b0-5eaf-4489-9460-5e2ee2fe2c9f",
+        "dayKey": "2026-07-09",
+        "ts": 1783598400000,
+        "habitId": "2b617423-ddbf-4ee1-8a05-9db0ff428786",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "d0077c0d-4e2a-4b97-87d1-0ac08173af94",
+        "dayKey": "2026-07-08",
+        "ts": 1783512000000,
+        "habitId": "2b617423-ddbf-4ee1-8a05-9db0ff428786",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "7acf0d22-ea9c-4ffc-ae09-4755af4d06c8",
+        "dayKey": "2026-07-07",
+        "ts": 1783425600000,
+        "habitId": "2b617423-ddbf-4ee1-8a05-9db0ff428786",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "f945875e-b728-40fb-9819-27e3746464b4",
+        "dayKey": "2026-07-06",
+        "ts": 1783339200000,
+        "habitId": "2b617423-ddbf-4ee1-8a05-9db0ff428786",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "96ee3059-a570-4a85-b5b5-3d0229da745c",
+        "dayKey": "2026-07-05",
+        "ts": 1783252800000,
+        "habitId": "2b617423-ddbf-4ee1-8a05-9db0ff428786",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "57fe1939-052b-4c9b-b6d5-9ebfc8f9846d",
+        "dayKey": "2026-07-04",
+        "ts": 1783166400000,
+        "habitId": "2b617423-ddbf-4ee1-8a05-9db0ff428786",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "fb467347-d397-4ad0-9545-1bdc48174913",
+        "dayKey": "2026-07-03",
+        "ts": 1783080000000,
+        "habitId": "2b617423-ddbf-4ee1-8a05-9db0ff428786",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "41cb3955-b31c-4fc8-b1fb-1d94d39af51e",
+        "dayKey": "2026-07-02",
+        "ts": 1782993600000,
+        "habitId": "2b617423-ddbf-4ee1-8a05-9db0ff428786",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "e5a9719d-667a-4802-97e9-34324a2faccb",
+        "dayKey": "2026-06-30",
+        "ts": 1782820800000,
+        "habitId": "2b617423-ddbf-4ee1-8a05-9db0ff428786",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "e28d9c19-cc29-4c99-ab99-131cc5236d95",
+        "dayKey": "2026-06-29",
+        "ts": 1782734400000,
+        "habitId": "2b617423-ddbf-4ee1-8a05-9db0ff428786",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "371bc626-3c39-4087-9506-209d05086dae",
+        "dayKey": "2026-06-28",
+        "ts": 1782648000000,
+        "habitId": "2b617423-ddbf-4ee1-8a05-9db0ff428786",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "453e65ea-05f6-47b4-87cd-59609f0ee726",
+        "dayKey": "2026-06-27",
+        "ts": 1782561600000,
+        "habitId": "2b617423-ddbf-4ee1-8a05-9db0ff428786",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "5a39d93f-b732-423b-b939-c59df11294ed",
+        "dayKey": "2026-06-26",
+        "ts": 1782475200000,
+        "habitId": "2b617423-ddbf-4ee1-8a05-9db0ff428786",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "dc7c20f8-ab9c-4173-b76e-9d0d1245e2be",
+        "dayKey": "2026-06-25",
+        "ts": 1782388800000,
+        "habitId": "2b617423-ddbf-4ee1-8a05-9db0ff428786",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "017d4be7-7a0c-4827-b6e1-64b975cffdb0",
+        "dayKey": "2026-06-24",
+        "ts": 1782302400000,
+        "habitId": "2b617423-ddbf-4ee1-8a05-9db0ff428786",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "930a0c3d-efdf-47ac-9dcf-4a4218fc9910",
+        "dayKey": "2026-07-14",
+        "ts": 1784077200000,
+        "habitId": "381947ef-00c4-40aa-b406-2d339505d4ff",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "14c6d0f0-c0cb-4786-ae7e-b0ca9580e456",
+        "dayKey": "2026-07-13",
+        "ts": 1783990800000,
+        "habitId": "381947ef-00c4-40aa-b406-2d339505d4ff",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "b7f3c83d-6fbd-473b-93cc-2053b057057c",
+        "dayKey": "2026-07-11",
+        "ts": 1783818000000,
+        "habitId": "381947ef-00c4-40aa-b406-2d339505d4ff",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "852ace63-4294-4661-8e64-1fcddcf0690e",
+        "dayKey": "2026-07-10",
+        "ts": 1783731600000,
+        "habitId": "381947ef-00c4-40aa-b406-2d339505d4ff",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "21247f6b-c015-4b7a-9fdc-9e88db7d0a4b",
+        "dayKey": "2026-07-09",
+        "ts": 1783645200000,
+        "habitId": "381947ef-00c4-40aa-b406-2d339505d4ff",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "c810ccce-41bb-4954-8405-dda3021174bd",
+        "dayKey": "2026-07-08",
+        "ts": 1783558800000,
+        "habitId": "381947ef-00c4-40aa-b406-2d339505d4ff",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "269662c3-9be2-40e2-82ea-e8fdc53bc54e",
+        "dayKey": "2026-07-07",
+        "ts": 1783472400000,
+        "habitId": "381947ef-00c4-40aa-b406-2d339505d4ff",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "8dcad2dc-7195-4496-b32c-84e092ec83e7",
+        "dayKey": "2026-07-06",
+        "ts": 1783386000000,
+        "habitId": "381947ef-00c4-40aa-b406-2d339505d4ff",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "feca008b-691a-4c22-92bf-b7e3a2cc3edb",
+        "dayKey": "2026-07-04",
+        "ts": 1783213200000,
+        "habitId": "381947ef-00c4-40aa-b406-2d339505d4ff",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "109890c8-dfbd-48ca-aab1-10eaabb362d1",
+        "dayKey": "2026-07-03",
+        "ts": 1783126800000,
+        "habitId": "381947ef-00c4-40aa-b406-2d339505d4ff",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "5c4d7652-94d3-4e1b-8c88-86972828a630",
+        "dayKey": "2026-07-02",
+        "ts": 1783040400000,
+        "habitId": "381947ef-00c4-40aa-b406-2d339505d4ff",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "8f24ca8e-c97f-4f72-9fe6-d6d7655eb5b9",
+        "dayKey": "2026-07-01",
+        "ts": 1782954000000,
+        "habitId": "381947ef-00c4-40aa-b406-2d339505d4ff",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "ed585360-517e-462d-9392-3898c12ca753",
+        "dayKey": "2026-06-30",
+        "ts": 1782867600000,
+        "habitId": "381947ef-00c4-40aa-b406-2d339505d4ff",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "2962168e-119e-44eb-8c9c-12f89c1e8925",
+        "dayKey": "2026-06-28",
+        "ts": 1782694800000,
+        "habitId": "381947ef-00c4-40aa-b406-2d339505d4ff",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "44872dff-b576-4afa-897b-cc4401ac0d00",
+        "dayKey": "2026-06-27",
+        "ts": 1782608400000,
+        "habitId": "381947ef-00c4-40aa-b406-2d339505d4ff",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "dc8264c7-48d3-4b30-b275-ca253d559825",
+        "dayKey": "2026-06-26",
+        "ts": 1782522000000,
+        "habitId": "381947ef-00c4-40aa-b406-2d339505d4ff",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "d9b9b3e5-f3b5-4c42-a8ef-2856d82e089c",
+        "dayKey": "2026-06-25",
+        "ts": 1782435600000,
+        "habitId": "381947ef-00c4-40aa-b406-2d339505d4ff",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "39edcdda-0d9e-458d-a5a7-779d510be295",
+        "dayKey": "2026-06-24",
+        "ts": 1782349200000,
+        "habitId": "381947ef-00c4-40aa-b406-2d339505d4ff",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "4dd77b7e-7fcc-402a-907d-14b909cf582f",
+        "dayKey": "2026-07-14",
+        "ts": 1784026800000,
+        "habitId": "64da24e4-f7ad-4782-944f-e269ea862c2d",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "03c6fbbf-453e-4df2-a9cf-bf881e73ed2b",
+        "dayKey": "2026-07-13",
+        "ts": 1783940400000,
+        "habitId": "64da24e4-f7ad-4782-944f-e269ea862c2d",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "35ae975f-8ff1-46c8-8cbd-eee7c18eeba7",
+        "dayKey": "2026-07-10",
+        "ts": 1783681200000,
+        "habitId": "64da24e4-f7ad-4782-944f-e269ea862c2d",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "8277f5fe-1a94-4f4d-a6c8-43ff711e55b9",
+        "dayKey": "2026-07-09",
+        "ts": 1783594800000,
+        "habitId": "64da24e4-f7ad-4782-944f-e269ea862c2d",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "b5956181-4cd5-411a-8c21-c0534d0859c8",
+        "dayKey": "2026-07-08",
+        "ts": 1783508400000,
+        "habitId": "64da24e4-f7ad-4782-944f-e269ea862c2d",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "aa5a57c5-2bed-44ab-a875-3b5df042a613",
+        "dayKey": "2026-07-07",
+        "ts": 1783422000000,
+        "habitId": "64da24e4-f7ad-4782-944f-e269ea862c2d",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "650513a3-7e19-4125-b3c9-febad09b5699",
+        "dayKey": "2026-07-06",
+        "ts": 1783335600000,
+        "habitId": "64da24e4-f7ad-4782-944f-e269ea862c2d",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "ca1da983-b1f7-4877-82ea-57f4191bb5c6",
+        "dayKey": "2026-07-03",
+        "ts": 1783076400000,
+        "habitId": "64da24e4-f7ad-4782-944f-e269ea862c2d",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "2f685a94-4cd3-4b40-8d58-952474e9fb85",
+        "dayKey": "2026-07-02",
+        "ts": 1782990000000,
+        "habitId": "64da24e4-f7ad-4782-944f-e269ea862c2d",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "ea6acb69-639c-45c3-801b-9035cc89b876",
+        "dayKey": "2026-07-01",
+        "ts": 1782903600000,
+        "habitId": "64da24e4-f7ad-4782-944f-e269ea862c2d",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "94665db2-8260-4e0a-adaa-9d5cc8777089",
+        "dayKey": "2026-06-30",
+        "ts": 1782817200000,
+        "habitId": "64da24e4-f7ad-4782-944f-e269ea862c2d",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "091fd27e-6fc2-4d73-916c-88434c9eee19",
+        "dayKey": "2026-06-29",
+        "ts": 1782730800000,
+        "habitId": "64da24e4-f7ad-4782-944f-e269ea862c2d",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "13ad90d5-f28d-495c-b4af-4bec3a411549",
+        "dayKey": "2026-06-24",
+        "ts": 1782298800000,
+        "habitId": "64da24e4-f7ad-4782-944f-e269ea862c2d",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "59b871e5-ad24-4d14-8493-4c45a4ecafc5",
+        "dayKey": "2026-07-14",
+        "ts": 1784080800000,
+        "habitId": "0582da6e-b95a-4eea-ad4e-1541d86e047b",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "24514253-1984-4955-abfd-ee7197abede1",
+        "dayKey": "2026-07-13",
+        "ts": 1783994400000,
+        "habitId": "0582da6e-b95a-4eea-ad4e-1541d86e047b",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "a2cb684d-e9b8-4be8-829d-736d613e3473",
+        "dayKey": "2026-07-12",
+        "ts": 1783908000000,
+        "habitId": "0582da6e-b95a-4eea-ad4e-1541d86e047b",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "0d198c99-532d-4dbf-96a5-9ef9e7122385",
+        "dayKey": "2026-07-11",
+        "ts": 1783821600000,
+        "habitId": "0582da6e-b95a-4eea-ad4e-1541d86e047b",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "8cdb3f3a-fc79-4498-a43f-25772f20b843",
+        "dayKey": "2026-07-10",
+        "ts": 1783735200000,
+        "habitId": "0582da6e-b95a-4eea-ad4e-1541d86e047b",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "b70648e4-0fa8-4494-bfba-55727f329bba",
+        "dayKey": "2026-07-09",
+        "ts": 1783648800000,
+        "habitId": "0582da6e-b95a-4eea-ad4e-1541d86e047b",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "7a12633f-600c-488b-81be-606a3504615c",
+        "dayKey": "2026-07-07",
+        "ts": 1783476000000,
+        "habitId": "0582da6e-b95a-4eea-ad4e-1541d86e047b",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "67198c36-ddcb-4ea3-a643-f59076ed6613",
+        "dayKey": "2026-07-06",
+        "ts": 1783389600000,
+        "habitId": "0582da6e-b95a-4eea-ad4e-1541d86e047b",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "d28b0cf7-0791-4f44-a16b-a89c73753750",
+        "dayKey": "2026-07-05",
+        "ts": 1783303200000,
+        "habitId": "0582da6e-b95a-4eea-ad4e-1541d86e047b",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "5ecf57bb-ea02-4a38-8e8e-accc3a2fe3ce",
+        "dayKey": "2026-07-04",
+        "ts": 1783216800000,
+        "habitId": "0582da6e-b95a-4eea-ad4e-1541d86e047b",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "f828b8c8-c12c-4ff3-91cc-057cf5aeca44",
+        "dayKey": "2026-07-03",
+        "ts": 1783130400000,
+        "habitId": "0582da6e-b95a-4eea-ad4e-1541d86e047b",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "b95e3e66-0f9f-47e0-83a1-bdda68be03bd",
+        "dayKey": "2026-07-02",
+        "ts": 1783044000000,
+        "habitId": "0582da6e-b95a-4eea-ad4e-1541d86e047b",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "a8036022-2f06-4678-b6a4-77fe97e1a945",
+        "dayKey": "2026-07-01",
+        "ts": 1782957600000,
+        "habitId": "0582da6e-b95a-4eea-ad4e-1541d86e047b",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "111da6c1-7ecd-45a5-91e2-f7ee08a98f12",
+        "dayKey": "2026-06-30",
+        "ts": 1782871200000,
+        "habitId": "0582da6e-b95a-4eea-ad4e-1541d86e047b",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "229bcdd9-002d-4664-9341-b7feca24d0a7",
+        "dayKey": "2026-06-29",
+        "ts": 1782784800000,
+        "habitId": "0582da6e-b95a-4eea-ad4e-1541d86e047b",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "c7ced934-7d82-4f2d-9be1-c51d16e8f560",
+        "dayKey": "2026-06-28",
+        "ts": 1782698400000,
+        "habitId": "0582da6e-b95a-4eea-ad4e-1541d86e047b",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "3dfe1baf-29ce-4ce2-b705-a6149829e50c",
+        "dayKey": "2026-06-27",
+        "ts": 1782612000000,
+        "habitId": "0582da6e-b95a-4eea-ad4e-1541d86e047b",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "8db2d37c-d1d6-4672-9050-e696c198c4af",
+        "dayKey": "2026-06-26",
+        "ts": 1782525600000,
+        "habitId": "0582da6e-b95a-4eea-ad4e-1541d86e047b",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "061058e5-bcac-48a6-8705-2139bc3bd791",
+        "dayKey": "2026-06-25",
+        "ts": 1782439200000,
+        "habitId": "0582da6e-b95a-4eea-ad4e-1541d86e047b",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "f41079e2-bba9-4941-bd8d-18bc8d31f842",
+        "dayKey": "2026-06-24",
+        "ts": 1782352800000,
+        "habitId": "0582da6e-b95a-4eea-ad4e-1541d86e047b",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "b7c17481-8fa4-4c11-b8a3-b55853c68991",
+        "dayKey": "2026-07-14",
+        "ts": 1784066400000,
+        "habitId": "c14880ee-7565-4ccb-b892-40ed6795da20",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "dd933340-1976-451b-9ae7-7ebb6ce4af8d",
+        "dayKey": "2026-07-12",
+        "ts": 1783893600000,
+        "habitId": "c14880ee-7565-4ccb-b892-40ed6795da20",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "17182b90-5572-47ce-ad2c-778462bfb8aa",
+        "dayKey": "2026-07-11",
+        "ts": 1783807200000,
+        "habitId": "c14880ee-7565-4ccb-b892-40ed6795da20",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "6a894fa6-9289-48af-b083-6a975ee0ebdc",
+        "dayKey": "2026-07-09",
+        "ts": 1783634400000,
+        "habitId": "c14880ee-7565-4ccb-b892-40ed6795da20",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "e18499bd-12fc-45d9-81ee-6f2bc020ee98",
+        "dayKey": "2026-07-08",
+        "ts": 1783548000000,
+        "habitId": "c14880ee-7565-4ccb-b892-40ed6795da20",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "7d96d06a-00de-47c8-b31b-db5a7c4dbbee",
+        "dayKey": "2026-07-07",
+        "ts": 1783461600000,
+        "habitId": "c14880ee-7565-4ccb-b892-40ed6795da20",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "5ec15207-809f-426c-a6a0-4d92cb0e4364",
+        "dayKey": "2026-07-05",
+        "ts": 1783288800000,
+        "habitId": "c14880ee-7565-4ccb-b892-40ed6795da20",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "36906ddf-0123-4343-a1b9-e0470e5c5915",
+        "dayKey": "2026-07-04",
+        "ts": 1783202400000,
+        "habitId": "c14880ee-7565-4ccb-b892-40ed6795da20",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "a2446a41-3171-4201-908f-5ffe7a65748a",
+        "dayKey": "2026-07-01",
+        "ts": 1782943200000,
+        "habitId": "c14880ee-7565-4ccb-b892-40ed6795da20",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "056fb7a6-69bf-4e82-af59-c69552b6e534",
+        "dayKey": "2026-06-30",
+        "ts": 1782856800000,
+        "habitId": "c14880ee-7565-4ccb-b892-40ed6795da20",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "a6484b0a-6b26-4daa-88a8-18fcc90fdb23",
+        "dayKey": "2026-06-29",
+        "ts": 1782770400000,
+        "habitId": "c14880ee-7565-4ccb-b892-40ed6795da20",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "600e7fe1-30a1-46c9-8e96-643751a15ebe",
+        "dayKey": "2026-06-27",
+        "ts": 1782597600000,
+        "habitId": "c14880ee-7565-4ccb-b892-40ed6795da20",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "0b82e6f3-fd8b-4c86-bd44-d04e5c102e91",
+        "dayKey": "2026-06-26",
+        "ts": 1782511200000,
+        "habitId": "c14880ee-7565-4ccb-b892-40ed6795da20",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "b110633d-d540-4550-b141-0383e459bdf8",
+        "dayKey": "2026-06-24",
+        "ts": 1782338400000,
+        "habitId": "c14880ee-7565-4ccb-b892-40ed6795da20",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "0749c60d-493a-437c-a1bf-52bd9af55662",
+        "dayKey": "2026-07-14",
+        "ts": 1784044800000,
+        "habitId": "0b95850c-7ae6-414c-bec6-208b9b9e3917",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "b5657ea0-102a-409e-848d-b48090d1f6d9",
+        "dayKey": "2026-07-13",
+        "ts": 1783958400000,
+        "habitId": "0b95850c-7ae6-414c-bec6-208b9b9e3917",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "2cda5b7e-1fac-4b19-91ff-1cf50cba73eb",
+        "dayKey": "2026-07-12",
+        "ts": 1783872000000,
+        "habitId": "0b95850c-7ae6-414c-bec6-208b9b9e3917",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "daca5e2c-0290-4f1c-88c1-183933cb9318",
+        "dayKey": "2026-07-10",
+        "ts": 1783699200000,
+        "habitId": "0b95850c-7ae6-414c-bec6-208b9b9e3917",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "4c82dea6-34e9-4b26-9690-bee7cac8fcf7",
+        "dayKey": "2026-07-09",
+        "ts": 1783612800000,
+        "habitId": "0b95850c-7ae6-414c-bec6-208b9b9e3917",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "d3a7afd8-c239-4606-afb8-189bd24217d9",
+        "dayKey": "2026-07-08",
+        "ts": 1783526400000,
+        "habitId": "0b95850c-7ae6-414c-bec6-208b9b9e3917",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "0e4d26c1-5f8f-45bd-83f9-fe7084378591",
+        "dayKey": "2026-07-07",
+        "ts": 1783440000000,
+        "habitId": "0b95850c-7ae6-414c-bec6-208b9b9e3917",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "63844dfa-928a-49d2-9e5e-2fad72acca60",
+        "dayKey": "2026-07-06",
+        "ts": 1783353600000,
+        "habitId": "0b95850c-7ae6-414c-bec6-208b9b9e3917",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "79730f20-8bb2-43ae-ad5a-a034d084184c",
+        "dayKey": "2026-07-05",
+        "ts": 1783267200000,
+        "habitId": "0b95850c-7ae6-414c-bec6-208b9b9e3917",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "13d23dd9-6775-4825-8aca-8779fe0b6ec2",
+        "dayKey": "2026-07-03",
+        "ts": 1783094400000,
+        "habitId": "0b95850c-7ae6-414c-bec6-208b9b9e3917",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "77f2247b-dbe4-47dd-930c-3b9eb9727390",
+        "dayKey": "2026-07-02",
+        "ts": 1783008000000,
+        "habitId": "0b95850c-7ae6-414c-bec6-208b9b9e3917",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "9fc962a7-3f23-4b66-900e-17d2a25c2bfe",
+        "dayKey": "2026-07-01",
+        "ts": 1782921600000,
+        "habitId": "0b95850c-7ae6-414c-bec6-208b9b9e3917",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "396e9b19-0c61-4722-97d7-889c6237eddf",
+        "dayKey": "2026-06-30",
+        "ts": 1782835200000,
+        "habitId": "0b95850c-7ae6-414c-bec6-208b9b9e3917",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "1c76c40b-c7dc-4211-928c-eff0453c6b2e",
+        "dayKey": "2026-06-29",
+        "ts": 1782748800000,
+        "habitId": "0b95850c-7ae6-414c-bec6-208b9b9e3917",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "7493786d-a373-4241-bc1a-a3dbcd6d2f0d",
+        "dayKey": "2026-06-28",
+        "ts": 1782662400000,
+        "habitId": "0b95850c-7ae6-414c-bec6-208b9b9e3917",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "5ac4e7f3-dbfe-4b6c-947c-1285deefa2cf",
+        "dayKey": "2026-06-26",
+        "ts": 1782489600000,
+        "habitId": "0b95850c-7ae6-414c-bec6-208b9b9e3917",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "56c1a72c-a1cc-46d0-9bf8-386ee0b2696a",
+        "dayKey": "2026-06-25",
+        "ts": 1782403200000,
+        "habitId": "0b95850c-7ae6-414c-bec6-208b9b9e3917",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "5af51d87-7a00-41ca-aca1-8b2718f232f1",
+        "dayKey": "2026-06-24",
+        "ts": 1782316800000,
+        "habitId": "0b95850c-7ae6-414c-bec6-208b9b9e3917",
+        "amount": 1,
+        "kind": "done"
+      },
+      {
+        "id": "5c511090-c679-4678-ad49-476531bb4989",
+        "dayKey": "2026-07-04",
+        "ts": 1783182600000,
+        "habitId": "0b95850c-7ae6-414c-bec6-208b9b9e3917",
+        "amount": 1,
+        "kind": "skip"
+      }
+    ],
+    "waterLogs": [
+      {
+        "id": "a407877d-c07b-451f-9318-e8fb22d4b881",
+        "dayKey": "2026-07-14",
+        "ts": 1784031300000,
+        "ml": 350
+      },
+      {
+        "id": "6ad27423-0cd0-413e-abd4-437e376246b8",
+        "dayKey": "2026-07-14",
+        "ts": 1784038500000,
+        "ml": 350
+      },
+      {
+        "id": "ec867f6c-6dc1-4276-8b16-7b3e5abb92ad",
+        "dayKey": "2026-07-14",
+        "ts": 1784045700000,
+        "ml": 350
+      },
+      {
+        "id": "fc9a505d-8bad-4463-92f5-8a0c2cd11b42",
+        "dayKey": "2026-07-14",
+        "ts": 1784052900000,
+        "ml": 350
+      },
+      {
+        "id": "35c47716-343b-46be-b530-a32f6f2ddf96",
+        "dayKey": "2026-07-14",
+        "ts": 1784060100000,
+        "ml": 350
+      },
+      {
+        "id": "232205e2-948e-49f0-b891-27b8c1c99823",
+        "dayKey": "2026-07-13",
+        "ts": 1783944900000,
+        "ml": 350
+      },
+      {
+        "id": "ee996b7b-c05e-400e-9d54-177ab9961e2d",
+        "dayKey": "2026-07-13",
+        "ts": 1783952100000,
+        "ml": 350
+      },
+      {
+        "id": "df27ff34-490a-4e4b-bee4-1a9ef8c40be6",
+        "dayKey": "2026-07-13",
+        "ts": 1783959300000,
+        "ml": 350
+      },
+      {
+        "id": "b1c5d579-b50e-45e2-a219-fca291653d84",
+        "dayKey": "2026-07-13",
+        "ts": 1783966500000,
+        "ml": 350
+      },
+      {
+        "id": "83427220-e6d7-442a-9e2d-ccec79c75a1a",
+        "dayKey": "2026-07-13",
+        "ts": 1783973700000,
+        "ml": 350
+      },
+      {
+        "id": "254854b9-4b98-483e-83f3-d5eb55ad553c",
+        "dayKey": "2026-07-13",
+        "ts": 1783980900000,
+        "ml": 350
+      },
+      {
+        "id": "0efd33cc-46bd-45fa-84c1-58146365718f",
+        "dayKey": "2026-07-13",
+        "ts": 1783988100000,
+        "ml": 350
+      },
+      {
+        "id": "d2dae614-1b11-44f3-a0f0-aa070379425a",
+        "dayKey": "2026-07-13",
+        "ts": 1783995300000,
+        "ml": 350
+      },
+      {
+        "id": "fdeb6ee7-2329-44d7-b88c-498133ce08e1",
+        "dayKey": "2026-07-12",
+        "ts": 1783858500000,
+        "ml": 350
+      },
+      {
+        "id": "38176942-24c3-491a-beb7-79dff95c7599",
+        "dayKey": "2026-07-12",
+        "ts": 1783865700000,
+        "ml": 350
+      },
+      {
+        "id": "75f552c2-f983-46a6-9b3f-93cdbd848a06",
+        "dayKey": "2026-07-12",
+        "ts": 1783872900000,
+        "ml": 350
+      },
+      {
+        "id": "569f2458-2302-4dc1-9b8e-f5aba559aada",
+        "dayKey": "2026-07-12",
+        "ts": 1783880100000,
+        "ml": 350
+      },
+      {
+        "id": "d953fb4d-8b5d-4604-afea-077d4c5b9b41",
+        "dayKey": "2026-07-12",
+        "ts": 1783887300000,
+        "ml": 350
+      },
+      {
+        "id": "eae247e3-ab51-48d1-b4a8-fd5e80f1f359",
+        "dayKey": "2026-07-12",
+        "ts": 1783894500000,
+        "ml": 350
+      },
+      {
+        "id": "31bc3663-d2e7-4f22-a074-fad5b4ba4e14",
+        "dayKey": "2026-07-12",
+        "ts": 1783901700000,
+        "ml": 350
+      },
+      {
+        "id": "ee4545e4-7a0a-4f4c-b039-ad8493f6a147",
+        "dayKey": "2026-07-11",
+        "ts": 1783772100000,
+        "ml": 350
+      },
+      {
+        "id": "8bcf1651-bd53-4f84-a211-7e810abb9444",
+        "dayKey": "2026-07-11",
+        "ts": 1783779300000,
+        "ml": 350
+      },
+      {
+        "id": "12b0e343-2d8a-46df-9cfe-a9e4ca038734",
+        "dayKey": "2026-07-11",
+        "ts": 1783786500000,
+        "ml": 350
+      },
+      {
+        "id": "f87655e9-5e46-44a2-aa82-895304710bc9",
+        "dayKey": "2026-07-11",
+        "ts": 1783793700000,
+        "ml": 350
+      },
+      {
+        "id": "614dccb6-e336-42ee-89db-750476c55815",
+        "dayKey": "2026-07-11",
+        "ts": 1783800900000,
+        "ml": 350
+      },
+      {
+        "id": "899ef44a-4171-4ff5-b787-fb712b5471f0",
+        "dayKey": "2026-07-11",
+        "ts": 1783808100000,
+        "ml": 350
+      },
+      {
+        "id": "b37129cc-275d-4e58-ac5b-eb446b4c0ba1",
+        "dayKey": "2026-07-10",
+        "ts": 1783685700000,
+        "ml": 350
+      },
+      {
+        "id": "57ad0d99-362d-41f5-978f-fe5907b1c00e",
+        "dayKey": "2026-07-10",
+        "ts": 1783692900000,
+        "ml": 350
+      },
+      {
+        "id": "60056d74-b4c3-4624-b89c-42dae9700d2a",
+        "dayKey": "2026-07-10",
+        "ts": 1783700100000,
+        "ml": 350
+      },
+      {
+        "id": "d0279e46-cfd2-421e-9249-604bf85448da",
+        "dayKey": "2026-07-10",
+        "ts": 1783707300000,
+        "ml": 350
+      },
+      {
+        "id": "6e7e152b-8c5d-4d0b-a126-39b31cb2c5d9",
+        "dayKey": "2026-07-10",
+        "ts": 1783714500000,
+        "ml": 350
+      },
+      {
+        "id": "f979111f-7089-4f1a-81bc-fa9eb365dbc3",
+        "dayKey": "2026-07-09",
+        "ts": 1783599300000,
+        "ml": 350
+      },
+      {
+        "id": "ec6c92f6-408c-489b-b003-69b4378bddd0",
+        "dayKey": "2026-07-09",
+        "ts": 1783606500000,
+        "ml": 350
+      },
+      {
+        "id": "6c26f472-70b1-482e-98a9-bcdac0ac78a8",
+        "dayKey": "2026-07-09",
+        "ts": 1783613700000,
+        "ml": 350
+      },
+      {
+        "id": "a66de56c-4738-42f6-a5f9-60277c927080",
+        "dayKey": "2026-07-09",
+        "ts": 1783620900000,
+        "ml": 350
+      },
+      {
+        "id": "8446fdd9-d08a-4d5a-bedb-818e541e849b",
+        "dayKey": "2026-07-09",
+        "ts": 1783628100000,
+        "ml": 350
+      },
+      {
+        "id": "10703a10-e1dd-4cfe-abca-a781bbd80392",
+        "dayKey": "2026-07-09",
+        "ts": 1783635300000,
+        "ml": 350
+      },
+      {
+        "id": "0a82c175-758b-4fc4-b524-139702c85c90",
+        "dayKey": "2026-07-09",
+        "ts": 1783642500000,
+        "ml": 350
+      },
+      {
+        "id": "591473a1-2464-434d-8d2a-3d60b8a5f6b3",
+        "dayKey": "2026-07-09",
+        "ts": 1783649700000,
+        "ml": 350
+      },
+      {
+        "id": "bfa6633d-9bc3-4ab8-a7e8-19755cf6d169",
+        "dayKey": "2026-07-08",
+        "ts": 1783512900000,
+        "ml": 350
+      },
+      {
+        "id": "50eccf8b-61d6-43b1-9e6c-b196a42c1bfd",
+        "dayKey": "2026-07-08",
+        "ts": 1783520100000,
+        "ml": 350
+      },
+      {
+        "id": "7a87d2bd-36bf-435c-a220-ec28c249c7f5",
+        "dayKey": "2026-07-08",
+        "ts": 1783527300000,
+        "ml": 350
+      },
+      {
+        "id": "34d78192-b3de-4ec0-8e86-8640f6d17cc6",
+        "dayKey": "2026-07-08",
+        "ts": 1783534500000,
+        "ml": 350
+      },
+      {
+        "id": "e09b5c8f-6c73-427d-ba17-8224d868808e",
+        "dayKey": "2026-07-08",
+        "ts": 1783541700000,
+        "ml": 350
+      },
+      {
+        "id": "f558056c-1396-40b4-ae37-052cc6d3eaea",
+        "dayKey": "2026-07-08",
+        "ts": 1783548900000,
+        "ml": 350
+      },
+      {
+        "id": "3d126768-f979-4e8d-882a-c51b88116d80",
+        "dayKey": "2026-07-08",
+        "ts": 1783556100000,
+        "ml": 350
+      },
+      {
+        "id": "fb64f9c3-05e4-4fb9-90e7-2f11c64e1716",
+        "dayKey": "2026-07-07",
+        "ts": 1783426500000,
+        "ml": 350
+      },
+      {
+        "id": "24a1049c-dd77-4ef5-9a38-583b48d8fb4c",
+        "dayKey": "2026-07-07",
+        "ts": 1783433700000,
+        "ml": 350
+      },
+      {
+        "id": "2e0b2c21-6a65-4f46-b35e-7df0fd37c9cf",
+        "dayKey": "2026-07-07",
+        "ts": 1783440900000,
+        "ml": 350
+      },
+      {
+        "id": "ae032baa-16ad-4b74-b680-80c193be323c",
+        "dayKey": "2026-07-07",
+        "ts": 1783448100000,
+        "ml": 350
+      },
+      {
+        "id": "94f4bf73-381b-4bb0-b32e-5e0bc0bb9e2b",
+        "dayKey": "2026-07-07",
+        "ts": 1783455300000,
+        "ml": 350
+      },
+      {
+        "id": "4ccd7076-6ac5-4b6a-803f-7d48f0271f0d",
+        "dayKey": "2026-07-07",
+        "ts": 1783462500000,
+        "ml": 350
+      },
+      {
+        "id": "42e7c3cf-7acd-405f-b0b9-d568c8fb5dfe",
+        "dayKey": "2026-07-06",
+        "ts": 1783340100000,
+        "ml": 350
+      },
+      {
+        "id": "6aa6b36d-daa4-4265-b238-fa0e0c8c7b0d",
+        "dayKey": "2026-07-06",
+        "ts": 1783347300000,
+        "ml": 350
+      },
+      {
+        "id": "45736347-d8a2-4c7b-9cad-496c0dbff6f0",
+        "dayKey": "2026-07-06",
+        "ts": 1783354500000,
+        "ml": 350
+      },
+      {
+        "id": "98d6ecaf-d082-41ac-af50-c2c37ca0e054",
+        "dayKey": "2026-07-06",
+        "ts": 1783361700000,
+        "ml": 350
+      },
+      {
+        "id": "9e83dad7-d2b7-4c38-b38c-f4fdeea2e5ce",
+        "dayKey": "2026-07-06",
+        "ts": 1783368900000,
+        "ml": 350
+      },
+      {
+        "id": "d4035247-0eb7-40ea-9ab0-bfa047a4c6d6",
+        "dayKey": "2026-07-05",
+        "ts": 1783253700000,
+        "ml": 350
+      },
+      {
+        "id": "692f0d4a-2878-42b5-a4ee-87fd6ea3b8c6",
+        "dayKey": "2026-07-05",
+        "ts": 1783260900000,
+        "ml": 350
+      },
+      {
+        "id": "9b374250-93d9-4d75-b600-73c6c210a761",
+        "dayKey": "2026-07-05",
+        "ts": 1783268100000,
+        "ml": 350
+      },
+      {
+        "id": "2cd706c5-8248-45f4-9685-64d0432802a6",
+        "dayKey": "2026-07-05",
+        "ts": 1783275300000,
+        "ml": 350
+      },
+      {
+        "id": "a7fe5060-f9d5-4619-a6f0-27e0a7e157f8",
+        "dayKey": "2026-07-05",
+        "ts": 1783282500000,
+        "ml": 350
+      },
+      {
+        "id": "4ffd2268-df01-4253-af12-bf5deae72e5b",
+        "dayKey": "2026-07-05",
+        "ts": 1783289700000,
+        "ml": 350
+      },
+      {
+        "id": "8925a84f-3631-456a-840a-41a167dc2ef7",
+        "dayKey": "2026-07-05",
+        "ts": 1783296900000,
+        "ml": 350
+      },
+      {
+        "id": "129edf9d-0e61-4e82-b246-5bc6e0dcbbe7",
+        "dayKey": "2026-07-05",
+        "ts": 1783304100000,
+        "ml": 350
+      },
+      {
+        "id": "eea309d2-b12c-494b-a3ad-13986955d683",
+        "dayKey": "2026-07-04",
+        "ts": 1783167300000,
+        "ml": 350
+      },
+      {
+        "id": "2b63ef77-699a-43ea-aa17-633b01f94b31",
+        "dayKey": "2026-07-04",
+        "ts": 1783174500000,
+        "ml": 350
+      },
+      {
+        "id": "221d3612-a11e-45b1-a9fc-d7912732fdb0",
+        "dayKey": "2026-07-04",
+        "ts": 1783181700000,
+        "ml": 350
+      },
+      {
+        "id": "cabc2308-b96e-4257-9b60-3dfd0853f35d",
+        "dayKey": "2026-07-04",
+        "ts": 1783188900000,
+        "ml": 350
+      },
+      {
+        "id": "7e750910-f29b-45bc-9ef6-7ee7a6c176b3",
+        "dayKey": "2026-07-04",
+        "ts": 1783196100000,
+        "ml": 350
+      },
+      {
+        "id": "489165a2-b337-4e02-a318-fbf0ead73078",
+        "dayKey": "2026-07-04",
+        "ts": 1783203300000,
+        "ml": 350
+      },
+      {
+        "id": "835f9dee-5da3-460a-a712-a9abec39fd4c",
+        "dayKey": "2026-07-04",
+        "ts": 1783210500000,
+        "ml": 350
+      },
+      {
+        "id": "341f715a-19fb-4998-a67e-332f7eb05df5",
+        "dayKey": "2026-07-03",
+        "ts": 1783080900000,
+        "ml": 350
+      },
+      {
+        "id": "ccbb9e21-1bf5-400a-8b12-7e5ed72e6adf",
+        "dayKey": "2026-07-03",
+        "ts": 1783088100000,
+        "ml": 350
+      },
+      {
+        "id": "81465036-0d7c-4b03-8bf8-1d6d373fb843",
+        "dayKey": "2026-07-03",
+        "ts": 1783095300000,
+        "ml": 350
+      },
+      {
+        "id": "fcd98881-6951-4b9f-9869-1817c87bc8fe",
+        "dayKey": "2026-07-03",
+        "ts": 1783102500000,
+        "ml": 350
+      },
+      {
+        "id": "635ce362-7bc5-41aa-ab70-abec623c19dd",
+        "dayKey": "2026-07-03",
+        "ts": 1783109700000,
+        "ml": 350
+      },
+      {
+        "id": "f0622fb1-91d6-4424-891a-70a839fbb6d3",
+        "dayKey": "2026-07-03",
+        "ts": 1783116900000,
+        "ml": 350
+      },
+      {
+        "id": "acf5b0e1-a50e-4c94-bb86-ceffe6f40578",
+        "dayKey": "2026-07-02",
+        "ts": 1782994500000,
+        "ml": 350
+      },
+      {
+        "id": "e48d28b5-a2b4-423a-b761-e90532011061",
+        "dayKey": "2026-07-02",
+        "ts": 1783001700000,
+        "ml": 350
+      },
+      {
+        "id": "00f45ea9-8624-4b0a-9e04-fb1aafc2e697",
+        "dayKey": "2026-07-02",
+        "ts": 1783008900000,
+        "ml": 350
+      },
+      {
+        "id": "c1057119-534a-406f-bb91-6813621b47b3",
+        "dayKey": "2026-07-02",
+        "ts": 1783016100000,
+        "ml": 350
+      },
+      {
+        "id": "31af9064-2764-4118-91c0-f3d72fe9f112",
+        "dayKey": "2026-07-02",
+        "ts": 1783023300000,
+        "ml": 350
+      },
+      {
+        "id": "339b32fa-699a-42cc-9454-1434959cc63c",
+        "dayKey": "2026-07-01",
+        "ts": 1782908100000,
+        "ml": 350
+      },
+      {
+        "id": "73a7eaa5-319e-4bd0-b3ed-8b018ef763fd",
+        "dayKey": "2026-07-01",
+        "ts": 1782915300000,
+        "ml": 350
+      },
+      {
+        "id": "f22b16af-8204-40dd-a41c-893fe9ccaf3c",
+        "dayKey": "2026-07-01",
+        "ts": 1782922500000,
+        "ml": 350
+      },
+      {
+        "id": "70133c55-db4d-4e4a-b2a0-ff380601e4c3",
+        "dayKey": "2026-07-01",
+        "ts": 1782929700000,
+        "ml": 350
+      },
+      {
+        "id": "ee6de3bb-1848-4b34-ad12-a78a4b526afe",
+        "dayKey": "2026-07-01",
+        "ts": 1782936900000,
+        "ml": 350
+      },
+      {
+        "id": "b31b02a0-5dd5-4f8f-bd85-3ac741962858",
+        "dayKey": "2026-07-01",
+        "ts": 1782944100000,
+        "ml": 350
+      },
+      {
+        "id": "fb29ad16-33ff-4de3-914f-069616b70bdd",
+        "dayKey": "2026-07-01",
+        "ts": 1782951300000,
+        "ml": 350
+      },
+      {
+        "id": "49c522e0-c778-403d-876d-de57bda72f4f",
+        "dayKey": "2026-07-01",
+        "ts": 1782958500000,
+        "ml": 350
+      },
+      {
+        "id": "ef009256-25f7-4734-8d9e-d8cde0cd45f0",
+        "dayKey": "2026-06-30",
+        "ts": 1782821700000,
+        "ml": 350
+      },
+      {
+        "id": "0eeac81f-98b5-4af5-acdf-fc3ce2ced011",
+        "dayKey": "2026-06-30",
+        "ts": 1782828900000,
+        "ml": 350
+      },
+      {
+        "id": "83bdb842-a669-493c-934a-b6a25ea94d9a",
+        "dayKey": "2026-06-30",
+        "ts": 1782836100000,
+        "ml": 350
+      },
+      {
+        "id": "0287a452-a74e-4e75-a537-1c656f1dd3fa",
+        "dayKey": "2026-06-30",
+        "ts": 1782843300000,
+        "ml": 350
+      },
+      {
+        "id": "ad3575c6-609c-477b-978e-2b72c108140a",
+        "dayKey": "2026-06-30",
+        "ts": 1782850500000,
+        "ml": 350
+      },
+      {
+        "id": "9bcb824d-1c55-4ee8-bcac-1e62eb082151",
+        "dayKey": "2026-06-30",
+        "ts": 1782857700000,
+        "ml": 350
+      },
+      {
+        "id": "9ad6fd41-f535-4165-b818-d52c4906cb59",
+        "dayKey": "2026-06-30",
+        "ts": 1782864900000,
+        "ml": 350
+      },
+      {
+        "id": "7710fb96-153a-4f37-ad2d-1931581215ed",
+        "dayKey": "2026-06-29",
+        "ts": 1782735300000,
+        "ml": 350
+      },
+      {
+        "id": "6af2f828-b74c-446c-8ce5-89baa0d39067",
+        "dayKey": "2026-06-29",
+        "ts": 1782742500000,
+        "ml": 350
+      },
+      {
+        "id": "e6918d61-89e8-4eee-8e70-3d8bf7e650d3",
+        "dayKey": "2026-06-29",
+        "ts": 1782749700000,
+        "ml": 350
+      },
+      {
+        "id": "daea01da-8e36-4f94-82ff-b23588d6d299",
+        "dayKey": "2026-06-29",
+        "ts": 1782756900000,
+        "ml": 350
+      },
+      {
+        "id": "a56c7ae9-39a7-4b66-b194-cb34cd3f2040",
+        "dayKey": "2026-06-29",
+        "ts": 1782764100000,
+        "ml": 350
+      },
+      {
+        "id": "32c8998e-9c4c-4bb7-847e-2c5290ccd9a6",
+        "dayKey": "2026-06-29",
+        "ts": 1782771300000,
+        "ml": 350
+      },
+      {
+        "id": "48c83175-e56f-4e23-9d34-0c073d00f70f",
+        "dayKey": "2026-06-28",
+        "ts": 1782648900000,
+        "ml": 350
+      },
+      {
+        "id": "1f3ee1ed-a470-4dd4-a87e-793b5f42dce2",
+        "dayKey": "2026-06-28",
+        "ts": 1782656100000,
+        "ml": 350
+      },
+      {
+        "id": "cc65e2ec-0326-4629-a594-b7795c36a577",
+        "dayKey": "2026-06-28",
+        "ts": 1782663300000,
+        "ml": 350
+      },
+      {
+        "id": "0b6cc1df-4546-45a0-89dc-bc01da6b9b81",
+        "dayKey": "2026-06-28",
+        "ts": 1782670500000,
+        "ml": 350
+      },
+      {
+        "id": "86c79728-ad64-4cb9-aca6-0abb94eedac0",
+        "dayKey": "2026-06-28",
+        "ts": 1782677700000,
+        "ml": 350
+      },
+      {
+        "id": "96c2a5bd-5dda-42c7-85af-f8a184b60cf5",
+        "dayKey": "2026-06-27",
+        "ts": 1782562500000,
+        "ml": 350
+      },
+      {
+        "id": "5c367f96-4f2e-4744-adc7-a5e5b5b0f53b",
+        "dayKey": "2026-06-27",
+        "ts": 1782569700000,
+        "ml": 350
+      },
+      {
+        "id": "b7f68eea-6a46-4145-9eff-a9ac16fc4320",
+        "dayKey": "2026-06-27",
+        "ts": 1782576900000,
+        "ml": 350
+      },
+      {
+        "id": "f3f81298-c7c0-43b7-88ef-b3fb9da8b8b7",
+        "dayKey": "2026-06-27",
+        "ts": 1782584100000,
+        "ml": 350
+      },
+      {
+        "id": "c3badae6-38ff-4476-9369-18a68cade799",
+        "dayKey": "2026-06-27",
+        "ts": 1782591300000,
+        "ml": 350
+      },
+      {
+        "id": "fc6efc67-3f7f-4702-adcc-9b1f31b81282",
+        "dayKey": "2026-06-27",
+        "ts": 1782598500000,
+        "ml": 350
+      },
+      {
+        "id": "36b6bba5-7c6e-4868-a4a4-42ab2076ddf7",
+        "dayKey": "2026-06-27",
+        "ts": 1782605700000,
+        "ml": 350
+      },
+      {
+        "id": "ff501a8a-038a-4ff7-8317-f9ae181d11db",
+        "dayKey": "2026-06-27",
+        "ts": 1782612900000,
+        "ml": 350
+      },
+      {
+        "id": "97d59dfe-0767-4e72-a09a-4f2513a87049",
+        "dayKey": "2026-06-26",
+        "ts": 1782476100000,
+        "ml": 350
+      },
+      {
+        "id": "57bc06bf-7790-4a7d-bc16-02229ac4ca0d",
+        "dayKey": "2026-06-26",
+        "ts": 1782483300000,
+        "ml": 350
+      },
+      {
+        "id": "0bed3260-db03-4861-b503-bdf1f9aee37d",
+        "dayKey": "2026-06-26",
+        "ts": 1782490500000,
+        "ml": 350
+      },
+      {
+        "id": "3a99af47-20d3-45f3-99ab-24d9bbdf0645",
+        "dayKey": "2026-06-26",
+        "ts": 1782497700000,
+        "ml": 350
+      },
+      {
+        "id": "b5c0d6d2-4550-45e2-bb9b-5db119d9c8b4",
+        "dayKey": "2026-06-26",
+        "ts": 1782504900000,
+        "ml": 350
+      },
+      {
+        "id": "c5ca21af-78c7-415a-b213-d776a0bebfb6",
+        "dayKey": "2026-06-26",
+        "ts": 1782512100000,
+        "ml": 350
+      },
+      {
+        "id": "043db0f2-cd08-48d0-9490-b005c4ed0a00",
+        "dayKey": "2026-06-26",
+        "ts": 1782519300000,
+        "ml": 350
+      },
+      {
+        "id": "9c3e0649-7317-4c57-a8a5-2243bde5919d",
+        "dayKey": "2026-06-25",
+        "ts": 1782389700000,
+        "ml": 350
+      },
+      {
+        "id": "2aac705b-0d03-4df7-9042-d1a35dfef5c0",
+        "dayKey": "2026-06-25",
+        "ts": 1782396900000,
+        "ml": 350
+      },
+      {
+        "id": "46e3f333-df55-4810-b7f7-bbeac42161cd",
+        "dayKey": "2026-06-25",
+        "ts": 1782404100000,
+        "ml": 350
+      },
+      {
+        "id": "54e8a6ad-8b87-44d4-984e-70e530dcf9a7",
+        "dayKey": "2026-06-25",
+        "ts": 1782411300000,
+        "ml": 350
+      },
+      {
+        "id": "927eb062-0ff6-48c4-9bbc-44dee5e227d0",
+        "dayKey": "2026-06-25",
+        "ts": 1782418500000,
+        "ml": 350
+      },
+      {
+        "id": "177dd5ad-2c7f-4145-9d2b-371af72aba79",
+        "dayKey": "2026-06-25",
+        "ts": 1782425700000,
+        "ml": 350
+      },
+      {
+        "id": "35b51443-6533-40de-bddd-40e8225218ab",
+        "dayKey": "2026-06-24",
+        "ts": 1782303300000,
+        "ml": 350
+      },
+      {
+        "id": "4a276a80-6b30-4337-aa3e-b4029e0b6a89",
+        "dayKey": "2026-06-24",
+        "ts": 1782310500000,
+        "ml": 350
+      },
+      {
+        "id": "d2b4360f-d09f-45ac-a686-283c2f04a540",
+        "dayKey": "2026-06-24",
+        "ts": 1782317700000,
+        "ml": 350
+      },
+      {
+        "id": "faffd830-6d6c-41f8-934d-54994f06b023",
+        "dayKey": "2026-06-24",
+        "ts": 1782324900000,
+        "ml": 350
+      },
+      {
+        "id": "71f7bb14-d03c-4349-a075-74e01a086be8",
+        "dayKey": "2026-06-24",
+        "ts": 1782332100000,
+        "ml": 350
+      }
+    ],
+    "moodLogs": [
+      {
+        "id": "ba49b810-6639-41d6-8cab-321b2d8978dc",
+        "dayKey": "2026-07-14",
+        "ts": 1784075400000,
+        "rating": 4,
+        "energy": 4
+      },
+      {
+        "id": "adeb81bd-3086-41b5-8e82-fa7a6430b3d1",
+        "dayKey": "2026-07-13",
+        "ts": 1783989000000,
+        "rating": 3,
+        "energy": 2
+      },
+      {
+        "id": "e4f9e774-4bb2-47ee-a858-533dabb10285",
+        "dayKey": "2026-07-12",
+        "ts": 1783902600000,
+        "rating": 5,
+        "energy": 5
+      },
+      {
+        "id": "685a52ef-c87f-4612-b1a2-05ac94450716",
+        "dayKey": "2026-07-11",
+        "ts": 1783816200000,
+        "rating": 4,
+        "energy": 3
+      },
+      {
+        "id": "3e04963f-2be3-4de2-bae1-3bfa6aa18910",
+        "dayKey": "2026-07-10",
+        "ts": 1783729800000,
+        "rating": 2,
+        "energy": 2,
+        "note": "shift ran long — flat all day"
+      },
+      {
+        "id": "a24faf0c-5a42-411a-af84-d2aef908ca29",
+        "dayKey": "2026-07-09",
+        "ts": 1783643400000,
+        "rating": 4,
+        "energy": 3
+      },
+      {
+        "id": "e98fffaa-f6aa-4924-bb57-f864a4d7f06a",
+        "dayKey": "2026-07-08",
+        "ts": 1783557000000,
+        "rating": 3,
+        "energy": 3
+      },
+      {
+        "id": "e6e03320-27db-4edf-8f1a-aa9660efa572",
+        "dayKey": "2026-07-07",
+        "ts": 1783470600000,
+        "rating": 5,
+        "energy": 4,
+        "note": "long ride, head quiet after"
+      },
+      {
+        "id": "70e0b964-2c7e-44d2-b09a-99d93a05ba45",
+        "dayKey": "2026-07-06",
+        "ts": 1783384200000,
+        "rating": 4,
+        "energy": 4
+      },
+      {
+        "id": "fac758b5-7db5-412c-8855-5efa5bf64e94",
+        "dayKey": "2026-07-05",
+        "ts": 1783297800000,
+        "rating": 4,
+        "energy": 3
+      },
+      {
+        "id": "ad5b5cfe-543e-4b23-bff9-999ae30db857",
+        "dayKey": "2026-07-04",
+        "ts": 1783211400000,
+        "rating": 3,
+        "energy": 3
+      },
+      {
+        "id": "7df16e33-c957-4de3-8249-532b47351b8d",
+        "dayKey": "2026-07-03",
+        "ts": 1783125000000,
+        "rating": 4,
+        "energy": 3
+      },
+      {
+        "id": "175afaad-eaa2-4bf0-84af-6e83dc788d90",
+        "dayKey": "2026-07-02",
+        "ts": 1783038600000,
+        "rating": 5,
+        "energy": 5,
+        "note": "best day in a while"
+      },
+      {
+        "id": "09d0f592-f27d-467d-b729-a7acf0d290ef",
+        "dayKey": "2026-07-01",
+        "ts": 1782952200000,
+        "rating": 3,
+        "energy": 2
+      },
+      {
+        "id": "3b540b94-e4a9-4847-92de-4ce23f2e0f5f",
+        "dayKey": "2026-06-30",
+        "ts": 1782865800000,
+        "rating": 4,
+        "energy": 4
+      },
+      {
+        "id": "48bc81a1-45f5-4178-bb76-30fa3c0c99ac",
+        "dayKey": "2026-06-29",
+        "ts": 1782779400000,
+        "rating": 2,
+        "energy": 1,
+        "note": "slept 5h, everything is loud"
+      },
+      {
+        "id": "d4c28d94-b5ec-41ee-b7f0-f0a8d0dd85c6",
+        "dayKey": "2026-06-28",
+        "ts": 1782693000000,
+        "rating": 3,
+        "energy": 3
+      },
+      {
+        "id": "977667c9-77bd-4414-8308-5737f43f4556",
+        "dayKey": "2026-06-27",
+        "ts": 1782606600000,
+        "rating": 4,
+        "energy": 3
+      },
+      {
+        "id": "46c0e4c6-3c06-4f2c-adf1-08da55b1df30",
+        "dayKey": "2026-06-26",
+        "ts": 1782520200000,
+        "rating": 4,
+        "energy": 4
+      },
+      {
+        "id": "03f9235c-3f10-456f-958b-ba46058ef2e9",
+        "dayKey": "2026-06-25",
+        "ts": 1782433800000,
+        "rating": 5,
+        "energy": 4
+      },
+      {
+        "id": "3fc6e9a3-42ff-4067-a2fa-931b0a9b5516",
+        "dayKey": "2026-06-24",
+        "ts": 1782347400000,
+        "rating": 4,
+        "energy": 4
+      }
+    ],
+    "workoutLogs": [
+      {
+        "id": "b536a1d9-3d7c-4f1f-9c91-9e437e51459c",
+        "dayKey": "2026-07-13",
+        "ts": 1783978200000,
+        "name": "Push day",
+        "style": "sets",
+        "durationMin": 48,
+        "exercises": [
+          {
+            "name": "Bench press",
+            "sets": [
+              {
+                "reps": 5,
+                "weight": 135
+              },
+              {
+                "reps": 5,
+                "weight": 135
+              },
+              {
+                "reps": 5,
+                "weight": 135
+              }
+            ]
+          },
+          {
+            "name": "Overhead press",
+            "sets": [
+              {
+                "reps": 8,
+                "weight": 75
+              },
+              {
+                "reps": 8,
+                "weight": 75
+              },
+              {
+                "reps": 8,
+                "weight": 75
+              }
+            ]
+          },
+          {
+            "name": "Dips",
+            "sets": [
+              {
+                "reps": 10
+              },
+              {
+                "reps": 10
+              },
+              {
+                "reps": 10
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "3816dce4-661a-4c72-9a94-f22c6aae3eed",
+        "dayKey": "2026-07-11",
+        "ts": 1783805400000,
+        "name": "Zone 2 ride",
+        "style": "cardio",
+        "durationMin": 52,
+        "distance": 12.4,
+        "note": "kept HR low, felt easy"
+      },
+      {
+        "id": "259e0f13-5878-4a60-96bc-bb37de4ccded",
+        "dayKey": "2026-07-08",
+        "ts": 1783546200000,
+        "name": "Leg day",
+        "style": "sets",
+        "durationMin": 55,
+        "exercises": [
+          {
+            "name": "Squat",
+            "sets": [
+              {
+                "reps": 5,
+                "weight": 185
+              },
+              {
+                "reps": 5,
+                "weight": 185
+              },
+              {
+                "reps": 5,
+                "weight": 185
+              }
+            ]
+          },
+          {
+            "name": "Romanian deadlift",
+            "sets": [
+              {
+                "reps": 8,
+                "weight": 155
+              },
+              {
+                "reps": 8,
+                "weight": 155
+              },
+              {
+                "reps": 8,
+                "weight": 155
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "0a1d93ae-a2fe-413e-a8f7-913bef9cca30",
+        "dayKey": "2026-07-05",
+        "ts": 1783287000000,
+        "name": "Tempo run",
+        "style": "cardio",
+        "durationMin": 28,
+        "distance": 3.1
+      },
+      {
+        "id": "42f20982-35b9-4486-bfd3-b585bc426650",
+        "dayKey": "2026-07-01",
+        "ts": 1782941400000,
+        "name": "Pull day",
+        "style": "sets",
+        "durationMin": 45,
+        "exercises": [
+          {
+            "name": "Deadlift",
+            "sets": [
+              {
+                "reps": 5,
+                "weight": 225
+              },
+              {
+                "reps": 5,
+                "weight": 225
+              },
+              {
+                "reps": 5,
+                "weight": 225
+              }
+            ]
+          },
+          {
+            "name": "Barbell row",
+            "sets": [
+              {
+                "reps": 10,
+                "weight": 95
+              },
+              {
+                "reps": 10,
+                "weight": 95
+              },
+              {
+                "reps": 10,
+                "weight": 95
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "4c1bb680-8e0e-4582-85fb-5eceb2497262",
+        "dayKey": "2026-06-28",
+        "ts": 1782682200000,
+        "name": "Garage AMRAP",
+        "style": "amrap",
+        "durationMin": 20,
+        "score": "7 rounds + 4"
+      },
+      {
+        "id": "9d5941ef-7387-4c37-b392-fbdaa74d66a4",
+        "dayKey": "2026-06-25",
+        "ts": 1782423000000,
+        "name": "Push day",
+        "style": "sets",
+        "durationMin": 50,
+        "exercises": [
+          {
+            "name": "Bench press",
+            "sets": [
+              {
+                "reps": 5,
+                "weight": 130
+              },
+              {
+                "reps": 5,
+                "weight": 130
+              },
+              {
+                "reps": 5,
+                "weight": 130
+              }
+            ]
+          },
+          {
+            "name": "Overhead press",
+            "sets": [
+              {
+                "reps": 8,
+                "weight": 70
+              },
+              {
+                "reps": 8,
+                "weight": 70
+              },
+              {
+                "reps": 8,
+                "weight": 70
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "readingItems": [
+      {
+        "id": "328ea742-f673-4a58-936a-79c88f888701",
+        "title": "Neuromancer",
+        "author": "William Gibson",
+        "type": "book",
+        "status": "reading",
+        "createdAt": 1782309600000
+      },
+      {
+        "id": "50827da8-525f-4ac7-860f-7e43555dc1e9",
+        "title": "The Left Hand of Darkness",
+        "author": "Ursula K. Le Guin",
+        "type": "book",
+        "status": "finished",
+        "createdAt": 1778853600000,
+        "finishedAt": 1782871200000
+      }
+    ],
+    "readingLogs": [
+      {
+        "id": "57a30104-f66a-470f-b751-f1fab2f1ae15",
+        "dayKey": "2026-07-14",
+        "ts": 1784081400000,
+        "itemId": "328ea742-f673-4a58-936a-79c88f888701",
+        "minutes": 25,
+        "pages": 18,
+        "feeling": 4
+      },
+      {
+        "id": "9c1ace8b-4e8c-4125-b265-616ade94f99e",
+        "dayKey": "2026-07-13",
+        "ts": 1783995000000,
+        "itemId": "328ea742-f673-4a58-936a-79c88f888701",
+        "minutes": 30,
+        "pages": 22
+      },
+      {
+        "id": "3eca8f08-a3b2-4f11-ad3a-032b0e3e98e0",
+        "dayKey": "2026-07-11",
+        "ts": 1783822200000,
+        "itemId": "328ea742-f673-4a58-936a-79c88f888701",
+        "minutes": 20,
+        "pages": 15,
+        "feeling": 5,
+        "note": "chapter 3 goes hard"
+      },
+      {
+        "id": "e2021e70-3ecc-413e-84de-3556ea3f6dfd",
+        "dayKey": "2026-07-09",
+        "ts": 1783649400000,
+        "itemId": "328ea742-f673-4a58-936a-79c88f888701",
+        "minutes": 35,
+        "pages": 26
+      },
+      {
+        "id": "9ef2bda6-902f-45cb-b8ba-c0bc0eda94c4",
+        "dayKey": "2026-07-06",
+        "ts": 1783390200000,
+        "itemId": "328ea742-f673-4a58-936a-79c88f888701",
+        "minutes": 15,
+        "pages": 11
+      },
+      {
+        "id": "b1aa5bd7-e15c-41d6-8629-f524aaf7392b",
+        "dayKey": "2026-07-02",
+        "ts": 1783044600000,
+        "itemId": "328ea742-f673-4a58-936a-79c88f888701",
+        "minutes": 40,
+        "pages": 30,
+        "feeling": 4
+      },
+      {
+        "id": "8a614ff2-c389-4452-9190-150fe90bc3c0",
+        "dayKey": "2026-06-30",
+        "ts": 1782871800000,
+        "itemId": "50827da8-525f-4ac7-860f-7e43555dc1e9",
+        "minutes": 45,
+        "pages": 38,
+        "feeling": 5,
+        "note": "finished it. wow."
+      },
+      {
+        "id": "f33a2574-1ab3-4577-9ec3-427c2de56a6e",
+        "dayKey": "2026-06-26",
+        "ts": 1782526200000,
+        "itemId": "50827da8-525f-4ac7-860f-7e43555dc1e9",
+        "minutes": 30,
+        "pages": 24
+      }
+    ],
+    "highlightLogs": [
+      {
+        "id": "a2ac0f10-7ea9-49b2-b31b-240b79f26b3c",
+        "dayKey": "2026-07-14",
+        "ts": 1784083200000,
+        "text": "Streaks aren't the point — showing up after a broken one is."
+      },
+      {
+        "id": "83c436a4-486f-438c-9c1e-02af97ea3560",
+        "dayKey": "2026-07-10",
+        "ts": 1783737600000,
+        "text": "Book note: the city as an operating system you live inside."
+      },
+      {
+        "id": "cf675344-d5ad-49ce-a3e5-a1b453fbb551",
+        "dayKey": "2026-07-05",
+        "ts": 1783305600000,
+        "text": "Cheap dopamine is a loan. Sleep is the repayment plan."
+      },
+      {
+        "id": "f72baa38-95e4-4f56-b0ad-c636a227d0f3",
+        "dayKey": "2026-06-29",
+        "ts": 1782787200000,
+        "text": "You don't rise to your goals, you fall to your defaults."
+      }
+    ],
+    "bodyLogs": [
+      {
+        "id": "a1713fa5-6b26-4579-b951-10c8f1796fdc",
+        "dayKey": "2026-06-30",
+        "ts": 1782819900000,
+        "weight": 186,
+        "unit": "lbs"
+      },
+      {
+        "id": "68bbcc32-32ac-4bc1-b3ee-a7fd944e3ce2",
+        "dayKey": "2026-07-07",
+        "ts": 1783424700000,
+        "weight": 185.2,
+        "unit": "lbs"
+      },
+      {
+        "id": "b6dc035b-c585-426f-8515-98ac7092f8ae",
+        "dayKey": "2026-07-14",
+        "ts": 1784029500000,
+        "weight": 184.6,
+        "unit": "lbs"
+      }
+    ],
+    "journalLogs": [
+      {
+        "id": "5d581ab6-6fa0-483e-9578-9d8692659098",
+        "dayKey": "2026-07-03",
+        "ts": 1783129800000,
+        "text": "Missed three stretch days after the double shift. Old me would have deleted the app. New me just… started again. That's the whole upgrade."
+      },
+      {
+        "id": "278e8e11-ea29-4ef5-98ee-75d95ebdc01e",
+        "dayKey": "2026-07-12",
+        "ts": 1783907400000,
+        "text": "Grounding ritual is actually working. Ten minutes offline and the static drops."
+      }
+    ],
+    "gigs": [
+      {
+        "id": "1f96b474-db0f-4dfd-9580-eadd6f12c5a7",
+        "text": "Refill meds before the weekend",
+        "createdDay": "2026-07-08",
+        "ts": 1783519200000,
+        "doneTs": 1783627200000,
+        "doneDay": "2026-07-09"
+      },
+      {
+        "id": "48074a61-d383-447a-a649-2a9ba6df9755",
+        "text": "Book dentist — it's been a year",
+        "createdDay": "2026-07-02",
+        "ts": 1783000800000,
+        "doneTs": 1783368000000,
+        "doneDay": "2026-07-06"
+      },
+      {
+        "id": "4be8eb44-e079-46a0-8f3e-f86bba0776af",
+        "text": "Replace running shoes (soles are toast)",
+        "createdDay": "2026-07-10",
+        "ts": 1783692000000
+      }
+    ],
+    "bioMetrics": [
+      {
+        "id": "6ba77680-2a41-489f-a79b-3d1dcaa83519",
+        "name": "Resting HR",
+        "unit": "bpm",
+        "createdAt": 1782306000000
+      }
+    ],
+    "bioReadings": [
+      {
+        "id": "c590768e-5160-4975-9035-548cd8902dcc",
+        "dayKey": "2026-06-28",
+        "ts": 1782648300000,
+        "metricId": "6ba77680-2a41-489f-a79b-3d1dcaa83519",
+        "value": "64"
+      },
+      {
+        "id": "ef3e22ac-379f-4e8e-800c-0380813d607a",
+        "dayKey": "2026-07-02",
+        "ts": 1782993900000,
+        "metricId": "6ba77680-2a41-489f-a79b-3d1dcaa83519",
+        "value": "63"
+      },
+      {
+        "id": "4a8ff4d3-8c3d-4ad4-a5e9-83de840a6aa2",
+        "dayKey": "2026-07-06",
+        "ts": 1783339500000,
+        "metricId": "6ba77680-2a41-489f-a79b-3d1dcaa83519",
+        "value": "61"
+      },
+      {
+        "id": "1ef70d4e-d9f8-446f-b1bc-5f3477550ee7",
+        "dayKey": "2026-07-10",
+        "ts": 1783685100000,
+        "metricId": "6ba77680-2a41-489f-a79b-3d1dcaa83519",
+        "value": "62"
+      },
+      {
+        "id": "5b78a00a-25be-471b-8137-ac5050cd844a",
+        "dayKey": "2026-07-14",
+        "ts": 1784030700000,
+        "metricId": "6ba77680-2a41-489f-a79b-3d1dcaa83519",
+        "value": "60"
+      }
+    ],
+    "screenings": [
+      {
+        "id": "ee7590df-05d7-4f44-87f2-a8f7776378ea",
+        "dayKey": "2026-07-04",
+        "ts": 1783206000000,
+        "tool": "phq9",
+        "score": 5,
+        "answers": [
+          1,
+          0,
+          1,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0
+        ]
+      }
+    ],
+    "goals": [
+      {
+        "id": "d6b5cba8-7b41-4ca0-b3f2-f358533d3fa7",
+        "name": "120 pages a week",
+        "icon": "📖",
+        "horizon": "week",
+        "target": 120,
+        "source": {
+          "kind": "readingPages"
+        },
+        "createdAt": 1782478800000,
+        "order": 0
+      },
+      {
+        "id": "aac4c662-943e-4b9a-9cae-5c2e66bd77da",
+        "name": "Train 3× a week",
+        "icon": "⚔",
+        "horizon": "week",
+        "target": 3,
+        "source": {
+          "kind": "workouts"
+        },
+        "createdAt": 1782478800000,
+        "order": 1
+      }
+    ],
+    "tombstones": [],
+    "kv": [
+      {
+        "key": "onboarded",
+        "value": true
+      },
+      {
+        "key": "lastBootDay",
+        "value": "2026-07-14"
+      },
+      {
+        "key": "settings",
+        "value": {
+          "waterGoalMl": 2900,
+          "waterUnit": "oz",
+          "difficulty": "standard"
+        }
+      }
+    ]
+  }
+}
