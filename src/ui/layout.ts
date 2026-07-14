@@ -61,3 +61,76 @@ export function moveBlock(
     return next;
   });
 }
+
+// ---------- nav defaults ----------
+
+export const NAV_DEFAULTS: Record<string, { label: string; glyph: string }> = {
+  home: { label: "Directives", glyph: "◉" },
+  training: { label: "Training", glyph: "⚔" },
+  bio: { label: "Bio", glyph: "⌬" },
+  feed: { label: "Feed", glyph: "▤" },
+  goals: { label: "Goals", glyph: "◎" },
+  telemetry: { label: "Telemetry", glyph: "∿" },
+};
+
+export function navLabel(e: NavEntry): string {
+  return e.label ?? NAV_DEFAULTS[e.id]?.label ?? "Page";
+}
+export function navGlyph(e: NavEntry): string {
+  return e.glyph ?? NAV_DEFAULTS[e.id]?.glyph ?? "▪";
+}
+
+// ---------- nav operations ----------
+
+function mapNav(cfg: LayoutConfig, id: string, fn: (e: NavEntry) => NavEntry): LayoutConfig {
+  return { ...cfg, nav: cfg.nav.map((e) => (e.id === id ? fn(e) : e)) };
+}
+
+export function renameNavEntry(cfg: LayoutConfig, id: string, label: string): LayoutConfig {
+  const trimmed = label.trim();
+  return mapNav(cfg, id, (e) => {
+    const { label: _drop, ...rest } = e;
+    return trimmed ? { ...rest, label: trimmed } : rest;
+  });
+}
+
+export function setNavHidden(cfg: LayoutConfig, id: string, hidden: boolean): LayoutConfig {
+  return mapNav(cfg, id, (e) => {
+    const { hidden: _drop, ...rest } = e;
+    return hidden ? { ...rest, hidden: true } : rest;
+  });
+}
+
+export function setNavGroup(cfg: LayoutConfig, id: string, group: string | undefined): LayoutConfig {
+  const trimmed = group?.trim();
+  return mapNav(cfg, id, (e) => {
+    const { group: _drop, ...rest } = e;
+    return trimmed ? { ...rest, group: trimmed } : rest;
+  });
+}
+
+export function visibleNav(cfg: LayoutConfig): NavEntry[] {
+  return cfg.nav.filter((e) => !e.hidden);
+}
+export function hiddenNav(cfg: LayoutConfig): NavEntry[] {
+  return cfg.nav.filter((e) => e.hidden);
+}
+
+/** Reorder within siblings: entries sharing the same group (or both ungrouped)
+ *  and the same hidden state. Swaps flat-array positions so drawers keep
+ *  their anchor position. */
+export function moveNavEntry(cfg: LayoutConfig, id: string, dir: -1 | 1): LayoutConfig {
+  const nav = cfg.nav;
+  const i = nav.findIndex((n) => n.id === id);
+  if (i < 0) return cfg;
+  const me = nav[i];
+  const sibIdx = nav
+    .map((_n, idx) => idx)
+    .filter((idx) => (nav[idx].group ?? "") === (me.group ?? "") && !!nav[idx].hidden === !!me.hidden);
+  const pos = sibIdx.indexOf(i);
+  const j = pos + dir;
+  if (j < 0 || j >= sibIdx.length) return cfg;
+  const next = [...nav];
+  [next[i], next[sibIdx[j]]] = [next[sibIdx[j]], next[i]];
+  return { ...cfg, nav: next };
+}

@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 import {
   defaultLayout, addBlock, removeBlock, moveBlock,
+  NAV_DEFAULTS, navLabel, navGlyph, renameNavEntry, setNavHidden,
+  setNavGroup, moveNavEntry, visibleNav, hiddenNav,
 } from "./layout";
 
 describe("defaultLayout", () => {
@@ -58,5 +60,76 @@ describe("moveBlock", () => {
   });
   it("unknown pageId is a no-op, never throws", () => {
     expect(() => moveBlock(defaultLayout(), "nope", "water", 1)).not.toThrow();
+  });
+});
+
+describe("nav defaults", () => {
+  it("labels/glyphs for every default entry", () => {
+    for (const e of defaultLayout().nav) {
+      expect(NAV_DEFAULTS[e.id]).toBeDefined();
+      expect(navLabel(e)).toBe(NAV_DEFAULTS[e.id].label);
+      expect(navGlyph(e)).toBe(NAV_DEFAULTS[e.id].glyph);
+    }
+  });
+  it("label override wins; unknown id falls back", () => {
+    expect(navLabel({ id: "training", kind: "screen", label: "Ops" })).toBe("Ops");
+    expect(navLabel({ id: "xyz", kind: "page" })).toBe("Page");
+    expect(navGlyph({ id: "xyz", kind: "page" })).toBe("▪");
+  });
+});
+
+describe("renameNavEntry", () => {
+  it("sets a trimmed label override", () => {
+    const cfg = renameNavEntry(defaultLayout(), "training", "  Ops  ");
+    expect(cfg.nav.find((n) => n.id === "training")?.label).toBe("Ops");
+  });
+  it("blank reverts to default (label dropped)", () => {
+    let cfg = renameNavEntry(defaultLayout(), "training", "Ops");
+    cfg = renameNavEntry(cfg, "training", "   ");
+    expect(cfg.nav.find((n) => n.id === "training")?.label).toBeUndefined();
+  });
+  it("does not mutate input", () => {
+    const before = defaultLayout();
+    const snap = JSON.stringify(before);
+    renameNavEntry(before, "training", "Ops");
+    expect(JSON.stringify(before)).toBe(snap);
+  });
+});
+
+describe("setNavHidden / visibleNav / hiddenNav", () => {
+  it("hide moves entry to hiddenNav, unhide restores", () => {
+    let cfg = setNavHidden(defaultLayout(), "feed", true);
+    expect(hiddenNav(cfg).map((n) => n.id)).toEqual(["feed"]);
+    expect(visibleNav(cfg).some((n) => n.id === "feed")).toBe(false);
+    cfg = setNavHidden(cfg, "feed", false);
+    expect(hiddenNav(cfg)).toEqual([]);
+  });
+});
+
+describe("setNavGroup", () => {
+  it("moves entry into a named drawer; blank/undefined ungroups", () => {
+    let cfg = setNavGroup(defaultLayout(), "telemetry", "Grind");
+    expect(cfg.nav.find((n) => n.id === "telemetry")?.group).toBe("Grind");
+    cfg = setNavGroup(cfg, "telemetry", "  ");
+    expect(cfg.nav.find((n) => n.id === "telemetry")?.group).toBeUndefined();
+  });
+});
+
+describe("moveNavEntry", () => {
+  it("swaps with the neighbor in the same group only", () => {
+    const cfg = moveNavEntry(defaultLayout(), "bio", -1);
+    const ids = cfg.nav.map((n) => n.id);
+    expect(ids).toEqual(["home", "bio", "training", "feed", "goals", "telemetry"]);
+  });
+  it("no-op at the edge of its group", () => {
+    const cfg = moveNavEntry(defaultLayout(), "training", -1);
+    expect(cfg.nav.map((n) => n.id)).toEqual(defaultLayout().nav.map((n) => n.id));
+  });
+  it("ungrouped entries skip over grouped ones", () => {
+    // "home" (no group) moving down should swap with "telemetry" (no group),
+    // jumping the whole Grind drawer.
+    const cfg = moveNavEntry(defaultLayout(), "home", 1);
+    const ids = cfg.nav.map((n) => n.id);
+    expect(ids).toEqual(["telemetry", "training", "bio", "feed", "goals", "home"]);
   });
 });
