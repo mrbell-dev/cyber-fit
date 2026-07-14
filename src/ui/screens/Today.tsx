@@ -1,24 +1,14 @@
-import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "../../db/db.ts";
-import { useDayKey, useSettings } from "../hooks.ts";
-import { WaterGauge } from "../components/WaterGauge.tsx";
+import { useDayKey } from "../hooks.ts";
 import { XpBar } from "../components/XpBar.tsx";
-import { MoodRow } from "../components/MoodRow.tsx";
 import { MissedPing } from "../components/MissedPing.tsx";
 import { GoalBanner } from "../components/GoalBanner.tsx";
-import { Highlight } from "../components/Highlight.tsx";
 import { DailyBoot } from "../components/DailyBoot.tsx";
 import { GigMigration } from "../components/GigMigration.tsx";
-import { DirectivesCard } from "../components/DirectivesCard.tsx";
-import { GigList } from "../components/GigList.tsx";
 import { Onboarding } from "../components/Onboarding.tsx";
+import { Dashboard } from "../components/Dashboard.tsx";
 
 export function Today() {
   const today = useDayKey();
-  const settings = useSettings();
-  const waterLogs = useLiveQuery(() => db.waterLogs.where({ dayKey: today }).toArray(), [today]);
-
-  if (!waterLogs) return null;
 
   return (
     <section aria-label="Today">
@@ -29,15 +19,7 @@ export function Today() {
       <GoalBanner today={today} />
       <XpBar />
 
-      <DirectivesCard />
-
-      <WaterGauge logs={waterLogs} goalMl={settings.waterGoalMl} unit={settings.waterUnit ?? "ml"} today={today} />
-
-      <GigList today={today} />
-
-      <MoodRow today={today} />
-
-      <Highlight today={today} />
+      <Dashboard pageId="home" />
     </section>
   );
 }
