@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { useLayout } from "./useLayout";
 import {
   visibleNav, hiddenNav, navLabel, navGlyph, renameNavEntry, setNavHidden, setNavGroup,
-  moveNavEntry, type NavEntry,
+  moveNavEntry, addPage, deletePage, type NavEntry,
 } from "./layout";
 import { setLayout } from "../db/repo";
+import { IconPicker } from "./components/IconPicker";
 
 export type Tab = string;
 
@@ -63,6 +64,8 @@ export function Nav({ open, tab, onChange, onClose }: {
   const [renaming, setRenaming] = useState<string | null>(null);   // entry id
   const [grouping, setGrouping] = useState<string | null>(null);   // entry id
   const [newDrawer, setNewDrawer] = useState("");
+  const [newPage, setNewPage] = useState<{ name: string; glyph: string } | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -74,7 +77,10 @@ export function Nav({ open, tab, onChange, onClose }: {
   }, [open, onClose]);
 
   useEffect(() => {
-    if (!open) { setEditing(false); setRenaming(null); setGrouping(null); setNewDrawer(""); }
+    if (!open) {
+      setEditing(false); setRenaming(null); setGrouping(null); setNewDrawer("");
+      setNewPage(null); setConfirmDelete(null);
+    }
   }, [open]);
 
   if (!open) return null;
@@ -127,6 +133,20 @@ export function Nav({ open, tab, onChange, onClose }: {
               onClick={() => setGrouping(grouping === e.id ? null : e.id)}>Drawer…</button>
           </>
         )}
+        {e.kind === "page" && e.id !== "home" && (
+          <button aria-label={`Delete ${navLabel(e)}`} style={{ minHeight: 48 }}
+            onClick={() => {
+              if (confirmDelete !== e.id) { setConfirmDelete(e.id); return; }
+              setLayout(deletePage(cfg, e.id));
+              setConfirmDelete(null);
+              if (tab === e.id) onChange("directives");
+            }}>
+            {confirmDelete === e.id ? "Confirm delete" : "Delete"}
+          </button>
+        )}
+        {confirmDelete === e.id && (
+          <p className="dim">Deletes the page layout only — every log you recorded survives.</p>
+        )}
         {grouping === e.id && (
           <div role="group" aria-label={`Drawer options for ${navLabel(e)}`} className="nav-group-pick">
             {drawers.map((g) => (
@@ -176,6 +196,22 @@ export function Nav({ open, tab, onChange, onClose }: {
       <nav className="nav-drawer" aria-label="Main" onClick={(ev) => ev.stopPropagation()}>
         <div className="nav-drawer-title">CYBER<span className="slash">//</span>FIT</div>
         {rows}
+        {editing && (newPage ? (
+          <div className="nav-new-page">
+            <input autoFocus aria-label="Page name" placeholder="Page name" value={newPage.name}
+              onChange={(ev) => setNewPage({ ...newPage, name: ev.target.value })} />
+            <IconPicker icon={newPage.glyph} onPick={(g) => setNewPage({ ...newPage, glyph: g })} />
+            <button style={{ minHeight: 48 }} onClick={async () => {
+              const { cfg: next, id } = addPage(cfg, newPage.name, newPage.glyph);
+              await setLayout(next);
+              setNewPage(null); onChange(id); onClose();
+            }}>Create</button>
+            <button style={{ minHeight: 48 }} onClick={() => setNewPage(null)}>Cancel</button>
+          </div>
+        ) : (
+          <button style={{ minHeight: 48, width: "100%" }}
+            onClick={() => setNewPage({ name: "", glyph: "⚡" })}>+ New page</button>
+        ))}
         {hidden.length > 0 && (
           <>
             <button className="nav-group classified" onClick={() => setClassifiedOpen(!classifiedOpen)}
@@ -195,7 +231,10 @@ export function Nav({ open, tab, onChange, onClose }: {
         </button>
         <button style={{ minHeight: 48, width: "100%" }}
           aria-label={editing ? "Done reconfiguring nav" : "Reconfig nav"}
-          onClick={() => { setEditing(!editing); setRenaming(null); setGrouping(null); setNewDrawer(""); }}>
+          onClick={() => {
+            setEditing(!editing); setRenaming(null); setGrouping(null); setNewDrawer("");
+            setNewPage(null); setConfirmDelete(null);
+          }}>
           {editing ? "Done" : "⧉ Reconfig"}
         </button>
         {editing && <p className="dim">Stashed pages wait in CLASSIFIED — nothing is deleted.</p>}
