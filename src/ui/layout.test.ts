@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   defaultLayout, addBlock, removeBlock, moveBlock,
   NAV_DEFAULTS, navLabel, navGlyph, renameNavEntry, setNavHidden,
-  setNavGroup, moveNavEntry, visibleNav, hiddenNav,
+  setNavGroup, moveNavEntry, visibleNav, hiddenNav, addPage, deletePage,
 } from "./layout";
 
 describe("defaultLayout", () => {
@@ -131,5 +131,33 @@ describe("moveNavEntry", () => {
     const cfg = moveNavEntry(defaultLayout(), "home", 1);
     const ids = cfg.nav.map((n) => n.id);
     expect(ids).toEqual(["telemetry", "training", "bio", "feed", "goals", "home"]);
+  });
+});
+
+describe("addPage", () => {
+  it("creates an empty uuid page plus a nav entry with label/glyph", () => {
+    const { cfg, id } = addPage(defaultLayout(), "Recovery", "🌙");
+    expect(id).toMatch(/^[0-9a-f-]{36}$/);
+    expect(cfg.pages.find((p) => p.id === id)?.blocks).toEqual([]);
+    const e = cfg.nav.at(-1)!;
+    expect(e).toEqual({ id, kind: "page", label: "Recovery", glyph: "🌙" });
+  });
+  it("blank name gets a fallback label", () => {
+    const { cfg, id } = addPage(defaultLayout(), "   ", "⚡");
+    expect(cfg.nav.find((n) => n.id === id)?.label).toBe("New page");
+  });
+});
+
+describe("deletePage", () => {
+  it("drops the page and its nav entry", () => {
+    const { cfg, id } = addPage(defaultLayout(), "Recovery", "🌙");
+    const next = deletePage(cfg, id);
+    expect(next.pages.some((p) => p.id === id)).toBe(false);
+    expect(next.nav.some((n) => n.id === id)).toBe(false);
+  });
+  it("refuses to delete home or screens", () => {
+    const cfg = defaultLayout();
+    expect(deletePage(cfg, "home")).toEqual(cfg);
+    expect(deletePage(cfg, "training")).toEqual(cfg);
   });
 });

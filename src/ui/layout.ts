@@ -134,3 +134,29 @@ export function moveNavEntry(cfg: LayoutConfig, id: string, dir: -1 | 1): Layout
   [next[i], next[sibIdx[j]]] = [next[sibIdx[j]], next[i]];
   return { ...cfg, nav: next };
 }
+
+// ---------- page operations ----------
+
+export function addPage(
+  cfg: LayoutConfig, name: string, glyph: string,
+): { cfg: LayoutConfig; id: string } {
+  const id = crypto.randomUUID();
+  const label = name.trim() || "New page";
+  return {
+    id,
+    cfg: {
+      pages: [...cfg.pages, { id, blocks: [] }],
+      nav: [...cfg.nav, { id, kind: "page", label, glyph }],
+    },
+  };
+}
+
+/** Custom pages only. "home" and built-in screens are structural. */
+export function deletePage(cfg: LayoutConfig, id: string): LayoutConfig {
+  const entry = cfg.nav.find((n) => n.id === id);
+  if (id === "home" || !entry || entry.kind !== "page") return cfg;
+  return {
+    pages: cfg.pages.filter((p) => p.id !== id),
+    nav: cfg.nav.filter((n) => n.id !== id),
+  };
+}
