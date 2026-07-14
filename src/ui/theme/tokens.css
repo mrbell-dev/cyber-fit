@@ -313,6 +313,12 @@ button {
   font-size: 13px;
 }
 
+/* Generic de-emphasis utility — secondary copy inside cards/sheets. */
+.dim {
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
 /* ---------- install prompt ---------- */
 .install-banner {
   display: block;
