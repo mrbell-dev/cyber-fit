@@ -27,6 +27,7 @@ const MERGE_TABLES = [
   "bioReadings",
   "screenings",
   "goals",
+  "goalLogs",
   "tombstones",
 ] as const;
 

@@ -1189,9 +1189,21 @@ html.theme-ice {
 
 /* ---------- goals ---------- */
 .goal-row {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   width: 100%;
   padding: 8px 0;
+}
+
+.goal-row + .goal-row {
+  border-top: 1px solid var(--border);
+}
+
+.goal-row-main {
+  flex: 1;
+  min-width: 0;
+  display: block;
   border: none;
   background: none;
   color: var(--text);
@@ -1201,8 +1213,30 @@ html.theme-ice {
   min-height: var(--tap-min);
 }
 
-.goal-row + .goal-row {
-  border-top: 1px solid var(--border);
+.goal-manual {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.goal-log-btn {
+  min-height: 40px;
+  min-width: 48px;
+  padding: 0 12px;
+  border: 1px solid var(--neon-green);
+  border-radius: var(--radius);
+  color: var(--neon-green);
+  font-family: var(--font-mono);
+  background: rgba(0, 255, 179, 0.08);
+}
+
+.goal-undo-btn {
+  min-height: 32px;
+  min-width: 48px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-dim);
 }
 
 .goal-row-top {

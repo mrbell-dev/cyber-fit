@@ -12,7 +12,7 @@ import { dayKeyFor } from "../src/engine/time.ts";
 
 // Must match EXPORT_VERSION in src/db/export.ts — drift is caught by
 // src/db/seed-demo.test.ts, which imports both and asserts equality.
-export const SEED_SCHEMA_VERSION = 9;
+export const SEED_SCHEMA_VERSION = 10;
 
 const DAY_START_HOUR = 3; // matches the app's settings default
 const DAYS = 21;
@@ -178,13 +178,19 @@ export function buildDemoExport(now = Date.now()) {
     score: phqAnswers.reduce((a, b) => a + b, 0), answers: phqAnswers,
   }];
 
-  // ---------- goals ----------
+  // ---------- goals (incl. a manual + lifelong open-ended one) ----------
+  const coldPlunge = { id: uuid(), name: "Cold plunges", icon: "🧊", horizon: "lifelong",
+    source: { kind: "manual" }, createdAt: at(now, 20, 9), order: 2 };
   const goals = [
     { id: uuid(), name: "120 pages a week", icon: "📖", horizon: "week", target: 120,
       source: { kind: "readingPages" }, createdAt: at(now, 18, 9), order: 0 },
     { id: uuid(), name: "Train 3× a week", icon: "⚔", horizon: "week", target: 3,
       source: { kind: "workouts" }, createdAt: at(now, 18, 9), order: 1 },
+    coldPlunge, // no target = open-ended running count
   ];
+  const goalLogs = [17, 14, 9, 5, 2, 0].map((d) => ({
+    ...stamp(at(now, d, 7, 15)), goalId: coldPlunge.id, amount: 1,
+  }));
 
   // ---------- kv: suppress first-run modals; settings are overrides only,
   // merged over DEFAULT_SETTINGS by getSettings() in src/db/repo.ts ----------
@@ -203,7 +209,7 @@ export function buildDemoExport(now = Date.now()) {
     tables: {
       habits, habitLogs, waterLogs, moodLogs, workoutLogs,
       readingItems, readingLogs, highlightLogs, bodyLogs, journalLogs,
-      gigs, bioMetrics: [restingHr], bioReadings, screenings, goals,
+      gigs, bioMetrics: [restingHr], bioReadings, screenings, goals, goalLogs,
       tombstones: [], kv,
     },
   };

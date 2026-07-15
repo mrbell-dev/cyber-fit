@@ -11,12 +11,14 @@ const HORIZONS: { id: Goal["horizon"]; label: string }[] = [
   { id: "week", label: "This week" },
   { id: "month", label: "This month" },
   { id: "year", label: "This year" },
+  { id: "lifelong", label: "Lifelong (no deadline)" },
 ];
 
 const SOURCES: { id: SourceKind; label: string }[] = [
   { id: "habits", label: "Linked directives" },
   { id: "readingPages", label: "Reading pages" },
   { id: "workouts", label: "Workouts" },
+  { id: "manual", label: "Manual tally (tap to add)" },
 ];
 
 /** Goal create/edit sheet — a goal is a lens over logs you already keep, so
@@ -25,7 +27,7 @@ export function GoalEditor({ goal, onClose }: { goal?: Goal; onClose: () => void
   const [name, setName] = useState(goal?.name ?? "");
   const [icon, setIcon] = useState(goal?.icon ?? "🎯");
   const [horizon, setHorizon] = useState<Goal["horizon"]>(goal?.horizon ?? "week");
-  const [target, setTarget] = useState(goal?.target ?? 4);
+  const [target, setTarget] = useState(goal?.target != null ? String(goal.target) : "");
   const [sourceKind, setSourceKind] = useState<SourceKind>(goal?.source.kind ?? "habits");
   const [habitIds, setHabitIds] = useState<string[]>(
     goal?.source.kind === "habits" ? goal.source.habitIds : [],
@@ -40,10 +42,13 @@ export function GoalEditor({ goal, onClose }: { goal?: Goal; onClose: () => void
     setHabitIds(habitIds.includes(id) ? habitIds.filter((x) => x !== id) : [...habitIds, id]);
 
   const save = async () => {
-    if (!name.trim() || target < 1) return;
+    if (!name.trim()) return;
     const source: Goal["source"] =
       sourceKind === "habits" ? { kind: "habits", habitIds } : { kind: sourceKind };
-    const fields = { name: name.trim(), icon: icon || "🎯", horizon, target, source };
+    const parsed = Math.floor(Number(target));
+    const targetVal = Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+    // Clear a previously-set target when the field is blanked (open-ended).
+    const fields = { name: name.trim(), icon: icon || "🎯", horizon, target: targetVal, source };
     if (goal) await updateGoal(goal.id, fields);
     else await addGoal(fields);
     onClose();
@@ -96,11 +101,13 @@ export function GoalEditor({ goal, onClose }: { goal?: Goal; onClose: () => void
           <input
             type="number"
             className="input num-input-sm"
-            min={1}
+            min={0}
             value={target}
-            onChange={(e) => setTarget(Math.max(1, Number(e.target.value) || 1))}
-            aria-label="Target"
+            onChange={(e) => setTarget(e.target.value)}
+            placeholder="open"
+            aria-label="Target (leave blank for open-ended)"
           />
+          <span className="placeholder">// blank = open-ended (just track the count)</span>
         </div>
 
         <div className="editor-row">
@@ -141,6 +148,9 @@ export function GoalEditor({ goal, onClose }: { goal?: Goal; onClose: () => void
           )}
           {sourceKind === "workouts" && (
             <p className="placeholder">// counts every workout you log — any style</p>
+          )}
+          {sourceKind === "manual" && (
+            <p className="placeholder">// a running tally you control — tap ＋ on the goal to add progress</p>
           )}
         </div>
 

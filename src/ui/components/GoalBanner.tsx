@@ -6,6 +6,7 @@ const PERIOD_NOUN: Record<Goal["horizon"], string> = {
   week: "the week",
   month: "the month",
   year: "the year",
+  lifelong: "your streak", // lifelong goals never reach the coast-day banner (no pace)
 };
 
 /** Did anything land today that already moves this goal? If so, stay quiet. */
@@ -19,6 +20,9 @@ function movedToday(goal: Goal, tables: GoalTables, today: DayKey): boolean {
   if (goal.source.kind === "readingPages") {
     return tables.readingLogs.some((l) => l.dayKey === today && (l.pages ?? 0) > 0);
   }
+  if (goal.source.kind === "manual") {
+    return tables.goalLogs.some((l) => l.dayKey === today && l.goalId === goal.id && l.amount > 0);
+  }
   return tables.workoutLogs.some((l) => l.dayKey === today);
 }
 
@@ -27,14 +31,15 @@ function movedToday(goal: Goal, tables: GoalTables, today: DayKey): boolean {
  *  counts of anything missed, ever. */
 export function GoalBanner({ today }: { today: DayKey }) {
   const data = useLiveQuery(async () => {
-    const [goals, habits, habitLogs, readingLogs, workoutLogs] = await Promise.all([
+    const [goals, habits, habitLogs, readingLogs, workoutLogs, goalLogs] = await Promise.all([
       db.goals.filter((g) => !g.archivedAt).sortBy("order"),
       db.habits.filter((h) => !h.archivedAt).toArray(),
       db.habitLogs.toArray(),
       db.readingLogs.toArray(),
       db.workoutLogs.toArray(),
+      db.goalLogs.toArray(),
     ]);
-    return { goals, habits, tables: { habitLogs, readingLogs, workoutLogs } };
+    return { goals, habits, tables: { habitLogs, readingLogs, workoutLogs, goalLogs } };
   }, []);
 
   if (!data) return null;

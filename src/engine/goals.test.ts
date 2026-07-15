@@ -8,8 +8,10 @@ const g = (over: Partial<Goal> = {}): Goal => ({
 });
 const hl = (dayKey: string, amount = 1, habitId = "h1"): HabitLog =>
   ({ id: "x", habitId, dayKey, ts: 0, amount, kind: "done" });
-const T = (habitLogs: HabitLog[] = [], readingLogs: any[] = [], workoutLogs: any[] = []) =>
-  ({ habitLogs, readingLogs, workoutLogs });
+const T = (habitLogs: HabitLog[] = [], readingLogs: any[] = [], workoutLogs: any[] = [], goalLogs: any[] = []) =>
+  ({ habitLogs, readingLogs, workoutLogs, goalLogs });
+const gl = (dayKey: string, amount = 1, goalId = "g1") =>
+  ({ id: `gl-${dayKey}`, goalId, dayKey, ts: 0, amount });
 
 describe("periodOf", () => {
   it("week is Monday-anchored (2026-07-08 is a Wednesday)", () => {
@@ -63,7 +65,54 @@ describe("lastPeriodResult", () => {
   it("previous month crosses the year boundary", () => {
     const goal = g({ horizon: "month", target: 10 });
     const logs = [hl("2025-12-31"), hl("2025-12-01"), hl("2026-01-01")];
-    expect(lastPeriodResult(goal, T(logs), "2026-01-15").value).toBe(2);
+    expect(lastPeriodResult(goal, T(logs), "2026-01-15")!.value).toBe(2);
+  });
+});
+
+describe("manual source", () => {
+  it("goalValue sums goalLogs in range, net of undos", () => {
+    const goal = g({ source: { kind: "manual" }, target: 10 });
+    const logs = [gl("2026-07-06", 1), gl("2026-07-07", 2), gl("2026-07-07", -1), gl("2026-06-30", 5)];
+    expect(goalValue(goal, T([], [], [], logs), "2026-07-06", "2026-07-12")).toBe(2);
+  });
+
+  it("manual periodic goal paces like any other", () => {
+    const goal = g({ source: { kind: "manual" }, target: 4 });
+    const logs = [gl("2026-07-06"), gl("2026-07-07"), gl("2026-07-08")];
+    expect(goalProgress(goal, T([], [], [], logs), "2026-07-08").pace).toBe("ahead");
+  });
+});
+
+describe("lifelong + open-ended", () => {
+  it("lifelong counts all-time, no pace, no deadline", () => {
+    const goal = g({ horizon: "lifelong", target: undefined, source: { kind: "manual" } });
+    const logs = [gl("2025-01-01"), gl("2026-07-01"), gl("2026-07-08")];
+    const p = goalProgress(goal, T([], [], [], logs), "2026-07-08");
+    expect(p.value).toBe(3);
+    expect(p.pace).toBe("none");
+    expect(p.lifelong).toBe(true);
+    expect(p.openEnded).toBe(true); // no target
+  });
+
+  it("lifelong with a target still reports value + target, no pace", () => {
+    const goal = g({ horizon: "lifelong", target: 100, source: { kind: "manual" } });
+    const logs = [gl("2026-07-01"), gl("2026-07-08")];
+    const p = goalProgress(goal, T([], [], [], logs), "2026-07-08");
+    expect(p).toMatchObject({ value: 2, target: 100, pace: "none", openEnded: false, lifelong: true });
+  });
+
+  it("open-ended periodic goal: value within the period, no pace", () => {
+    const goal = g({ horizon: "week", target: undefined, source: { kind: "manual" } });
+    const logs = [gl("2026-07-06"), gl("2026-07-07"), gl("2026-06-29")];
+    const p = goalProgress(goal, T([], [], [], logs), "2026-07-08");
+    expect(p.value).toBe(2); // only this week
+    expect(p.pace).toBe("none");
+    expect(p.openEnded).toBe(true);
+  });
+
+  it("lastPeriodResult is null for lifelong (no previous period)", () => {
+    const goal = g({ horizon: "lifelong", source: { kind: "manual" } });
+    expect(lastPeriodResult(goal, T([], [], [], [gl("2026-07-01")]), "2026-07-08")).toBeNull();
   });
 });
 

@@ -8,7 +8,7 @@ import { buildDemoExport, SEED_SCHEMA_VERSION } from "../../scripts/seed-demo.mj
 const TABLES = [
   "habits", "habitLogs", "waterLogs", "moodLogs", "workoutLogs",
   "readingItems", "readingLogs", "highlightLogs", "bodyLogs", "journalLogs",
-  "gigs", "bioMetrics", "bioReadings", "screenings", "goals", "tombstones", "kv",
+  "gigs", "bioMetrics", "bioReadings", "screenings", "goals", "goalLogs", "tombstones", "kv",
 ] as const;
 
 // Fixed local-time "now" so assertions are stable.

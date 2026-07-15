@@ -6,6 +6,7 @@ import type {
   BodyLog,
   Gig,
   Goal,
+  GoalLog,
   Habit,
   JournalLog,
   HabitLog,
@@ -50,6 +51,7 @@ export const db = new Dexie("cyber-fit") as Dexie & {
   screenings: EntityTable<Screening, "id">;
   kv: EntityTable<KvRow, "key">;
   goals: EntityTable<Goal, "id">;
+  goalLogs: EntityTable<GoalLog, "id">;
   tombstones: EntityTable<Tombstone, "id">;
 };
 
@@ -95,4 +97,8 @@ db.version(8).stores({
 
 db.version(9).stores({
   tombstones: "id, table",
+});
+
+db.version(10).stores({
+  goalLogs: "id, goalId, dayKey",
 });

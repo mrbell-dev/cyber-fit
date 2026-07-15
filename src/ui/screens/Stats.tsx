@@ -84,13 +84,14 @@ function WeeklyReport({
 /** Read-only glance at active goals — management lives in GRIND ▸ GOALS. */
 function ObjectivesStrip({ today }: { today: DayKey }) {
   const data = useLiveQuery(async () => {
-    const [goals, habitLogs, readingLogs, workoutLogs] = await Promise.all([
+    const [goals, habitLogs, readingLogs, workoutLogs, goalLogs] = await Promise.all([
       db.goals.filter((g) => !g.archivedAt).sortBy("order"),
       db.habitLogs.toArray(),
       db.readingLogs.toArray(),
       db.workoutLogs.toArray(),
+      db.goalLogs.toArray(),
     ]);
-    return { goals, tables: { habitLogs, readingLogs, workoutLogs } };
+    return { goals, tables: { habitLogs, readingLogs, workoutLogs, goalLogs } };
   }, []);
 
   if (!data || data.goals.length === 0) return null;
@@ -100,8 +101,8 @@ function ObjectivesStrip({ today }: { today: DayKey }) {
       <h2 className="card-title">Objectives</h2>
       {data.goals.map((g) => {
         const p = goalProgress(g, data.tables, today);
-        const pct = Math.min(100, p.target > 0 ? (p.value / p.target) * 100 : 0);
-        const done = p.value >= p.target;
+        const pct = p.target ? Math.min(100, (p.value / p.target) * 100) : 0;
+        const done = p.target ? p.value >= p.target : false;
         return (
           <div key={g.id} className="goal-row" aria-label={`Goal ${g.name}`}>
             <div className="goal-row-top">
@@ -110,12 +111,14 @@ function ObjectivesStrip({ today }: { today: DayKey }) {
                 {g.name}
               </span>
               <span className={done ? "goal-chip done" : `goal-chip ${p.pace}`}>
-                {done ? "✔ done" : `${Math.round(pct)}%`}
+                {done ? "✔ done" : p.openEnded ? `${p.value}` : `${Math.round(pct)}%`}
               </span>
             </div>
-            <div className="goal-bar" aria-hidden="true">
-              <div className="goal-fill" style={{ width: `${pct}%` }} />
-            </div>
+            {!p.openEnded && (
+              <div className="goal-bar" aria-hidden="true">
+                <div className="goal-fill" style={{ width: `${pct}%` }} />
+              </div>
+            )}
           </div>
         );
       })}

@@ -69,15 +69,29 @@ export interface Goal {
   name: string;
   /** single emoji/glyph shown next to the name */
   icon?: string;
-  horizon: "week" | "month" | "year";
-  target: number;
+  /** "lifelong" never resets — it counts all-time with no deadline. */
+  horizon: "week" | "month" | "year" | "lifelong";
+  /** optional: absent/0 = open-ended (track the running count, no bar/pace). */
+  target?: number;
   source:
     | { kind: "habits"; habitIds: string[] }
     | { kind: "readingPages" }
-    | { kind: "workouts" };
+    | { kind: "workouts" }
+    // manual tally — progress comes from GoalLog rows the user adds by hand.
+    | { kind: "manual" };
   createdAt: number;
   archivedAt?: number;
   order: number;
+}
+
+/** A hand-added increment toward a manual-source goal. Append-only event log,
+ *  like every other tracker; amount can be negative to undo. */
+export interface GoalLog {
+  id: string;
+  goalId: string;
+  dayKey: DayKey;
+  ts: number;
+  amount: number;
 }
 
 // ---------- event logs (append-only) ----------

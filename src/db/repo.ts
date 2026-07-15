@@ -274,6 +274,26 @@ export async function archiveGoal(id: string): Promise<void> {
   await db.goals.update(id, { archivedAt: Date.now() });
 }
 
+/** Add manual progress to a goal (amount may be negative to undo). Goals earn
+ *  no XP — they're a lens, not a game mechanic — so no refreshPlayer. */
+export async function logGoalProgress(goalId: string, amount: number): Promise<void> {
+  if (!Number.isFinite(amount) || amount === 0) return;
+  await db.goalLogs.add({
+    id: crypto.randomUUID(),
+    goalId,
+    dayKey: await currentDayKey(),
+    ts: Date.now(),
+    amount,
+  });
+}
+
+/** Undo the most recent manual increment for a goal. */
+export async function undoLastGoalProgress(goalId: string): Promise<void> {
+  const logs = await db.goalLogs.where({ goalId }).toArray();
+  const last = logs.sort((a, b) => b.ts - a.ts)[0];
+  if (last) await db.goalLogs.delete(last.id);
+}
+
 export async function logWeight(weight: number, unit: "lbs" | "kg"): Promise<void> {
   if (!Number.isFinite(weight) || weight <= 0) return;
   await db.bodyLogs.add({

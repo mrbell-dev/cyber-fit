@@ -2,13 +2,17 @@
 // target and never writes. Pure — no Date.now()/Math.random()/tz reads here.
 import { addDays, diffDays, weekKeyOf, type DayKey } from "./time.ts";
 import { isScheduledOn } from "./habits.ts";
-import type { Goal, Habit, HabitLog, ReadingLog, WorkoutLog } from "./types.ts";
+import type { Goal, GoalLog, Habit, HabitLog, ReadingLog, WorkoutLog } from "./types.ts";
 
 export interface GoalTables {
   habitLogs: HabitLog[];
   readingLogs: ReadingLog[];
   workoutLogs: WorkoutLog[];
+  goalLogs: GoalLog[];
 }
+
+/** Widest possible dayKey range — for lifelong goals that count all-time. */
+const ALL_TIME: [DayKey, DayKey] = ["0000-01-01", "9999-12-31"];
 
 export interface GoalPeriod {
   startKey: DayKey;
@@ -20,7 +24,9 @@ export interface GoalPeriod {
 
 const daysBetweenInclusive = (a: DayKey, b: DayKey) => diffDays(a, b) + 1;
 
-export function periodOf(horizon: Goal["horizon"], dayKey: DayKey): GoalPeriod {
+/** Period bounds for a bounded horizon. Lifelong has no period — callers must
+ *  handle it before reaching here (the type keeps them honest). */
+export function periodOf(horizon: "week" | "month" | "year", dayKey: DayKey): GoalPeriod {
   let startKey: DayKey, endKey: DayKey;
   const [y, m] = dayKey.split("-").map(Number);
   if (horizon === "week") {
@@ -57,33 +63,59 @@ export function goalValue(goal: Goal, tables: GoalTables, startKey: DayKey, endK
       .filter((l) => l.pages && inRange(l.dayKey, startKey, endKey))
       .reduce((sum, l) => sum + (l.pages ?? 0), 0);
   }
+  if (goal.source.kind === "manual") {
+    const net = tables.goalLogs
+      .filter((l) => l.goalId === goal.id && inRange(l.dayKey, startKey, endKey))
+      .reduce((sum, l) => sum + l.amount, 0);
+    return Math.max(0, net);
+  }
   return tables.workoutLogs.filter((l) => inRange(l.dayKey, startKey, endKey)).length;
 }
 
 export interface GoalProgress {
   value: number;
-  target: number;
+  /** undefined when the goal is open-ended (no numeric target). */
+  target?: number;
   expectedByNow: number;
-  pace: "ahead" | "on" | "behind";
+  /** "none" for lifelong or open-ended goals — there's nothing to be behind on. */
+  pace: "ahead" | "on" | "behind" | "none";
   daysLeft: number;
+  /** no numeric target — show a running count, not a bar. */
+  openEnded: boolean;
+  /** no deadline — counts all-time. */
+  lifelong: boolean;
 }
 
 export function goalProgress(goal: Goal, tables: GoalTables, todayKey: DayKey): GoalProgress {
+  const openEnded = !goal.target || goal.target <= 0;
+  const target = openEnded ? undefined : goal.target;
+
+  if (goal.horizon === "lifelong") {
+    const value = goalValue(goal, tables, ...ALL_TIME);
+    return { value, target, expectedByNow: 0, pace: "none", daysLeft: 0, openEnded, lifelong: true };
+  }
+
   const p = periodOf(goal.horizon, todayKey);
   const value = goalValue(goal, tables, p.startKey, p.endKey);
+  const daysLeft = p.totalDays - p.elapsedDays;
+  if (openEnded) {
+    return { value, target: undefined, expectedByNow: 0, pace: "none", daysLeft, openEnded: true, lifelong: false };
+  }
   // today itself doesn't count against pace yet — there's still time left in it
-  const expectedByNow = goal.target * ((p.elapsedDays - 1) / p.totalDays);
+  const expectedByNow = target! * ((p.elapsedDays - 1) / p.totalDays);
   const pace = value < expectedByNow - 0.5 ? "behind" : value > expectedByNow + 0.5 ? "ahead" : "on";
-  return { value, target: goal.target, expectedByNow, pace, daysLeft: p.totalDays - p.elapsedDays };
+  return { value, target, expectedByNow, pace, daysLeft, openEnded: false, lifelong: false };
 }
 
 /** Result for the period immediately before the current one — the "last week: 3/5"
- *  line. Target is today's target; we don't keep historical target values. */
+ *  line. Target is today's target; we don't keep historical target values.
+ *  Null for lifelong goals (they have no "previous period"). */
 export function lastPeriodResult(
   goal: Goal,
   tables: GoalTables,
   todayKey: DayKey,
-): { value: number; target: number } {
+): { value: number; target?: number } | null {
+  if (goal.horizon === "lifelong") return null;
   const prevDay = addDays(periodOf(goal.horizon, todayKey).startKey, -1);
   const p = periodOf(goal.horizon, prevDay);
   return { value: goalValue(goal, tables, p.startKey, p.endKey), target: goal.target };
