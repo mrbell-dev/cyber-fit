@@ -210,14 +210,15 @@ the data lives. Shipped in 3 chunks via a reusable `InfoSheet`/`InfoButton`
 - [ ] **Bottom tab bar** (finding G2, rec #3 — Directives / Grind / Telemetry).
       The biggest single flow improvement per the eval; needs Michael's call
       because it reshapes the nav-drawer customization he just got.
-- [ ] **Trend views:** mood over 30/90 days + PHQ-9/GAD-7 score over time, in
-      Telemetry and the Trauma Team export (rec #4 — the #1 care-team ask).
-- [ ] **"Repeat last workout" one-tap** on Training (rec #5 — pre-fill last
-      session's exercises/weights).
-- [ ] Small carried items: Training history rows need a tappable affordance
-      (or the sets view is the missing feature) · Feed note icon 📝 needs a
-      way to read the note · weight delta display opt-in (ED-adjacent) ·
-      fuller scrim behind the crash kit overlay.
+- [x] **Trend views.** DONE. `src/engine/trend.ts` (mood 30/90d + PHQ-9/GAD-7
+      over time) → SVG sparklines in Telemetry (gaps stay gaps) + plain-English
+      trend-direction lines in the Trauma Team export (rec #4). 7 engine tests.
+- [x] **"Repeat last workout" one-tap.** DONE (rec #5). Re-logs the last
+      session's shape (score not copied — it's a result, not the workout).
+- [x] **Small carried items.** DONE: Training history rows expand to show sets;
+      Feed 📝 rows expand to show the note; weight delta is opt-in (default off,
+      ED-adjacent); crash-kit overlay got a fuller scrim.
+- [ ] **Bottom tab bar** still deferred to Michael (see above).
 
 ### TIER LT — flavor, reach, and the long game (carried forward)
 
@@ -230,10 +231,15 @@ the data lives. Shipped in 3 chunks via a reusable `InfoSheet`/`InfoButton`
       NOT: a separate desktop app. Decide layout approach (CSS grid
       breakpoints vs. container queries) in the design pass, not ad hoc.
 
-- [ ] **Goals system (captured 2026-07-08, needs brainstorm before build):**
-      viewable general goals with progress + pace-aware reminders that fire on
-      the days you'd otherwise coast (inverse of the fixed-day workout ping).
-      Raw capture + open design questions in `TODO.md` — scope it there first.
+- [~] **Goals system.** Core shipped across two passes. Base lens over logs
+      (habits/reading/workouts, week/month/year targets) + coast-day pace nudge
+      shipped earlier. **2026-07-15 pass (Michael's daily-driver bugs):** added
+      a **manual-tally source** (＋1/undo on the goal — you can now move a goal
+      by hand), a **lifelong horizon** (no reset, all-time count), and an
+      **optional target** (blank = open-ended running count, no bar/pace). New
+      `goalLogs` table (Dexie v10). STILL OPEN: pace-aware push reminders that
+      fire on coast days (inverse of the fixed-day ping) — in-app coast banner
+      exists; the push side needs the relay slot design. Scope in `TODO.md`.
 - [ ] **Accessibility audit:** full axe pass + a real VoiceOver/TalkBack
       walkthrough (carried from v2 — needs a human session, still owed).
 - [ ] **Cyberware rig:** SVG avatar gaining visible chrome per level (arm LVL 3,
@@ -295,6 +301,24 @@ the data lives. Shipped in 3 chunks via a reusable `InfoSheet`/`InfoButton`
 - **Install-banner dismissal is per-device localStorage, not vault state.**
   Wanting the banner hidden is a device fact, not user data — it shouldn't
   sync, export, or survive a vault restore onto a fresh device.
+
+### Decisions recorded — daily-driver bug pass (2026-07-15)
+
+- **Nav layout editing lives in System ▸ Menu Layout, not the drawer.** The
+  per-row controls (rename/reorder/stash/drawer/delete) overflowed the 260px
+  drawer horizontally. The drawer is navigation-only now; CLASSIFIED stays in
+  the drawer so stashed pages remain reachable. (Dashboard block "Reconfig
+  layout" is separate and unchanged.)
+- **Goals earn no XP — manual ＋1 included.** `logGoalProgress` never calls
+  refreshPlayer. Goals are a lens/measurement, not a game mechanic; gamifying
+  a hand-tapped counter would just invite gaming the number.
+- **Open-ended vs lifelong are separate axes.** Target-optional (open-ended =
+  running count, no bar) is independent of horizon-lifelong (no reset). You can
+  have a targeted lifelong goal ("100 total plunges, no deadline") or an
+  open-ended weekly one ("just count this week"). Don't collapse them.
+- **Manual goalLogs are a normal append-only event log** (amount can be
+  negative to undo), same shape/rules as every other tracker; covered by
+  export/import/merge. No XP, no rebuild dependency.
 
 ### Post-eval candidates (Claude's picks, 2026-07-04 — NOT committed; revisit
 after Michael's 30-day daily-driver eval, and only after Tiers S–C are done)
