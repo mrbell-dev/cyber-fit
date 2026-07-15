@@ -280,6 +280,10 @@ export interface Settings {
   /** weight is no longer a hardwired metric — it shows once it has data or the
    *  user adds it from the Bio-Scan "+". */
   weightTracked?: boolean;
+  /** show the change-since-last-scan delta on the weight row. OFF by default:
+   *  a running delta is eating-disorder-adjacent; the trend chart covers the
+   *  same information for those who want it. */
+  showWeightDelta?: boolean;
 }
 
 export function difficultyFactor(s: Settings): number {

@@ -231,7 +231,9 @@ function WeightRow({ today, notifOn: _notifOn }: { today: DayKey; notifOn: boole
           <span className="off-day-tag">
             {" "}· {unit} · {cadence.label.toLowerCase()}
             {last ? ` · last ${last.weight}` : ""}
-            {delta !== null ? ` (${delta > 0 ? "+" : ""}${Math.round(delta * 10) / 10})` : ""}
+            {settings.showWeightDelta && delta !== null
+              ? ` (${delta > 0 ? "+" : ""}${Math.round(delta * 10) / 10})`
+              : ""}
           </span>
         </span>
         <span className="row-actions">
@@ -270,6 +272,16 @@ function WeightRow({ today, notifOn: _notifOn }: { today: DayKey; notifOn: boole
                 </option>
               ))}
             </select>
+          </label>
+          <label className="check-label">
+            <input
+              type="checkbox"
+              checked={Boolean(settings.showWeightDelta)}
+              onChange={(e) => saveSettings({ showWeightDelta: e.target.checked })}
+            />
+            <span className="check-label-text">
+              Show change since last scan (off by default — the trend chart is the fuller picture)
+            </span>
           </label>
           <p className="placeholder">// the trend is the signal, fluctuations are noise — early scans are fine, they just don't earn XP</p>
         </div>

@@ -1895,3 +1895,25 @@ html.theme-ice {
   margin-top: 10px;
   width: 100%;
 }
+
+/* Crash kit gets a fuller scrim than a normal overlay — at the worst moment,
+   the gamified UI behind it shouldn't bleed through as visual noise. */
+.crash-overlay {
+  background: rgba(6, 6, 12, 0.94);
+}
+
+/* Expandable history rows — session note (Feed) and sets (Training). */
+.note-toggle,
+.workout-row-btn {
+  text-align: left;
+}
+
+.session-note {
+  margin: 2px 0 8px 4px;
+  padding-left: 10px;
+  border-left: 2px solid var(--border);
+  font-size: 13px;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  white-space: pre-wrap;
+}

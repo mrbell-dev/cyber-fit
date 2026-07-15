@@ -18,6 +18,7 @@ function WorkoutCard() {
   const [sets, setSets] = useState<SetRow[]>([{ reps: "", weight: "" }]);
   const [templated, setTemplated] = useState(false);
   const [repeated, setRepeated] = useState<string | null>(null);
+  const [openSets, setOpenSets] = useState<string | null>(null); // workout id
   const [info, setInfo] = useState(false);
   const today = useDayKey();
   const settings = useSettings();
@@ -224,19 +225,45 @@ function WorkoutCard() {
 
       {(recent ?? []).length > 0 && (
         <div className="recent-list">
-          {recent!.map((w) => (
-            <div className="row-item" key={w.id}>
-              <span>
+          {recent!.map((w) => {
+            const sets = w.exercises?.[0]?.sets ?? [];
+            const summary = (
+              <>
                 {w.dayKey === today ? "▸ " : ""}
                 {w.name}
                 {w.style ? ` · ${WORKOUT_STYLES.find((s) => s.id === w.style)?.label ?? w.style}` : ""}
                 {w.score ? ` · ${w.score}` : ""}
                 {w.durationMin ? ` · ${w.durationMin} min` : ""}
                 {w.distance ? ` · ${w.distance} ${distanceUnit}` : ""}
-              </span>
-              <span className="off-day-tag">{w.dayKey}</span>
-            </div>
-          ))}
+                {sets.length ? ` · ${sets.length} set${sets.length === 1 ? "" : "s"}` : ""}
+              </>
+            );
+            return (
+              <div key={w.id}>
+                <div className="row-item">
+                  {sets.length ? (
+                    <button
+                      className="workout-row-btn"
+                      aria-expanded={openSets === w.id}
+                      onClick={() => setOpenSets(openSets === w.id ? null : w.id)}
+                    >
+                      {summary}
+                    </button>
+                  ) : (
+                    <span>{summary}</span>
+                  )}
+                  <span className="off-day-tag">{w.dayKey}</span>
+                </div>
+                {openSets === w.id && sets.length > 0 && (
+                  <p className="session-note">
+                    {sets
+                      .map((s, i) => `set ${i + 1}: ${s.reps ?? "—"}${s.weight ? ` × ${s.weight} ${settings.weightUnit ?? "lbs"}` : ""}`)
+                      .join(" · ")}
+                  </p>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
       <p className="placeholder">

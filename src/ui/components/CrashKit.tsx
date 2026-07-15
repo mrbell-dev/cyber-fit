@@ -98,7 +98,7 @@ export function CrashKit({ onClose }: { onClose: () => void }) {
   if (mode === "frames") return <GoodFrames onClose={() => setMode("menu")} />;
 
   return (
-    <div className="overlay" onClick={onClose}>
+    <div className="overlay crash-overlay" onClick={onClose}>
       <div
         className="modal boot-modal crash-kit"
         role="dialog"

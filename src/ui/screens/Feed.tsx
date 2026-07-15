@@ -155,6 +155,7 @@ function ReadingCard() {
   const [library, setLibrary] = useState(false);
   const [oneShot, setOneShot] = useState(false);
   const [oneShotItem, setOneShotItem] = useState<ReadingItem | null>(null);
+  const [openNote, setOpenNote] = useState<string | null>(null); // log id
 
   const items = useLiveQuery(
     () => db.readingItems.where("status").equals("reading").toArray(),
@@ -271,12 +272,27 @@ function ReadingCard() {
       {(recentLogs ?? []).length > 0 && (
         <div className="recent-list">
           {recentLogs!.map((l) => (
-            <div className="row-item" key={l.id}>
-              <span className="off-day-tag">
-                {l.dayKey} · {l.itemId ? (itemById.get(l.itemId)?.title ?? "session") : "session"}
-                {l.minutes ? ` · ${l.minutes} min` : ""}
-                {l.note ? " · 📝" : ""}
-              </span>
+            <div key={l.id}>
+              <div className="row-item">
+                {l.note ? (
+                  <button
+                    className="off-day-tag note-toggle"
+                    aria-expanded={openNote === l.id}
+                    onClick={() => setOpenNote(openNote === l.id ? null : l.id)}
+                  >
+                    {l.dayKey} · {l.itemId ? (itemById.get(l.itemId)?.title ?? "session") : "session"}
+                    {l.minutes ? ` · ${l.minutes} min` : ""} · 📝
+                  </button>
+                ) : (
+                  <span className="off-day-tag">
+                    {l.dayKey} · {l.itemId ? (itemById.get(l.itemId)?.title ?? "session") : "session"}
+                    {l.minutes ? ` · ${l.minutes} min` : ""}
+                  </span>
+                )}
+              </div>
+              {openNote === l.id && l.note && (
+                <p className="session-note">{l.note}</p>
+              )}
             </div>
           ))}
         </div>
