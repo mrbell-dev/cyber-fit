@@ -29,6 +29,13 @@ const page = await browser.newPage({
 let shot = 0;
 const snap = async (name) => {
   await page.waitForTimeout(300); // let live queries and fonts settle
+  // XP toasts auto-dismiss after 3.5s; importing the demo profile emits
+  // grants, so early shots race them. Wait for the stack to clear (bounded,
+  // in case a screen keeps re-toasting) so no screenshot ships with toasts.
+  await page
+    .locator(".toast-stack")
+    .waitFor({ state: "detached", timeout: 8000 })
+    .catch(() => {});
   shot += 1;
   const file = `${String(shot).padStart(2, "0")}-${name}.png`;
   await page.screenshot({ path: `${OUT}/${file}` });
