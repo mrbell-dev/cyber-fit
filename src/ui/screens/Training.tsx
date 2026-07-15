@@ -17,6 +17,7 @@ function WorkoutCard() {
   const [score, setScore] = useState("");
   const [sets, setSets] = useState<SetRow[]>([{ reps: "", weight: "" }]);
   const [templated, setTemplated] = useState(false);
+  const [repeated, setRepeated] = useState<string | null>(null);
   const [info, setInfo] = useState(false);
   const today = useDayKey();
   const settings = useSettings();
@@ -50,6 +51,23 @@ function WorkoutCard() {
       setSets(lastSets.map((s) => ({ reps: String(s.reps ?? ""), weight: String(s.weight ?? "") })));
     }
     setTemplated(true);
+  };
+
+  /** One-tap repeat (eval rec #5): logs the last session again as-is —
+   *  same style/sets/duration/distance. `score` is deliberately NOT copied:
+   *  a score is a result you got that day, not part of the workout's shape. */
+  const repeatLast = async () => {
+    const last = history?.[0];
+    if (!last) return;
+    await logWorkout({
+      name: last.name,
+      style: last.style,
+      durationMin: last.durationMin,
+      distance: last.distance,
+      exercises: last.exercises,
+    });
+    setRepeated(last.name);
+    setTimeout(() => setRepeated(null), 3000);
   };
 
   const submit = async () => {
@@ -194,6 +212,15 @@ function WorkoutCard() {
           Log workout
         </button>
       </div>
+
+      {history?.[0] && (
+        <button className="btn ghost repeat-last" onClick={repeatLast}>
+          ↻ Repeat last — {history[0].name}
+        </button>
+      )}
+      {repeated && (
+        <p className="placeholder">// logged "{repeated}" again — same shape as last time</p>
+      )}
 
       {(recent ?? []).length > 0 && (
         <div className="recent-list">

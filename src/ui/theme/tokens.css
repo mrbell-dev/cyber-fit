@@ -1858,3 +1858,40 @@ html.theme-ice {
   color: var(--text-dim);
   letter-spacing: 2px;
 }
+
+/* ---------- trend lines (mood + screeners) ---------- */
+.trend-block {
+  margin-top: 10px;
+}
+
+.trend-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+
+.trend-label {
+  font-size: 12px;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+}
+
+.trend-latest {
+  font-size: 12px;
+  color: var(--text);
+}
+
+.trend-svg {
+  width: 100%;
+  height: 64px;
+  display: block;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.repeat-last {
+  margin-top: 10px;
+  width: 100%;
+}

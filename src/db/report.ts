@@ -3,7 +3,10 @@
 // deliberately slang-free — this document represents the user to their care
 // team. Generated entirely on-device; shared only by the user's own hand.
 
-import { addDays, dayKeyFor, SCREENERS, scoreBand, stripTags, waterTotal } from "../engine/index.ts";
+import {
+  addDays, dayKeyFor, moodTrend, SCREENERS, scoreBand, screenerTrend,
+  stripTags, trendDirection, waterTotal,
+} from "../engine/index.ts";
 import { db } from "./db.ts";
 import { getSettings } from "./repo.ts";
 
@@ -71,6 +74,8 @@ export async function buildReport(days: number, sections: ReportSections): Promi
     const hardDays = new Set(rMoods.filter((m) => m.rating <= 2).map((m) => m.dayKey)).size;
     lines.push(`- Mood check-ins: ${rMoods.length} (average ${avg}/5)`);
     lines.push(`- Days with a high reading (4–5): ${goodDays} · days with a low reading (1–2): ${hardDays}`);
+    const dir = trendDirection(moodTrend(moods, today, days), 0.3);
+    if (dir) lines.push(`- Mood trend over the period: ${dir}`);
   }
   lines.push("");
 
@@ -79,6 +84,13 @@ export async function buildReport(days: number, sections: ReportSections): Promi
     if (rs.length > 0) {
       lines.push("## Standardized screeners (PHQ-9 / GAD-7, self-administered)");
       lines.push("");
+      for (const def of SCREENERS) {
+        // Trend needs the full history, not just the window, to have enough points.
+        const dir = trendDirection(screenerTrend(screenings, def.tool), 1, true);
+        if (dir) {
+          lines.push(`- ${def.tool === "phq9" ? "PHQ-9" : "GAD-7"} trend (lower is better): ${dir}`);
+        }
+      }
       for (const sc of rs) {
         const def = SCREENERS.find((d) => d.tool === sc.tool)!;
         lines.push(

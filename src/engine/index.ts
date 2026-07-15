@@ -16,4 +16,5 @@ export * from "./presets.ts";
 export * from "./exercises.ts";
 export * from "./tags.ts";
 export * from "./screeners.ts";
+export * from "./trend.ts";
 export { medWindow, type MedWindow } from "./meds.ts";
