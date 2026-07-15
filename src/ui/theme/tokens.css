@@ -1836,21 +1836,81 @@ html.theme-ice {
 .nav-edit-row {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-edit-name {
+  flex: 1;
+  min-width: 100px;
+  min-height: 40px;
+  text-align: left;
+  color: var(--text);
+}
+
+.nav-edit-btn {
+  min-height: 40px;
+  min-width: 40px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+.nav-edit-btn:disabled {
+  opacity: 0.35;
+}
+
+.nav-edit-btn.wide {
+  min-width: 64px;
+}
+
+.nav-edit-full {
+  flex-basis: 100%;
+}
+
+.nav-edit-group {
+  margin: 6px 0;
+}
+
+.nav-edit-group-title {
+  display: flex;
+  align-items: center;
   gap: 8px;
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.nav-edit-group-title.classified {
+  color: var(--text-dim);
+  letter-spacing: 2px;
+}
+
+.nav-add-page {
+  margin-top: 10px;
+  width: 100%;
 }
 
 .nav-group-pick {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
-  margin-left: 18px;
 }
 
 .nav-new-page {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
-  padding: 6px 12px;
+  padding: 6px 0;
 }
 
 .nav-drawer button.classified,

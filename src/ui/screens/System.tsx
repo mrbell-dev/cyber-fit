@@ -14,6 +14,7 @@ import { ReminderUplink } from "../components/ReminderUplink.tsx";
 import { HabitEditor, type EditorSeed } from "../components/HabitEditor.tsx";
 import { DirectiveCodex } from "../components/DirectiveCodex.tsx";
 import { FieldManual } from "../components/FieldManual.tsx";
+import { NavLayoutEditor } from "../components/NavLayoutEditor.tsx";
 import { DevPanel } from "../components/DevPanel.tsx";
 import { useSettings } from "../hooks.ts";
 
@@ -559,6 +560,8 @@ export function System() {
       {settings.devMode && <DevPanel />}
 
       <ReminderUplink />
+
+      <NavLayoutEditor />
 
       <Augments />
 
