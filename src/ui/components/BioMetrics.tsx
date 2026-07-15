@@ -187,7 +187,7 @@ function MetricRow({ metric, readings, notifOn }: { metric: BioMetric; readings:
           className="input"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          placeholder={`reading${metric.unit ? ` (${metric.unit})` : ""} — e.g. 120/80 works too`}
+          placeholder={`reading${metric.unit ? ` (${metric.unit})` : ""}${metric.id === "bp" ? " — e.g. 120/80 works too" : ""}`}
           aria-label={`${metric.name} reading`}
           onKeyDown={(e) => e.key === "Enter" && log()}
         />

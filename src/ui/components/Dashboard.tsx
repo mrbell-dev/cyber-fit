@@ -21,7 +21,7 @@ export function Dashboard({ pageId }: { pageId: string }) {
           style={{ minHeight: 48, minWidth: 48 }}
           onClick={() => { setEditing(!editing); setSheetOpen(false); }}
         >
-          {editing ? "Done" : "⧉ Reconfig"}
+          {editing ? "Done" : "⧉ Reconfig layout"}
         </button>
       </div>
 

@@ -81,9 +81,18 @@ export function InstallPrompt() {
 
   return (
     <>
-      <button className="install-banner" onClick={() => setOpen(true)}>
-        <ShareIcon /> Install to home screen — full-screen, works off-grid
-      </button>
+      <div className="install-banner">
+        <button className="install-banner-main" onClick={() => setOpen(true)}>
+          <ShareIcon /> Install to home screen — full-screen, works off-grid
+        </button>
+        <button
+          className="install-banner-dismiss"
+          aria-label="Dismiss install banner"
+          onClick={dismiss}
+        >
+          ✕
+        </button>
+      </div>
 
       {open && (
         <div className="overlay" onClick={() => setOpen(false)}>

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../../db/db.ts";
-import { goalProgress, type DayKey, type Goal } from "../../engine/index.ts";
+import { goalProgress, lastPeriodResult, type DayKey, type Goal } from "../../engine/index.ts";
 import { GoalEditor } from "./GoalEditor.tsx";
 
 const PERIOD_LABEL: Record<Goal["horizon"], string> = {
@@ -49,6 +49,14 @@ export function GoalsPanel({ today }: { today: DayKey }) {
           const p = goalProgress(g, data.tables, today);
           const pct = Math.min(100, p.target > 0 ? (p.value / p.target) * 100 : 0);
           const done = p.value >= p.target;
+          const last = lastPeriodResult(g, data.tables, today);
+          // concrete next step, not just a verdict — "~2 more this week" beats "behind"
+          const remaining = Math.max(0, p.target - p.value);
+          const hint = done
+            ? null
+            : p.daysLeft > 0
+              ? `≈${Math.ceil(remaining / (p.daysLeft + 1))}/day hits it`
+              : `${remaining} more today hits it`;
           return (
             <button
               key={g.id}
@@ -70,7 +78,13 @@ export function GoalsPanel({ today }: { today: DayKey }) {
               </div>
               <span className="goal-meta">
                 {p.value}/{p.target} · {PERIOD_LABEL[g.horizon]} · {p.daysLeft}d left
+                {hint ? ` · ${hint}` : ""}
               </span>
+              {last.value > 0 && (
+                <span className="goal-meta goal-last">
+                  last {PERIOD_LABEL[g.horizon]}: {last.value}/{last.target}
+                </span>
+              )}
             </button>
           );
         })

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { coastDay, goalProgress, goalValue, periodOf } from "./goals.ts";
+import { coastDay, goalProgress, goalValue, lastPeriodResult, periodOf } from "./goals.ts";
 import type { Goal, Habit, HabitLog } from "./types.ts";
 
 const g = (over: Partial<Goal> = {}): Goal => ({
@@ -51,6 +51,19 @@ describe("goalValue + pace", () => {
     expect(goalProgress(g(), T([hl("2026-07-06"), hl("2026-07-07"), hl("2026-07-08")]),
                         "2026-07-08").pace).toBe("ahead");
     expect(goalProgress(g(), T([]), "2026-07-08").daysLeft).toBe(4);
+  });
+});
+
+describe("lastPeriodResult", () => {
+  it("counts only the previous week's logs", () => {
+    // today 2026-07-08 (Wed) → current week starts 07-06, previous is 06-29..07-05
+    const logs = [hl("2026-07-05"), hl("2026-06-29"), hl("2026-07-06"), hl("2026-06-28")];
+    expect(lastPeriodResult(g(), T(logs), "2026-07-08")).toEqual({ value: 2, target: 4 });
+  });
+  it("previous month crosses the year boundary", () => {
+    const goal = g({ horizon: "month", target: 10 });
+    const logs = [hl("2025-12-31"), hl("2025-12-01"), hl("2026-01-01")];
+    expect(lastPeriodResult(goal, T(logs), "2026-01-15").value).toBe(2);
   });
 });
 

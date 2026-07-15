@@ -250,7 +250,9 @@ function ReadingCard() {
         </div>
         <label className="check-label">
           <input type="checkbox" checked={oneShot} onChange={(e) => setOneShot(e.target.checked)} />
-          One-time thing — log it and done, don't keep it in the feed
+          <span className="check-label-text">
+            One-time thing — log it and done, don't keep it in the feed
+          </span>
         </label>
         <button className="btn" onClick={add} disabled={!title.trim()}>
           {oneShot ? "Log it & done" : "Add to feed"}

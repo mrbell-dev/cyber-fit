@@ -19,8 +19,9 @@ import { useSettings } from "../hooks.ts";
 
 const REPO_URL = "https://github.com/mrbell-dev/cyber-fit";
 
-function areaIcon(id?: string): string {
-  return AREAS.find((a) => a.id === id)?.icon ?? "";
+function areaLabel(id?: string): string {
+  const a = AREAS.find((a) => a.id === id);
+  return a ? `${a.icon} ${a.name}` : "";
 }
 
 function Directives() {
@@ -40,7 +41,7 @@ function Directives() {
             <span>
               {h.icon} {h.name}
               <span className="off-day-tag">
-                {h.area ? ` · ${areaIcon(h.area)}` : ""}
+                {h.area ? ` · ${areaLabel(h.area)}` : ""}
                 {h.reminderTime ? ` · 🔔${h.reminderTime}` : ""}
                 {h.pings ? ` · 🔔×${h.pings.times}` : ""}
               </span>
@@ -76,7 +77,7 @@ function Directives() {
             + New directive
           </button>
           <button className="btn ghost" onClick={() => setCodexOpen(true)}>
-            Open codex
+            Open codex — preset directives
           </button>
         </div>
       </div>

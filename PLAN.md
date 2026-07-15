@@ -184,7 +184,51 @@ the data lives. Shipped in 3 chunks via a reusable `InfoSheet`/`InfoButton`
       managed/curated template list stays deferred until it earns its keep.
       Verified live.
 
+### TIER UX — screenshot walkthrough fold (2026-07-14, full report:
+`docs/ux-eval-2026-07-14.md` — dual-lens: end user + clinician)
+
+- [x] **PHQ-9 item-9 / score ≥15 → gentle crash-kit offer in screener
+      results.** DONE. The single highest-value clinical item in the eval and
+      it was cheap: a conditional in the results view, warm copy, never alarm
+      language, response never logged (pillar 1 intact).
+- [x] **Persistent crash-kit access.** DONE. Nav drawer entry added; no more
+      below-the-fold-only path. Clinical standard: reachable from any screen.
+- [x] **Install banner: one-tap ✕, dismissal remembered** (localStorage
+      `DISMISS_KEY`), and the screenshot pipeline seeds the dismissal so docs
+      images show the real app (finding G1).
+- [x] **Goals: pace hint + last-period result.** DONE. "ahead" badge now says
+      what pace keeps you there; the 70%-empty screen shows last period's
+      outcome.
+- [x] **Copy/polish batch (rec #6).** DONE: Resting-HR placeholder fixed (bpm
+      example, not "120/80"); screener history disambiguated ("last: N/27");
+      vitals naming collision resolved (mood check-in no longer called
+      "vitals"); System's area emoji now labeled (icon + area name); "OPEN
+      CODEX" gained a clarifying subtitle; Feed one-time checkbox no longer
+      detaches from its label (`.check-label-text`); ⚡/▣ chips are
+      tap-to-explain buttons with inline copy (finding G4); LINKED→ON-GRID
+      (finding G3); Reconfig context clarified.
+- [ ] **Bottom tab bar** (finding G2, rec #3 — Directives / Grind / Telemetry).
+      The biggest single flow improvement per the eval; needs Michael's call
+      because it reshapes the nav-drawer customization he just got.
+- [ ] **Trend views:** mood over 30/90 days + PHQ-9/GAD-7 score over time, in
+      Telemetry and the Trauma Team export (rec #4 — the #1 care-team ask).
+- [ ] **"Repeat last workout" one-tap** on Training (rec #5 — pre-fill last
+      session's exercises/weights).
+- [ ] Small carried items: Training history rows need a tappable affordance
+      (or the sets view is the missing feature) · Feed note icon 📝 needs a
+      way to read the note · weight delta display opt-in (ED-adjacent) ·
+      fuller scrim behind the crash kit overlay.
+
 ### TIER LT — flavor, reach, and the long game (carried forward)
+
+- [ ] **Desktop support (design item — captured 2026-07-14, needs a design
+      pass before code):** the app is phone-first but Michael uses desktop
+      Chrome daily (the CORS bug was FOUND on desktop). Scope: a max-width
+      multi-column layout for wide viewports (cards flow into 2–3 columns),
+      keyboard affordances (the quick-log command line candidate below is the
+      natural anchor), and hover states that don't lie on touch. Explicitly
+      NOT: a separate desktop app. Decide layout approach (CSS grid
+      breakpoints vs. container queries) in the design pass, not ad hoc.
 
 - [ ] **Goals system (captured 2026-07-08, needs brainstorm before build):**
       viewable general goals with progress + pace-aware reminders that fire on
@@ -232,6 +276,25 @@ the data lives. Shipped in 3 chunks via a reusable `InfoSheet`/`InfoButton`
 - **Tag Explorer screen dropped; #tag parsing kept** (rationale above).
 - **Stats becomes overview-only; per-thing charts live on the things** (the ⓘ
   pattern above).
+
+### Decisions recorded — UX-eval pass (2026-07-14, don't relitigate)
+
+- **Screener gating never blocks or logs.** The item-9/≥15 crash-kit offer
+  appears IN the results view, after the score, as an offer — never a modal
+  wall, never stored. Blocking results or logging the response would teach
+  users to lie on the screener, defeating the "so answers stay honest" design.
+- **No journaling/logging inside the crash kit** (eval's own recommendation,
+  now doctrine): the zero-logging property IS the feature. Keep the kit
+  read-only forever.
+- **⚡/▣ explain is inline text, not a modal/InfoSheet.** One tap on the chip
+  toggles a one-line explanation under the XP row. A sheet is heavier than
+  the question deserves; the pattern is finding-G4-sized.
+- **Bottom tab bar deferred to Michael, not refused.** It conflicts with the
+  just-shipped nav-drawer customization (rename/reorder/stash). Both can't be
+  the primary nav story; he picks after living with the drawer.
+- **Install-banner dismissal is per-device localStorage, not vault state.**
+  Wanting the banner hidden is a device fact, not user data — it shouldn't
+  sync, export, or survive a vault restore onto a fresh device.
 
 ### Post-eval candidates (Claude's picks, 2026-07-04 — NOT committed; revisit
 after Michael's 30-day daily-driver eval, and only after Tiers S–C are done)

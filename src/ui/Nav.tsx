@@ -54,8 +54,9 @@ function DrawerSection({ name, entries, navBtn }: {
  *  in order (grouped entries collapse into a DrawerSection at the first
  *  member's position), then a collapsed CLASSIFIED drawer for hidden
  *  entries, then the hardcoded System row and version footer. */
-export function Nav({ open, tab, onChange, onClose }: {
+export function Nav({ open, tab, onChange, onClose, onCrashKit }: {
   open: boolean; tab: string; onChange: (t: string) => void; onClose: () => void;
+  onCrashKit: () => void;
 }) {
   const online = useOnline();
   const cfg = useLayout();
@@ -224,6 +225,10 @@ export function Nav({ open, tab, onChange, onClose }: {
           </>
         )}
         <div className="nav-divider" role="separator" />
+        <button onClick={onCrashKit}>
+          <span className="glyph" aria-hidden="true">✚</span>
+          Crash Kit
+        </button>
         <button onClick={() => { onChange("system"); onClose(); }}
           aria-current={tab === "system" ? "page" : undefined}>
           <span className="glyph" aria-hidden="true">⚙</span>
@@ -235,13 +240,13 @@ export function Nav({ open, tab, onChange, onClose }: {
             setEditing(!editing); setRenaming(null); setGrouping(null); setNewDrawer("");
             setNewPage(null); setConfirmDelete(null);
           }}>
-          {editing ? "Done" : "⧉ Reconfig"}
+          {editing ? "Done" : "⧉ Reconfig layout"}
         </button>
         {editing && <p className="dim">Stashed pages wait in CLASSIFIED — nothing is deleted.</p>}
         <div className="nav-footer">
           <span>v{VERSION}</span>
           <span className={online ? "status-chip" : "status-chip offgrid"}>
-            {online ? "LINKED" : "OFF-GRID"}
+            {online ? "ON-GRID" : "OFF-GRID"}
           </span>
         </div>
       </nav>

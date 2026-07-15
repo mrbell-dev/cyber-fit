@@ -77,6 +77,18 @@ export function goalProgress(goal: Goal, tables: GoalTables, todayKey: DayKey): 
   return { value, target: goal.target, expectedByNow, pace, daysLeft: p.totalDays - p.elapsedDays };
 }
 
+/** Result for the period immediately before the current one — the "last week: 3/5"
+ *  line. Target is today's target; we don't keep historical target values. */
+export function lastPeriodResult(
+  goal: Goal,
+  tables: GoalTables,
+  todayKey: DayKey,
+): { value: number; target: number } {
+  const prevDay = addDays(periodOf(goal.horizon, todayKey).startKey, -1);
+  const p = periodOf(goal.horizon, prevDay);
+  return { value: goalValue(goal, tables, p.startKey, p.endKey), target: goal.target };
+}
+
 /** Is today safe to coast on this goal — behind on pace, but no linked
  *  directive is even scheduled today (so there's nothing to feel bad about skipping)? */
 export function coastDay(goal: Goal, habits: Habit[], tables: GoalTables, todayKey: DayKey): boolean {

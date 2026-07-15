@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../../db/db.ts";
 import { difficultyFactor, levelFromXp, type PlayerState } from "../../engine/index.ts";
@@ -5,6 +6,7 @@ import { useSettings } from "../hooks.ts";
 
 export function XpBar() {
   const settings = useSettings();
+  const [explain, setExplain] = useState<"streak" | "shield" | null>(null);
   const player = useLiveQuery(
     async () => (await db.kv.get("player"))?.value as PlayerState | undefined,
     [],
@@ -23,17 +25,36 @@ export function XpBar() {
         </span>
         <span className="xp-badges">
           {streak > 0 && (
-            <span className="streak-chip" title="Global streak">
+            <button
+              type="button"
+              className="streak-chip chip-btn"
+              title="Global streak"
+              aria-expanded={explain === "streak"}
+              onClick={() => setExplain(explain === "streak" ? null : "streak")}
+            >
               ⚡{streak}d
-            </span>
+            </button>
           )}
           {player.freezeTokens > 0 && (
-            <span className="shield-chip" title="Streak shields — auto-absorb a missed day">
+            <button
+              type="button"
+              className="shield-chip chip-btn"
+              title="Streak shields — auto-absorb a missed day"
+              aria-expanded={explain === "shield"}
+              onClick={() => setExplain(explain === "shield" ? null : "shield")}
+            >
               ▣{player.freezeTokens}
-            </span>
+            </button>
           )}
         </span>
       </div>
+      {explain && (
+        <p className="chip-explain" role="status">
+          {explain === "streak"
+            ? `⚡ Streak: ${streak} day${streak === 1 ? "" : "s"} in a row with at least one completed task. Miss a day and it resets — unless a shield absorbs it.`
+            : `▣ Shields: you hold ${player.freezeTokens}. Each one silently covers a missed day so your streak survives. Earned as streak rewards.`}
+        </p>
+      )}
       <div
         className="xp-bar"
         role="progressbar"

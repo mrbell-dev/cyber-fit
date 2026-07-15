@@ -49,6 +49,10 @@ const nav = async (name) => {
     .click();
 };
 
+// Screenshots should show the app, not the install nag — pre-dismiss it the
+// same way a user's tap on the banner's ✕ would.
+await page.addInitScript(() => localStorage.setItem("cf-install-dismissed", "1"));
+
 await page.goto(`http://localhost:${PORT}/`, { waitUntil: "networkidle" });
 
 // Fresh browser context always sees first-run onboarding; click through it.

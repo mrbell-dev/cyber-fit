@@ -33,16 +33,34 @@ function Runner({ def, onClose }: { def: ScreenerDef; onClose: () => void }) {
               Score: <strong>{result.score} / {def.maxScore}</strong> — {scoreBand(def, result.score)} range
             </p>
             {needsCrisisResources(def.tool, answers) && (
+              <>
+                <p className="crisis-note">
+                  One of your answers matters more than any score. If you're in the US, the 988
+                  Suicide &amp; Crisis Lifeline is there right now — <a href="tel:988">call</a> or{" "}
+                  <a href="sms:988">text 988</a>. Telling your therapist about this answer is a
+                  strong move, not a weak one.
+                </p>
+                <button
+                  className="btn crash-option"
+                  onClick={() => {
+                    onClose();
+                    window.dispatchEvent(new Event("cf-open-crashkit"));
+                  }}
+                >
+                  ✚ Open the crash kit — breathing, grounding, 988
+                </button>
+              </>
+            )}
+            {!needsCrisisResources(def.tool, answers) && result.score >= 15 && (
               <p className="crisis-note">
-                One of your answers matters more than any score. If you're in the US, the 988
-                Suicide &amp; Crisis Lifeline is there right now — <a href="tel:988">call</a> or{" "}
-                <a href="sms:988">text 988</a>. Telling your therapist about this answer is a
-                strong move, not a weak one.
+                A score in this range is worth bringing to your care team — the Trauma Team
+                export packages the trend for them. And the crash kit (✚, top right) is there
+                any time, no score required.
               </p>
             )}
             <p className="placeholder">
               // this is a screener, not a diagnosis. its real value is the trend over time —
-              which you can share via the Trauma Team export in STATS
+              which you can share via the Trauma Team export in TELEMETRY
             </p>
             <button className="btn" onClick={onClose}>
               Done
@@ -93,7 +111,7 @@ export function ScreenerCard() {
           return (
             <button key={def.tool} className="btn ghost" onClick={() => setActive(def)}>
               {def.tool === "phq9" ? "PHQ-9" : "GAD-7"}
-              {last ? ` · last ${last.score}` : ""}
+              {last ? ` · last: ${last.score}/${def.maxScore}` : ""}
             </button>
           );
         })}

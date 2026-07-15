@@ -61,7 +61,7 @@ function WeeklyReport({
   if (workouts > 0) lines.push(`${workouts} training session${workouts === 1 ? "" : "s"} — chrome maintained`);
   if (sessions.length > 0)
     lines.push(`${sessions.length} reading session${sessions.length === 1 ? "" : "s"}${notes ? ` (${notes} with reflections)` : ""}`);
-  if (moodAvg) lines.push(`vitals averaged ${moodAvg}/5 across ${moods.length} check-in${moods.length === 1 ? "" : "s"}`);
+  if (moodAvg) lines.push(`mood check-ins averaged ${moodAvg}/5 across ${moods.length} check-in${moods.length === 1 ? "" : "s"}`);
   const highlights = inWeek(data.highlightLogs).length;
   if (highlights > 0) lines.push(`${highlights} highlight${highlights === 1 ? "" : "s"} captured — the week had good frames`);
   if (shields > 0) lines.push(`${shields} shield${shields === 1 ? "" : "s"} banked against missed days`);

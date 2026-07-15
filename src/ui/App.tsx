@@ -32,7 +32,7 @@ function OffGridChip() {
   }, []);
   return (
     <span className={online ? "status-chip" : "status-chip offgrid"}>
-      {online ? "LINKED" : "OFF-GRID"}
+      {online ? "ON-GRID" : "OFF-GRID"}
     </span>
   );
 }
@@ -45,6 +45,13 @@ export function App() {
   const { activeTheme, activeFx } = useSettings();
   useEffect(() => applyTheme(activeTheme), [activeTheme]);
   useEffect(() => applyFx(activeFx ?? []), [activeFx]);
+  // Anywhere in the tree can open the crash kit (e.g. screener results) —
+  // crisis access must never depend on prop drilling.
+  useEffect(() => {
+    const open = () => setCrashKit(true);
+    window.addEventListener("cf-open-crashkit", open);
+    return () => window.removeEventListener("cf-open-crashkit", open);
+  }, []);
   // Re-upload reminder slots on every open (handles DST drift; harmless no-op
   // when push was never enabled).
   useEffect(() => {
@@ -100,7 +107,8 @@ export function App() {
       </main>
 
       <RewardToast />
-      <Nav open={menuOpen} tab={tab} onChange={setTab} onClose={() => setMenuOpen(false)} />
+      <Nav open={menuOpen} tab={tab} onChange={setTab} onClose={() => setMenuOpen(false)}
+        onCrashKit={() => { setMenuOpen(false); setCrashKit(true); }} />
     </>
   );
 }
