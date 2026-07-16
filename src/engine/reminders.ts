@@ -2,7 +2,7 @@
 // (labels, themed copy, what it's for) never leaves the device — only the
 // slot numbers do. EVERY ping is optional and user-defined.
 
-import type { BioMetric, Habit } from "./types.ts";
+import type { BioMetric, Goal, Habit } from "./types.ts";
 
 export interface Reminders {
   /** master switch — off = no pings anywhere (push or in-app), and editors
@@ -48,7 +48,7 @@ function clampToQuiet(minutes: number, quiet: Reminders["quiet"]): number {
   return inQuiet(minutes, s, e) ? e : minutes;
 }
 
-export type PingKind = Exclude<keyof Reminders, "enabled" | "quiet"> | "habit" | "bio";
+export type PingKind = Exclude<keyof Reminders, "enabled" | "quiet"> | "habit" | "bio" | "goal";
 
 /** Themed copy shown by the app (in-app pings + self-hosted relays). */
 export const REMINDER_COPY: Record<PingKind, string> = {
@@ -60,6 +60,7 @@ export const REMINDER_COPY: Record<PingKind, string> = {
   motivation: "Keep the chrome polished, choom.",
   habit: "Directive window open.",
   bio: "Bio-scan window — log your reading.",
+  goal: "Objective check-in — move the needle.",
 };
 
 export interface LocalPing {
@@ -89,7 +90,9 @@ function habitDays(habit: Habit): number[] {
 }
 
 /** Expand the schedule + per-habit + per-bio-metric reminders into local ping times. */
-export function localPings(r: Reminders, habits: Habit[] = [], metrics: BioMetric[] = []): LocalPing[] {
+export function localPings(
+  r: Reminders, habits: Habit[] = [], metrics: BioMetric[] = [], goals: Goal[] = [],
+): LocalPing[] {
   if (r.enabled === false) return []; // master switch off → nothing fires anywhere
   const pings: LocalPing[] = [];
   if (r.morning.on) pings.push({ kind: "morning", minutes: parseTime(r.morning.time), days: ALL_DAYS });
@@ -148,6 +151,11 @@ export function localPings(r: Reminders, habits: Habit[] = [], metrics: BioMetri
       { label: m.name },
     );
   }
+  // Goals only ping if the user opted in (reminderTime set) — never by default.
+  for (const g of goals) {
+    if (g.archivedAt || !g.reminderTime) continue;
+    pings.push({ kind: "goal", minutes: parseTime(g.reminderTime), days: ALL_DAYS, label: g.name });
+  }
   // Quiet hours defer every ping (system, habit, bio) out of the window.
   if (r.quiet?.on) return pings.map((p) => ({ ...p, minutes: clampToQuiet(p.minutes, r.quiet) }));
   return pings;
@@ -195,8 +203,9 @@ export function slotBundleFor(
   tzOffsetMinutes: number,
   habits: Habit[] = [],
   metrics: BioMetric[] = [],
+  goals: Goal[] = [],
 ): { slots: number[]; motivationSlots: number[] } {
-  const pings = localPings(r, habits, metrics);
+  const pings = localPings(r, habits, metrics, goals);
   return {
     slots: toSlots(pings.filter((p) => p.kind !== "motivation" && !p.inAppOnly), tzOffsetMinutes),
     motivationSlots: toSlots(pings.filter((p) => p.kind === "motivation" && !p.inAppOnly), tzOffsetMinutes),
@@ -217,6 +226,7 @@ export function duePingsToday(
   weekday: number,
   nowMinutes: number,
   habits: Habit[] = [],
+  goals: Goal[] = [],
 ): LocalPing[] {
-  return localPings(r, habits).filter((p) => p.days.includes(weekday) && p.minutes <= nowMinutes);
+  return localPings(r, habits, [], goals).filter((p) => p.days.includes(weekday) && p.minutes <= nowMinutes);
 }

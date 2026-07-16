@@ -44,9 +44,6 @@ export function GigList({ today }: { today: DayKey }) {
               aria-label={`Complete ${g.text}`}
             />
             <span className="gig-text">{g.text}</span>
-            {!g.doneTs && g.createdDay < today && (
-              <span className="off-day-tag">· carried over</span>
-            )}
           </label>
           <button className="link-btn" onClick={() => deleteGig(g.id)} aria-label={`Delete ${g.text}`}>
             ✕

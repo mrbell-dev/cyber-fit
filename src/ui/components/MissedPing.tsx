@@ -16,13 +16,14 @@ import {
  */
 export function MissedPing({ today }: { today: DayKey }) {
   const info = useLiveQuery(async () => {
-    const [remRow, habits, habitLogs, waterLogs, moodLogs, recentLogs] = await Promise.all([
+    const [remRow, habits, habitLogs, waterLogs, moodLogs, recentLogs, goals] = await Promise.all([
       db.kv.get("reminders"),
       db.habits.filter((h) => !h.archivedAt).toArray(),
       db.habitLogs.where({ dayKey: today }).toArray(),
       db.waterLogs.where({ dayKey: today }).toArray(),
       db.moodLogs.where({ dayKey: today }).toArray(),
       db.habitLogs.filter((l) => l.ts >= Date.now() - 2 * 86_400_000).toArray(),
+      db.goals.filter((g) => !g.archivedAt).toArray(),
     ]);
     const reminders = { ...DEFAULT_REMINDERS, ...((remRow?.value as Partial<Reminders>) ?? {}) };
     const lastLogTs = Math.max(
@@ -31,7 +32,7 @@ export function MissedPing({ today }: { today: DayKey }) {
       ...waterLogs.map((l) => l.ts),
       ...moodLogs.map((l) => l.ts),
     );
-    return { reminders, habits, habitLogs, recentLogs, lastLogTs };
+    return { reminders, habits, habitLogs, recentLogs, lastLogTs, goals };
   }, [today]);
 
   if (!info) return null;
@@ -59,6 +60,7 @@ export function MissedPing({ today }: { today: DayKey }) {
     now.getDay(),
     now.getHours() * 60 + now.getMinutes(),
     info.habits,
+    info.goals,
   ).filter((p) => {
     if (p.kind === "motivation") return false; // encouragement never "misses"
     if (p.habitId && quietMedHabits.has(p.habitId)) return false;

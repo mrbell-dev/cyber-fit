@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_REMINDERS, duePingsToday, inQuiet, localPings, slotBundleFor, slotsFor } from "./reminders.ts";
-import type { Habit } from "./types.ts";
+import type { Goal, Habit } from "./types.ts";
 
 describe("localPings", () => {
   it("water spreads count evenly across the window", () => {
@@ -74,6 +74,32 @@ describe("per-habit reminders", () => {
     expect(
       localPings(DEFAULT_REMINDERS, [habit({ reminderTime: "07:00", archivedAt: 1 })])
         .filter((p) => p.kind === "habit"),
+    ).toHaveLength(0);
+  });
+
+  const goal = (over: Partial<Goal>): Goal => ({
+    id: "g1", name: "Cold plunges", horizon: "lifelong", source: { kind: "manual" },
+    createdAt: 0, order: 0, ...over,
+  });
+
+  it("goals never ping unless a reminderTime is set (opt-in, off by default)", () => {
+    expect(localPings(DEFAULT_REMINDERS, [], [], [goal({})]).filter((p) => p.kind === "goal")).toHaveLength(0);
+  });
+
+  it("goal with reminderTime pings daily; archived goals don't", () => {
+    const pings = localPings(DEFAULT_REMINDERS, [], [], [goal({ reminderTime: "18:30" })])
+      .filter((p) => p.kind === "goal");
+    expect(pings).toHaveLength(1);
+    expect(pings[0]).toMatchObject({ minutes: 1110, days: [0, 1, 2, 3, 4, 5, 6], label: "Cold plunges" });
+    expect(
+      localPings(DEFAULT_REMINDERS, [], [], [goal({ reminderTime: "18:30", archivedAt: 1 })])
+        .filter((p) => p.kind === "goal"),
+    ).toHaveLength(0);
+  });
+
+  it("master switch off silences goal pings too", () => {
+    expect(
+      localPings({ ...DEFAULT_REMINDERS, enabled: false }, [], [], [goal({ reminderTime: "18:30" })]),
     ).toHaveLength(0);
   });
 

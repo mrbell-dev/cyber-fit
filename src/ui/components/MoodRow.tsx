@@ -14,7 +14,6 @@ const MOODS: { rating: MoodLog["rating"]; glyph: string; label: string }[] = [
 
 export function MoodRow({ today }: { today: DayKey }) {
   const [note, setNote] = useState("");
-  const [showNote, setShowNote] = useState(false);
 
   const readings = useLiveQuery(async () => {
     const logs = await db.moodLogs.where({ dayKey: today }).toArray();
@@ -25,7 +24,6 @@ export function MoodRow({ today }: { today: DayKey }) {
   const check = async (rating: MoodLog["rating"]) => {
     await logMood(rating, note.trim() ? { note } : {});
     setNote("");
-    setShowNote(false);
   };
 
   return (
@@ -48,20 +46,13 @@ export function MoodRow({ today }: { today: DayKey }) {
           </button>
         ))}
       </div>
-      {showNote ? (
-        <input
-          className="input mood-note"
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          placeholder="Optional note — what's running in the background? #tags work"
-          aria-label="Mood note"
-          autoFocus
-        />
-      ) : (
-        <button className="link-btn" onClick={() => setShowNote(true)}>
-          + add a note
-        </button>
-      )}
+      <input
+        className="input mood-note"
+        value={note}
+        onChange={(e) => setNote(e.target.value)}
+        placeholder="Optional note — what's running in the background? #tags work"
+        aria-label="Mood note"
+      />
       {(readings ?? []).length > 0 && (
         <div className="vitals-trace">
           {readings!.map((r, i) => (

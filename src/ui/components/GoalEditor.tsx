@@ -32,11 +32,18 @@ export function GoalEditor({ goal, onClose }: { goal?: Goal; onClose: () => void
   const [habitIds, setHabitIds] = useState<string[]>(
     goal?.source.kind === "habits" ? goal.source.habitIds : [],
   );
+  const [remindOn, setRemindOn] = useState(Boolean(goal?.reminderTime));
+  const [reminderTime, setReminderTime] = useState(goal?.reminderTime ?? "18:00");
 
   const activeHabits = useLiveQuery(
     () => db.habits.filter((h) => !h.archivedAt).sortBy("order"),
     [],
   );
+  // Master notification switch — off hides the goal's ping option entirely.
+  const notifOn = useLiveQuery(async () => {
+    const row = await db.kv.get("reminders");
+    return (row?.value as { enabled?: boolean } | undefined)?.enabled !== false;
+  }, []);
 
   const toggleHabit = (id: string) =>
     setHabitIds(habitIds.includes(id) ? habitIds.filter((x) => x !== id) : [...habitIds, id]);
@@ -48,7 +55,10 @@ export function GoalEditor({ goal, onClose }: { goal?: Goal; onClose: () => void
     const parsed = Math.floor(Number(target));
     const targetVal = Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
     // Clear a previously-set target when the field is blanked (open-ended).
-    const fields = { name: name.trim(), icon: icon || "🎯", horizon, target: targetVal, source };
+    const fields = {
+      name: name.trim(), icon: icon || "🎯", horizon, target: targetVal, source,
+      reminderTime: remindOn ? reminderTime : undefined,
+    };
     if (goal) await updateGoal(goal.id, fields);
     else await addGoal(fields);
     onClose();
@@ -153,6 +163,32 @@ export function GoalEditor({ goal, onClose }: { goal?: Goal; onClose: () => void
             <p className="placeholder">// a running tally you control — tap ＋ on the goal to add progress</p>
           )}
         </div>
+
+        {notifOn === false ? (
+          <div className="editor-row">
+            <p className="placeholder">// notifications are globally off — turn them on in Reminder Uplink (SYSTEM) to set a goal reminder</p>
+          </div>
+        ) : (
+          <div className="editor-row">
+            <label className="check-label">
+              <input type="checkbox" checked={remindOn} onChange={(e) => setRemindOn(e.target.checked)} />
+              Remind me
+              {!remindOn && <span className="off-day-tag">optional — off by default</span>}
+            </label>
+            {remindOn && (
+              <label className="check-label">
+                daily at
+                <input
+                  type="time"
+                  className="input time-input"
+                  value={reminderTime}
+                  onChange={(e) => setReminderTime(e.target.value)}
+                  aria-label="Goal reminder time"
+                />
+              </label>
+            )}
+          </div>
+        )}
 
         {goal && (
           <div className="editor-row">

@@ -220,6 +220,46 @@ the data lives. Shipped in 3 chunks via a reusable `InfoSheet`/`InfoButton`
       ED-adjacent); crash-kit overlay got a fuller scrim.
 - [ ] **Bottom tab bar** still deferred to Michael (see above).
 
+### TIER E — daily-driver batch 2 (Michael, 2026-07-15)
+
+Bugs/ergonomics first, features after (same ranking principle as v3).
+
+- [ ] **Boot greeting / pings banner needs a ✕.** The yellow "Rise and shine /
+      pings" strip at the top has no dismiss. Add a close button
+      (`DailyBoot.tsx` / the pings banner component — confirm which one he
+      means with a screenshot if both exist on TODAY).
+- [ ] **iOS: UI bleeds past the viewport edge when hydration is full.** Layout
+      bug — likely a full-width fill/glow overflowing at 100%. Needs an iPhone
+      screenshot to confirm; suspect `overflow` on the hydration card fill.
+- [ ] **Fixed header.** The app header (hamburger / logo / crash kit ✚)
+      scrolls away; make it `position: sticky` top. Mind iOS safe-area inset.
+- [ ] **Vitals: delete a mistaken check-in.** Bio-scan rows got UNDO (Tier C);
+      mood logs have no undo/delete path — he's mis-tapped twice already.
+      Same pattern: undo last reading, re-fold.
+- [x] **Vitals note field visible by default,** not hidden behind the +.
+      Shipped: note input always rendered in MoodRow; + toggle removed.
+      Verified via live screenshot (shots/tier-e-vitals-note.png).
+- [x] **Gigs: drop the "carried over" tag** on migrated gigs — he wants the
+      carry, not the label. Shipped: tag render + aria label removed in
+      GigList; migration/carry logic untouched (shots/tier-e-gigs-no-tag.png).
+- [ ] **Recurring gigs** ("pay the water bill" monthly). Feature, needs a
+      scope pass: closest existing shape is a directive with a sparse
+      schedule, but bills feel like gigs, not habits. NOTE: monthly cadences
+      can't push (weekly slot grid) — in-app nudge only, per platform physics.
+- [ ] **Gig history / reuse.** Partially exists: the gig input datalist is
+      already seeded from distinct past gig text (Tier D). Check what ✕
+      hard-delete does to that history and whether retired gigs need a
+      browsable list before building anything new.
+- [x] **Goals: + to log progress manually.** Shipped THIS batch's morning
+      (8ea6428, manual-tally ＋1/undo). If Michael doesn't see it: service
+      worker double-refresh dance (BUG-INTAKE.md), then re-report.
+- [x] **Vault sync data-retention concern — answered, no work needed.**
+      Blob is one KV value, client-side encrypted (PBKDF2 210k → AES-256-GCM),
+      random 128-bit id, ciphertext-only server side, auto-expires after 120
+      idle days (`VAULT_TTL`). KV value cap 25 MiB; years of logs ≪ that.
+      Optional nicety, unranked: show blob size + "expires after 120 days
+      idle" in the Data Vault card.
+
 ### TIER LT — flavor, reach, and the long game (carried forward)
 
 - [ ] **Desktop support (design item — captured 2026-07-14, needs a design

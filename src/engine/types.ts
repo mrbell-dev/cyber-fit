@@ -79,6 +79,9 @@ export interface Goal {
     | { kind: "workouts" }
     // manual tally — progress comes from GoalLog rows the user adds by hand.
     | { kind: "manual" };
+  /** optional daily nudge, "HH:MM" local. OFF by default (absent) — goals never
+   *  push unless the user opts in here. Inherits the master switch + quiet hours. */
+  reminderTime?: string;
   createdAt: number;
   archivedAt?: number;
   order: number;

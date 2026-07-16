@@ -45,12 +45,13 @@ function b64ToUint8(base64: string): Uint8Array {
 async function currentSlots(): Promise<{ slots: number[]; motivationSlots: number[] }> {
   const habits = await db.habits.filter((h) => !h.archivedAt).toArray();
   const metrics = await db.bioMetrics.filter((m) => !m.archivedAt).toArray();
+  const goals = await db.goals.filter((g) => !g.archivedAt).toArray();
   const reminders = await getReminders();
   const tz = new Date().getTimezoneOffset();
 
   // Deep-link map for the SW: which slot means which kind of ping (stays local).
   const kinds: Record<number, string> = {};
-  for (const p of localPings(reminders, habits, metrics)) {
+  for (const p of localPings(reminders, habits, metrics, goals)) {
     if (p.kind === "motivation") continue;
     for (const day of p.days) {
       const wrapped = (((day * 1440 + p.minutes + tz) % 10080) + 10080) % 10080;
@@ -60,7 +61,7 @@ async function currentSlots(): Promise<{ slots: number[]; motivationSlots: numbe
   }
   await db.kv.put({ key: "slotKinds", value: kinds });
 
-  return slotBundleFor(reminders, tz, habits, metrics);
+  return slotBundleFor(reminders, tz, habits, metrics, goals);
 }
 
 async function postJson(url: string, path: string, body: unknown): Promise<boolean> {
