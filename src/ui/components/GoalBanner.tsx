@@ -1,6 +1,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../../db/db.ts";
 import { coastDay, type DayKey, type Goal, type GoalTables } from "../../engine/index.ts";
+import { useDismissed } from "../useDismissed.ts";
 
 const PERIOD_NOUN: Record<Goal["horizon"], string> = {
   week: "the week",
@@ -42,7 +43,8 @@ export function GoalBanner({ today }: { today: DayKey }) {
     return { goals, habits, tables: { habitLogs, readingLogs, workoutLogs, goalLogs } };
   }, []);
 
-  if (!data) return null;
+  const [dismissed, dismiss] = useDismissed("pace", today);
+  if (!data || dismissed) return null;
 
   const goal = data.goals.find(
     (g) => coastDay(g, data.habits, data.tables, today) && !movedToday(g, data.tables, today),
@@ -56,6 +58,14 @@ export function GoalBanner({ today }: { today: DayKey }) {
         {" — "}
         {goal.name}: one today puts {PERIOD_NOUN[goal.horizon]} back on pace.
       </span>
+      <button
+        type="button"
+        className="missed-ping-close"
+        aria-label="Dismiss for today"
+        onClick={dismiss}
+      >
+        ✕
+      </button>
     </div>
   );
 }

@@ -224,13 +224,13 @@ the data lives. Shipped in 3 chunks via a reusable `InfoSheet`/`InfoButton`
 
 Bugs/ergonomics first, features after (same ranking principle as v3).
 
-- [ ] **Boot greeting / pings banner needs a ✕.** The yellow "Rise and shine /
-      pings" strip at the top has no dismiss. Add a close button
-      (`DailyBoot.tsx` / the pings banner component — confirm which one he
-      means with a screenshot if both exist on TODAY).
-- [ ] **iOS: UI bleeds past the viewport edge when hydration is full.** Layout
-      bug — likely a full-width fill/glow overflowing at 100%. Needs an iPhone
-      screenshot to confirm; suspect `overflow` on the hydration card fill.
+- [x] **Boot greeting / pings banner needs a ✕.** Shipped: ✕ dismiss on both
+      MissedPing and GoalBanner/PACE strips, dismissal persisted per period
+      (localStorage) so it stays gone until the next cycle.
+- [x] **iOS: UI bleeds past the viewport edge when hydration is full.**
+      Shipped: over-goal glow clipped at the gauge edge (overflow +
+      border-radius on the water fill in tokens.css); verified via screenshots
+      (shots/tier-e-vitals-note.png era batch).
 - [ ] **Fixed header.** The app header (hamburger / logo / crash kit ✚)
       scrolls away; make it `position: sticky` top. Mind iOS safe-area inset.
 - [ ] **Vitals: delete a mistaken check-in.** Bio-scan rows got UNDO (Tier C);
@@ -244,8 +244,10 @@ Bugs/ergonomics first, features after (same ranking principle as v3).
       GigList; migration/carry logic untouched (shots/tier-e-gigs-no-tag.png).
 - [ ] **Recurring gigs** ("pay the water bill" monthly). Feature, needs a
       scope pass: closest existing shape is a directive with a sparse
-      schedule, but bills feel like gigs, not habits. NOTE: monthly cadences
-      can't push (weekly slot grid) — in-app nudge only, per platform physics.
+      schedule, but bills feel like gigs, not habits. NOTE (updated): monthly
+      push is now POSSIBLE — the relay supports absolute one-shot epoch slots
+      (pre-uploaded horizon + weekly SW re-sync, deployed 80b4d2f0). The old
+      "weekly slot grid only" constraint no longer blocks this feature.
 - [ ] **Gig history / reuse.** Partially exists: the gig input datalist is
       already seeded from distinct past gig text (Tier D). Check what ✕
       hard-delete does to that history and whether retired gigs need a

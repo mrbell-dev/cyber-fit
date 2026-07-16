@@ -50,8 +50,14 @@ export function GoalEditor({ goal, onClose }: { goal?: Goal; onClose: () => void
 
   const save = async () => {
     if (!name.trim()) return;
+    // A "linked directives" goal with nothing linked can never be logged —
+    // quietly save it as a manual tally instead so the ＋ shows up.
     const source: Goal["source"] =
-      sourceKind === "habits" ? { kind: "habits", habitIds } : { kind: sourceKind };
+      sourceKind === "habits"
+        ? habitIds.length > 0
+          ? { kind: "habits", habitIds }
+          : { kind: "manual" }
+        : { kind: sourceKind };
     const parsed = Math.floor(Number(target));
     const targetVal = Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
     // Clear a previously-set target when the field is blanked (open-ended).

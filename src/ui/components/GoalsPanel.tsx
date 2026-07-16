@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../../db/db.ts";
 import { goalProgress, lastPeriodResult, type DayKey, type Goal } from "../../engine/index.ts";
-import { logGoalProgress, undoLastGoalProgress } from "../../db/repo.ts";
+import { logGoalProgress, undoLastGoalProgress, updateGoal } from "../../db/repo.ts";
 import { GoalEditor } from "./GoalEditor.tsx";
 
 const PERIOD_LABEL: Record<Goal["horizon"], string> = {
@@ -52,7 +52,14 @@ export function GoalsPanel({ today }: { today: DayKey }) {
       ) : (
         data.goals.map((g) => {
           const p = goalProgress(g, data.tables, today);
-          const manual = g.source.kind === "manual";
+          // Legacy goals saved as "linked directives" with nothing linked can
+          // never accrue — treat them as manual and upgrade on first tap.
+          const orphaned = g.source.kind === "habits" && g.source.habitIds.length === 0;
+          const manual = g.source.kind === "manual" || orphaned;
+          const logOne = async () => {
+            if (orphaned) await updateGoal(g.id, { source: { kind: "manual" } });
+            await logGoalProgress(g.id, 1);
+          };
           const pct = p.target ? Math.min(100, (p.value / p.target) * 100) : 0;
           const done = p.target ? p.value >= p.target : false;
           const last = lastPeriodResult(g, data.tables, today);
@@ -104,7 +111,7 @@ export function GoalsPanel({ today }: { today: DayKey }) {
               {manual && (
                 <div className="goal-manual" role="group" aria-label={`Log progress for ${g.name}`}>
                   <button className="goal-log-btn" aria-label={`Add one to ${g.name}`}
-                    onClick={() => logGoalProgress(g.id, 1)}>
+                    onClick={logOne}>
                     ＋1
                   </button>
                   {p.value > 0 && (

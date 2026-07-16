@@ -6,6 +6,7 @@ declare const self: ServiceWorkerGlobalScope;
 
 import { clientsClaim } from "workbox-core";
 import { cleanupOutdatedCaches, precacheAndRoute } from "workbox-precaching";
+import { expandOneShots, type OneShotSpec } from "./engine/reminders";
 
 self.skipWaiting();
 clientsClaim();
@@ -57,31 +58,96 @@ self.addEventListener("push", (event) => {
   );
 });
 
-/** Which kind of ping is due right now, from the locally stored slot→kind map. */
+/** Read one row from the Dexie-managed kv store without pulling in Dexie. */
+function readKV<T>(key: string): Promise<T | undefined> {
+  return new Promise((resolve) => {
+    const req = indexedDB.open("cyber-fit");
+    req.onerror = () => resolve(undefined);
+    req.onsuccess = () => {
+      try {
+        const get = req.result.transaction("kv").objectStore("kv").get(key);
+        get.onsuccess = () => resolve(get.result?.value as T | undefined);
+        get.onerror = () => resolve(undefined);
+      } catch {
+        resolve(undefined);
+      }
+    };
+  });
+}
+
+function writeKV(key: string, value: unknown): Promise<void> {
+  return new Promise((resolve) => {
+    const req = indexedDB.open("cyber-fit");
+    req.onerror = () => resolve();
+    req.onsuccess = () => {
+      try {
+        const tx = req.result.transaction("kv", "readwrite");
+        tx.objectStore("kv").put({ key, value });
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => resolve();
+      } catch {
+        resolve();
+      }
+    };
+  });
+}
+
+/** Which kind of ping is due right now, from the locally stored slot→kind maps
+ *  (weekly slots first, then one-shot epoch slots). */
 async function currentPingKind(): Promise<string> {
   try {
-    const kinds = await new Promise<Record<number, string>>((resolve) => {
-      const req = indexedDB.open("cyber-fit");
-      req.onerror = () => resolve({});
-      req.onsuccess = () => {
-        try {
-          const get = req.result.transaction("kv").objectStore("kv").get("slotKinds");
-          get.onsuccess = () => resolve((get.result?.value as Record<number, string>) ?? {});
-          get.onerror = () => resolve({});
-        } catch {
-          resolve({});
-        }
-      };
-    });
     const now = new Date();
     const weekMin = now.getUTCDay() * 1440 + now.getUTCHours() * 60 + now.getUTCMinutes();
     const slot = Math.floor(weekMin / 15) * 15;
     const prev = (slot - 15 + 10080) % 10080; // pushes can land a few minutes late
-    return kinds[slot] ?? kinds[prev] ?? "";
+    const kinds = (await readKV<Record<number, string>>("slotKinds")) ?? {};
+    const weekly = kinds[slot] ?? kinds[prev];
+    if (weekly) return weekly;
+    // One-shots key on absolute epoch-minute slots instead of week positions.
+    const oneShot = (await readKV<Record<number, string>>("oneShotKinds")) ?? {};
+    const epochSlot = Math.floor(now.getTime() / 60000 / 15) * 15;
+    return oneShot[epochSlot] ?? oneShot[epochSlot - 15] ?? "";
   } catch {
     return "";
   }
 }
+
+/** Weekly background re-sync (Chromium periodicSync): re-expand one-shot
+ *  monthly slots from the stored specs and re-upload, so monthly pings keep
+ *  firing even if the app stays closed past the pre-uploaded horizon. */
+type ResyncPayload = {
+  url: string;
+  slots: number[];
+  motivationSlots: number[];
+  specs: OneShotSpec[];
+  quiet?: { on: boolean; start: string; end: string };
+};
+
+self.addEventListener("periodicsync", ((event: ExtendableEvent & { tag: string }) => {
+  if (event.tag !== "cyber-fit-resync") return;
+  event.waitUntil(
+    (async () => {
+      const payload = await readKV<ResyncPayload>("pushResync");
+      const sub = await self.registration.pushManager.getSubscription();
+      if (!payload || !sub) return;
+      const shots = expandOneShots(payload.specs, Date.now(), payload.quiet);
+      // Refresh the on-device deep-link map alongside the relay record.
+      const oneShotKinds: Record<number, string> = {};
+      for (const s of shots) oneShotKinds[s.at] ??= s.kind;
+      await writeKV("oneShotKinds", oneShotKinds);
+      await fetch(payload.url.replace(/\/$/, "") + "/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subscription: sub.toJSON(),
+          slots: payload.slots,
+          motivationSlots: payload.motivationSlots,
+          oneShots: shots.map((s) => s.at),
+        }),
+      }).catch(() => null);
+    })(),
+  );
+}) as EventListener);
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();

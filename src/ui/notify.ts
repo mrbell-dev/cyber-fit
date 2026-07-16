@@ -1,7 +1,15 @@
 // Push opt-in + slot sync. Strictly nice-to-have: every failure path is
 // silent-but-reported, never blocking. The only bytes that ever leave the
 // device: the anonymous push subscription + slot numbers, over TLS.
-import { DEFAULT_REMINDERS, localPings, slotBundleFor, type Reminders } from "../engine/index.ts";
+import {
+  DEFAULT_REMINDERS,
+  expandOneShots,
+  localPings,
+  slotBundleFor,
+  weighinCadenceOf,
+  type OneShotSpec,
+  type Reminders,
+} from "../engine/index.ts";
 import { db } from "../db/db.ts";
 import { getSettings } from "../db/repo.ts";
 
@@ -42,7 +50,30 @@ function b64ToUint8(base64: string): Uint8Array {
   return Uint8Array.from(raw, (c) => c.charCodeAt(0));
 }
 
-async function currentSlots(): Promise<{ slots: number[]; motivationSlots: number[] }> {
+/**
+ * Cadences too sparse for the weekly slot grid (only the weigh-in check-in
+ * today). Anchored on the last body log; short cadences (≤7 days) already
+ * fit the week grid via regular pings, so they don't get one-shots.
+ */
+async function oneShotSpecs(reminders: Reminders): Promise<OneShotSpec[]> {
+  if (reminders.enabled === false) return [];
+  const settings = await getSettings();
+  const cadence = weighinCadenceOf(settings);
+  if (cadence.days <= 7) return [];
+  const last = await db.bodyLogs.orderBy("dayKey").last();
+  if (!last) return []; // never weighed — nothing to anchor a cadence on
+  const anchor = new Date(last.ts);
+  anchor.setHours(0, 0, 0, 0);
+  return [{
+    kind: "bio",
+    anchorDayMs: anchor.getTime(),
+    periodDays: cadence.days,
+    time: reminders.morning.time,
+    label: "Weigh-in",
+  }];
+}
+
+async function currentSlots(): Promise<{ slots: number[]; motivationSlots: number[]; oneShots: number[] }> {
   const habits = await db.habits.filter((h) => !h.archivedAt).toArray();
   const metrics = await db.bioMetrics.filter((m) => !m.archivedAt).toArray();
   const goals = await db.goals.filter((g) => !g.archivedAt).toArray();
@@ -61,7 +92,14 @@ async function currentSlots(): Promise<{ slots: number[]; motivationSlots: numbe
   }
   await db.kv.put({ key: "slotKinds", value: kinds });
 
-  return slotBundleFor(reminders, tz, habits, metrics, goals);
+  // One-shot slots for monthly-ish cadences (+ their own deep-link map).
+  const specs = await oneShotSpecs(reminders);
+  const shots = expandOneShots(specs, Date.now(), reminders.quiet);
+  const oneShotKinds: Record<number, string> = {};
+  for (const s of shots) oneShotKinds[s.at] ??= s.kind;
+  await db.kv.put({ key: "oneShotKinds", value: oneShotKinds });
+
+  return { ...slotBundleFor(reminders, tz, habits, metrics, goals), oneShots: shots.map((s) => s.at) };
 }
 
 async function postJson(url: string, path: string, body: unknown): Promise<boolean> {
@@ -74,6 +112,40 @@ async function postJson(url: string, path: string, body: unknown): Promise<boole
     return res.ok;
   } catch {
     return false;
+  }
+}
+
+/**
+ * Everything the SW needs to re-upload slots WITHOUT the app open: relay url,
+ * the week-slot bundle, and the one-shot specs (so it can re-expand a fresh
+ * horizon — re-posting stale absolute slots would let monthly pings run dry).
+ */
+async function storeResyncPayload(
+  url: string,
+  bundle: { slots: number[]; motivationSlots: number[] },
+): Promise<void> {
+  const reminders = await getReminders();
+  await db.kv.put({
+    key: "pushResync",
+    value: {
+      url,
+      slots: bundle.slots,
+      motivationSlots: bundle.motivationSlots,
+      specs: await oneShotSpecs(reminders),
+      quiet: reminders.quiet,
+    },
+  });
+}
+
+/** Weekly SW re-sync keeps one-shots topped up even if the app stays closed.
+ *  Chromium-only (periodicSync); everywhere else the app-open sync covers it. */
+async function registerResync(reg: ServiceWorkerRegistration): Promise<void> {
+  try {
+    const ps = (reg as unknown as { periodicSync?: { register(tag: string, opts: { minInterval: number }): Promise<void> } }).periodicSync;
+    if (!ps) return;
+    await ps.register("cyber-fit-resync", { minInterval: 7 * 86_400_000 });
+  } catch {
+    // permission denied / unsupported — nice-to-have only
   }
 }
 
@@ -94,10 +166,13 @@ export async function enablePush(): Promise<{ ok: boolean; reason?: string }> {
       applicationServerKey: b64ToUint8(relay.vapidKey).buffer as ArrayBuffer,
     }));
 
+  const bundle = await currentSlots();
   const ok = await postJson(relay.url, "/subscribe", {
     subscription: sub.toJSON(),
-    ...(await currentSlots()),
+    ...bundle,
   });
+  await storeResyncPayload(relay.url, bundle);
+  await registerResync(reg);
   return ok ? { ok: true } : { ok: false, reason: "Relay unreachable — reminders will retry on next app open." };
 }
 
@@ -110,7 +185,10 @@ export async function syncPush(): Promise<void> {
   const reg = await navigator.serviceWorker.ready;
   const sub = await reg.pushManager.getSubscription();
   if (!sub) return;
-  await postJson(relay.url, "/subscribe", { subscription: sub.toJSON(), ...(await currentSlots()) });
+  const bundle = await currentSlots();
+  await postJson(relay.url, "/subscribe", { subscription: sub.toJSON(), ...bundle });
+  await storeResyncPayload(relay.url, bundle);
+  await registerResync(reg);
 }
 
 export async function disablePush(): Promise<void> {

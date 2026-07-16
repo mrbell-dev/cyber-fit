@@ -230,3 +230,61 @@ export function duePingsToday(
 ): LocalPing[] {
   return localPings(r, habits, [], goals).filter((p) => p.days.includes(weekday) && p.minutes <= nowMinutes);
 }
+
+// ---------- one-shot slots (cadences too sparse for the weekly grid) ----------
+
+/**
+ * A recurring cadence that can't live on the 7-day slot grid (e.g. a monthly
+ * weigh-in). Expanded on-device into absolute one-shot slots; the relay only
+ * ever sees opaque epoch-minute numbers — same privacy contract as week-slots.
+ */
+export interface OneShotSpec {
+  kind: PingKind;
+  /** local midnight (epoch ms) of the day the cadence anchors on (last log) */
+  anchorDayMs: number;
+  /** days between firings (e.g. 30 for monthly) */
+  periodDays: number;
+  /** "HH:MM" local fire time */
+  time: string;
+  label?: string;
+}
+
+/** How far ahead one-shots are materialized. Anything that re-syncs at least
+ *  this often (SW weekly re-sync + every app open) never runs dry. */
+export const ONE_SHOT_HORIZON_DAYS = 42;
+/** Hard cap accepted by the relay — keep in sync with worker validation. */
+export const MAX_ONE_SHOTS = 64;
+
+const DAY_MS = 86_400_000;
+
+/** Epoch-minute 15-min slot for an absolute time (relay-side mirror: epochSlotOf). */
+export function epochSlot(ms: number): number {
+  return Math.floor(ms / 60_000 / 15) * 15;
+}
+
+/**
+ * Materialize specs into future one-shot firings within the horizon.
+ * Occurrences land at anchor + n·period days at the local fire time
+ * (quiet hours defer them like every other ping). Past occurrences are
+ * skipped — overdue is the in-app banner's job, not a stale push.
+ */
+export function expandOneShots(
+  specs: OneShotSpec[],
+  nowMs: number,
+  quiet?: Reminders["quiet"],
+  horizonDays: number = ONE_SHOT_HORIZON_DAYS,
+): { at: number; kind: PingKind }[] {
+  const out: { at: number; kind: PingKind }[] = [];
+  const end = nowMs + horizonDays * DAY_MS;
+  for (const spec of specs) {
+    const period = Math.floor(spec.periodDays);
+    if (period < 1) continue;
+    const minutes = quiet ? clampToQuiet(parseTime(spec.time), quiet) : parseTime(spec.time);
+    for (let day = spec.anchorDayMs + period * DAY_MS; day <= end; day += period * DAY_MS) {
+      const fire = day + minutes * 60_000;
+      if (fire <= nowMs || fire > end) continue;
+      out.push({ at: epochSlot(fire), kind: spec.kind });
+    }
+  }
+  return out.sort((a, b) => a.at - b.at).slice(0, MAX_ONE_SHOTS);
+}

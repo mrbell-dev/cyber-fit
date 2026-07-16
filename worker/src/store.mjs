@@ -13,7 +13,11 @@ export async function keyFor(endpoint) {
  * range [0, 10080). Daily reminders expand to 7 slots client-side; weekday
  * reminders (e.g. workout Tue/Thu) map to just those days.
  *
- * record = { subscription, slots: number[] }
+ * One-shots are absolute EPOCH-minutes on the same 15-min grid — how the
+ * client pushes cadences the weekly grid can't hold (monthly weigh-ins).
+ * Still just opaque numbers; the relay learns nothing new.
+ *
+ * record = { subscription, slots: number[], oneShots?: number[] }
  */
 export async function putSub(kv, record) {
   const key = await keyFor(record.subscription.endpoint);
@@ -21,6 +25,7 @@ export async function putSub(kv, record) {
     subscription: record.subscription,
     slots: record.slots,
     motivationSlots: record.motivationSlots ?? [],
+    oneShots: record.oneShots ?? [],
   }));
 }
 
@@ -74,6 +79,11 @@ export function slotOf(date) {
   return Math.floor(weekMin / 15) * 15;
 }
 
+/** Which absolute 15-min epoch-slot a Date falls in (for one-shots). */
+export function epochSlotOf(date) {
+  return Math.floor(date.getTime() / 60_000 / 15) * 15;
+}
+
 /** Validate a client-supplied record; returns an error string or null. */
 export function validateRecord(body) {
   const sub = body?.subscription;
@@ -89,5 +99,11 @@ export function validateRecord(body) {
     );
   if (badSlots(body?.slots)) return "bad slots";
   if (body?.motivationSlots !== undefined && badSlots(body.motivationSlots)) return "bad slots";
+  if (body?.oneShots !== undefined) {
+    const bad = !Array.isArray(body.oneShots) || body.oneShots.length > 64 || body.oneShots.some(
+      (s) => !Number.isSafeInteger(s) || s < 0 || s % 15 !== 0,
+    );
+    if (bad) return "bad one-shots";
+  }
   return null;
 }

@@ -7,7 +7,7 @@
 //   * TLS is mandatory (workers.dev / custom domains are HTTPS-only).
 
 import { buildPushHTTPRequest } from "@pushforge/builder";
-import { deleteSub, getVault, listSubs, putSub, putVault, slotOf, validateRecord } from "./store.mjs";
+import { deleteSub, epochSlotOf, getVault, listSubs, putSub, putVault, slotOf, validateRecord } from "./store.mjs";
 
 // ALLOWED_ORIGIN is a comma-separated allowlist (a single ACAO value can't
 // cover both cyberfit.dev and www) — echo the request's Origin iff listed.
@@ -148,13 +148,23 @@ const MOTIVATION_LINES = [
 
 async function dispatch(env, now) {
   const slot = slotOf(now);
+  const epochSlot = epochSlotOf(now);
   const subs = await listSubs(env.SUBS);
   for (const record of subs) {
+    const oneShots = record.oneShots ?? [];
     const motivate = (record.motivationSlots ?? []).includes(slot);
-    if (!motivate && !record.slots.includes(slot)) continue;
-    const text = motivate
-      ? MOTIVATION_LINES[Math.floor(Math.random() * MOTIVATION_LINES.length)]
-      : "Time to sync.";
-    await sendPush(env, record.subscription, text, motivate ? "motivation" : "generic");
+    const due = motivate || record.slots.includes(slot) || oneShots.includes(epochSlot);
+    if (due) {
+      const text = motivate
+        ? MOTIVATION_LINES[Math.floor(Math.random() * MOTIVATION_LINES.length)]
+        : "Time to sync.";
+      await sendPush(env, record.subscription, text, motivate ? "motivation" : "generic");
+    }
+    // Prune spent one-shots so the record never accumulates dead slots
+    // (the client re-tops the horizon on every sync).
+    const future = oneShots.filter((s) => s > epochSlot);
+    if (future.length !== oneShots.length) {
+      await putSub(env.SUBS, { ...record, oneShots: future });
+    }
   }
 }

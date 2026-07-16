@@ -1,5 +1,6 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../../db/db.ts";
+import { useDismissed } from "../useDismissed.ts";
 import {
   DEFAULT_REMINDERS,
   dayStatus,
@@ -35,7 +36,8 @@ export function MissedPing({ today }: { today: DayKey }) {
     return { reminders, habits, habitLogs, recentLogs, lastLogTs, goals };
   }, [today]);
 
-  if (!info) return null;
+  const [dismissed, dismiss] = useDismissed("ping", today);
+  if (!info || dismissed) return null;
 
   const now = new Date();
   // Which habits are already satisfied today (quiets untilDone pings).
@@ -82,6 +84,14 @@ export function MissedPing({ today }: { today: DayKey }) {
           ? `Directive window open: ${latest.label}`
           : REMINDER_COPY[latest.kind]}
       </span>
+      <button
+        type="button"
+        className="missed-ping-close"
+        aria-label="Dismiss for today"
+        onClick={dismiss}
+      >
+        ✕
+      </button>
     </div>
   );
 }
