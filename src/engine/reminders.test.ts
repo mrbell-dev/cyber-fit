@@ -1,5 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_REMINDERS, duePingsToday, inQuiet, localPings, slotBundleFor, slotsFor } from "./reminders.ts";
+import {
+  DEFAULT_REMINDERS,
+  duePingsToday,
+  epochSlot,
+  expandOneShots,
+  inQuiet,
+  localPings,
+  MAX_ONE_SHOTS,
+  slotBundleFor,
+  slotsFor,
+} from "./reminders.ts";
+import type { OneShotSpec } from "./reminders.ts";
 import type { Goal, Habit } from "./types.ts";
 
 describe("localPings", () => {
@@ -247,5 +258,82 @@ describe("master switch + quiet hours", () => {
     expect(inQuiet(12 * 60, 22 * 60, 7 * 60)).toBe(false); // noon not quiet
     expect(inQuiet(13 * 60, 13 * 60, 14 * 60)).toBe(true); // same-day nap window
     expect(inQuiet(14 * 60, 13 * 60, 14 * 60)).toBe(false); // end is exclusive
+  });
+});
+
+describe("expandOneShots", () => {
+  // local midnight anchors — expansion runs in local time, same as the UI
+  const jan5 = new Date(2026, 0, 5).getTime(); // Mon Jan 5 2026, 00:00 local
+  const spec = (over: Partial<OneShotSpec> = {}): OneShotSpec => ({
+    kind: "gig",
+    anchorDayMs: jan5,
+    periodDays: 7,
+    time: "09:00",
+    ...over,
+  });
+
+  it("steps anchor + n·period at the local fire time, epoch-slotted", () => {
+    const now = jan5 + 60 * 60_000; // Jan 5, 01:00 — anchor day itself never fires
+    const out = expandOneShots([spec()], now, undefined, 15);
+    expect(out).toHaveLength(2); // Jan 12 + Jan 19 inside 15-day horizon
+    expect(out[0].at).toBe(epochSlot(new Date(2026, 0, 12, 9, 0).getTime()));
+    expect(out[1].at).toBe(epochSlot(new Date(2026, 0, 19, 9, 0).getTime()));
+    expect(out.every((o) => o.kind === "gig")).toBe(true);
+  });
+
+  it("skips past occurrences — overdue is the banner's job, not a stale push", () => {
+    const now = new Date(2026, 0, 12, 12, 0).getTime(); // noon, after the 09:00 firing
+    const out = expandOneShots([spec()], now, undefined, 8);
+    expect(out).toHaveLength(1);
+    expect(out[0].at).toBe(epochSlot(new Date(2026, 0, 19, 9, 0).getTime()));
+  });
+
+  it("dayOfMonth anchors to the calendar, no drift", () => {
+    const now = new Date(2026, 0, 10).getTime();
+    const out = expandOneShots([spec({ dayOfMonth: 15, periodDays: 0 })], now, undefined, 42);
+    expect(out.map((o) => o.at)).toEqual([
+      epochSlot(new Date(2026, 0, 15, 9, 0).getTime()),
+      epochSlot(new Date(2026, 1, 15, 9, 0).getTime()),
+    ]);
+  });
+
+  it("dayOfMonth 31 clamps to the month's last day (Feb 28)", () => {
+    const now = new Date(2026, 0, 20).getTime();
+    const out = expandOneShots([spec({ dayOfMonth: 31, periodDays: 0 })], now, undefined, 42);
+    expect(out.map((o) => o.at)).toEqual([
+      epochSlot(new Date(2026, 0, 31, 9, 0).getTime()),
+      epochSlot(new Date(2026, 1, 28, 9, 0).getTime()), // 2026 is not a leap year
+    ]);
+  });
+
+  it("quiet hours defer the fire time like any other ping", () => {
+    const now = jan5 + 60 * 60_000;
+    const quiet = { on: true, start: "22:00", end: "10:30" };
+    const out = expandOneShots([spec()], now, quiet, 8); // 09:00 is inside quiet
+    expect(out).toHaveLength(1);
+    expect(out[0].at).toBe(epochSlot(new Date(2026, 0, 12, 10, 30).getTime()));
+  });
+
+  it("ignores invalid specs: period < 1 without dayOfMonth, dom out of range", () => {
+    const now = jan5 + 60 * 60_000;
+    expect(expandOneShots([spec({ periodDays: 0 })], now)).toHaveLength(0);
+    expect(expandOneShots([spec({ dayOfMonth: 0 })], now)).toHaveLength(0);
+    expect(expandOneShots([spec({ dayOfMonth: 32 })], now)).toHaveLength(0);
+  });
+
+  it("merges specs sorted by time and caps at MAX_ONE_SHOTS", () => {
+    const now = jan5 + 60 * 60_000;
+    const daily = spec({ periodDays: 1, time: "08:00" });
+    const weekly = spec({ time: "09:00", kind: "habit" });
+    const out = expandOneShots([weekly, daily], now, undefined, 365);
+    expect(out).toHaveLength(MAX_ONE_SHOTS);
+    for (let i = 1; i < out.length; i++) expect(out[i].at).toBeGreaterThanOrEqual(out[i - 1].at);
+    // earliest firings win the cap — daily 08:00 lands before weekly 09:00
+    expect(out[0].at).toBe(epochSlot(new Date(2026, 0, 6, 8, 0).getTime()));
+  });
+
+  it("returns nothing when the anchor's next firing is beyond the horizon", () => {
+    const now = jan5 + 60 * 60_000;
+    expect(expandOneShots([spec({ periodDays: 30 })], now, undefined, 20)).toHaveLength(0);
   });
 });

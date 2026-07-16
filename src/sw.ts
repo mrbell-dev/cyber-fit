@@ -24,6 +24,7 @@ const PING_COPY: Record<string, { title: string; body: string }> = {
   highlight: { title: "One Good Frame", body: "Capture today's highlight — anything real counts." },
   habit: { title: "Directive Window", body: "A directive is ready when you are." },
   bio: { title: "Bio-Scan Window", body: "Run a bio-scan — weight, sleep, vitals. Jack in." },
+  gig: { title: "Gig Window", body: "A gig is on the board. The job won't run itself." },
 };
 
 self.addEventListener("push", (event) => {

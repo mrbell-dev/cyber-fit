@@ -48,7 +48,7 @@ function clampToQuiet(minutes: number, quiet: Reminders["quiet"]): number {
   return inQuiet(minutes, s, e) ? e : minutes;
 }
 
-export type PingKind = Exclude<keyof Reminders, "enabled" | "quiet"> | "habit" | "bio" | "goal";
+export type PingKind = Exclude<keyof Reminders, "enabled" | "quiet"> | "habit" | "bio" | "goal" | "gig";
 
 /** Themed copy shown by the app (in-app pings + self-hosted relays). */
 export const REMINDER_COPY: Record<PingKind, string> = {
@@ -61,6 +61,7 @@ export const REMINDER_COPY: Record<PingKind, string> = {
   habit: "Directive window open.",
   bio: "Bio-scan window — log your reading.",
   goal: "Objective check-in — move the needle.",
+  gig: "Gig window open — the job won't run itself.",
 };
 
 export interface LocalPing {
@@ -242,8 +243,14 @@ export interface OneShotSpec {
   kind: PingKind;
   /** local midnight (epoch ms) of the day the cadence anchors on (last log) */
   anchorDayMs: number;
-  /** days between firings (e.g. 30 for monthly) */
+  /** days between firings (e.g. 30 for monthly) — ignored when dayOfMonth is set */
   periodDays: number;
+  /**
+   * Fire monthly on this calendar day (1-31) instead of a fixed period —
+   * bills anchor to "the 15th", not "every 30 days", so they never drift.
+   * Days past the month's end clamp to its last day (31 → Feb 28/29).
+   */
+  dayOfMonth?: number;
   /** "HH:MM" local fire time */
   time: string;
   label?: string;
@@ -277,9 +284,26 @@ export function expandOneShots(
   const out: { at: number; kind: PingKind }[] = [];
   const end = nowMs + horizonDays * DAY_MS;
   for (const spec of specs) {
+    const minutes = quiet ? clampToQuiet(parseTime(spec.time), quiet) : parseTime(spec.time);
+    if (spec.dayOfMonth != null) {
+      // Calendar anchoring: fire on the Nth of each month (clamped to month
+      // length), local time — no drift, unlike fixed periodDays stepping.
+      const dom = Math.floor(spec.dayOfMonth);
+      if (dom < 1 || dom > 31) continue;
+      const cursor = new Date(nowMs);
+      for (let m = 0; m <= Math.ceil(horizonDays / 28) + 1; m++) {
+        const y = cursor.getFullYear();
+        const mo = cursor.getMonth() + m;
+        const lastDay = new Date(y, mo + 1, 0).getDate();
+        const midnight = new Date(y, mo, Math.min(dom, lastDay)).getTime();
+        const fire = midnight + minutes * 60_000;
+        if (fire <= nowMs || fire > end) continue;
+        out.push({ at: epochSlot(fire), kind: spec.kind });
+      }
+      continue;
+    }
     const period = Math.floor(spec.periodDays);
     if (period < 1) continue;
-    const minutes = quiet ? clampToQuiet(parseTime(spec.time), quiet) : parseTime(spec.time);
     for (let day = spec.anchorDayMs + period * DAY_MS; day <= end; day += period * DAY_MS) {
       const fire = day + minutes * 60_000;
       if (fire <= nowMs || fire > end) continue;

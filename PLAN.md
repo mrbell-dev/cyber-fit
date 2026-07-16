@@ -231,11 +231,12 @@ Bugs/ergonomics first, features after (same ranking principle as v3).
       Shipped: over-goal glow clipped at the gauge edge (overflow +
       border-radius on the water fill in tokens.css); verified via screenshots
       (shots/tier-e-vitals-note.png era batch).
-- [ ] **Fixed header.** The app header (hamburger / logo / crash kit ✚)
-      scrolls away; make it `position: sticky` top. Mind iOS safe-area inset.
-- [ ] **Vitals: delete a mistaken check-in.** Bio-scan rows got UNDO (Tier C);
-      mood logs have no undo/delete path — he's mis-tapped twice already.
-      Same pattern: undo last reading, re-fold.
+- [x] **Fixed header.** Shipped: sticky top bar + iOS safe-area inset
+      (tokens.css); verified via Playwright (shots/header-menu-open.png).
+- [x] **Vitals: delete a mistaken check-in.** Shipped: `undoLastMood()` in
+      repo.ts (delete + moodLogs tombstone + refreshPlayer, mirrors
+      undoLastBioReading) + "↩ undo last check-in" link-btn in MoodRow
+      vitals trace. Typecheck clean; merge/export tombstone path verified.
 - [x] **Vitals note field visible by default,** not hidden behind the +.
       Shipped: note input always rendered in MoodRow; + toggle removed.
       Verified via live screenshot (shots/tier-e-vitals-note.png).

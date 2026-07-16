@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../../db/db.ts";
 import type { DayKey, MoodLog } from "../../engine/index.ts";
-import { logMood } from "../../db/repo.ts";
+import { logMood, undoLastMood } from "../../db/repo.ts";
 
 const MOODS: { rating: MoodLog["rating"]; glyph: string; label: string }[] = [
   { rating: 1, glyph: "▁", label: "Critical" },
@@ -66,6 +66,13 @@ export function MoodRow({ today }: { today: DayKey }) {
               {r.note ? ` · ${r.note}` : ""}
             </span>
           ))}
+          <button
+            className="link-btn danger"
+            onClick={() => undoLastMood()}
+            aria-label={`Undo last vitals check-in (${MOODS.find((m) => m.rating === todayMood?.rating)?.label ?? ""})`}
+          >
+            ↩ undo last check-in{todayMood ? ` (${MOODS.find((m) => m.rating === todayMood.rating)?.label})` : ""}
+          </button>
           <span className="off-day-tag">// vitals shift all day — log as many readings as you need</span>
         </div>
       )}

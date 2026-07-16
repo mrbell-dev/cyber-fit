@@ -63,7 +63,15 @@ export function App() {
     const go = new URLSearchParams(location.search).get("go");
     if (go) {
       setTab(
-        go === "workout" ? "training" : go === "bio" ? "bio" : go === "goal" ? "goals" : "directives",
+        go === "workout"
+          ? "training"
+          : go === "bio"
+            ? "bio"
+            : go === "goal"
+              ? "goals"
+              : go === "gig"
+                ? "home" // gigs block lives on the home board by default
+                : "directives",
       );
       history.replaceState(null, "", location.pathname);
     }

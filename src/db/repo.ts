@@ -414,6 +414,16 @@ export async function undoLastWeight(): Promise<void> {
   await refreshPlayer();
 }
 
+/** Undo the most recent mood reading — same mistype safety net. */
+export async function undoLastMood(): Promise<void> {
+  const all = await db.moodLogs.toArray();
+  const last = all.sort((a, b) => b.ts - a.ts)[0];
+  if (!last) return;
+  await db.moodLogs.delete(last.id);
+  await tombstone("moodLogs", last.id);
+  await refreshPlayer();
+}
+
 /** No XP, no refreshPlayer toast path — screeners are never gamified. */
 export async function logScreening(
   tool: "phq9" | "gad7",
