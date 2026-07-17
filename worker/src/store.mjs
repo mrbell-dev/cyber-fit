@@ -26,7 +26,7 @@ export async function putSub(kv, record) {
     slots: record.slots,
     motivationSlots: record.motivationSlots ?? [],
     oneShots: record.oneShots ?? [],
-  }));
+  }), { expirationTtl: 30 * 86400 });
 }
 
 export async function deleteSub(kv, endpoint) {

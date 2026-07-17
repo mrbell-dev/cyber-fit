@@ -18,9 +18,16 @@ function cors(env, request) {
   return {
     "Access-Control-Allow-Origin": allow,
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Headers": "Content-Type, x-cf-access",
     Vary: "Origin",
   };
+}
+
+function constantTimeEqual(a, b) {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
 }
 
 const json = (data, status, headers) =>
@@ -38,6 +45,15 @@ export default {
 
     if (url.pathname === "/health") {
       return json({ ok: true }, 200, headers);
+    }
+
+    // Closed-beta wall: every billable route needs the shared access code.
+    // Self-hosted relays that never set ACCESS_CODE stay open.
+    if (env.ACCESS_CODE) {
+      const code = request.headers.get("x-cf-access") ?? "";
+      if (!constantTimeEqual(code, env.ACCESS_CODE)) {
+        return json({ error: "access code required" }, 401, headers);
+      }
     }
 
     // Encrypted vault sync: we store ciphertext we cannot read, under a

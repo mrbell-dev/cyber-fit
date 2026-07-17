@@ -6,7 +6,7 @@ function mockKV() {
   const map = new Map();
   return {
     map,
-    async put(k, v, opts) { map.set(k, { v, metadata: opts?.metadata ?? null }); },
+    async put(k, v, opts) { map.set(k, { v, metadata: opts?.metadata ?? null, opts: opts ?? null }); },
     async get(k) { return map.get(k)?.v ?? null; },
     async getWithMetadata(k) {
       const hit = map.get(k);
@@ -70,5 +70,39 @@ assert.deepEqual(r, { ok: true, v: 3 });
 vkv.map.set(`vault:${"cd".repeat(16)}`, { v: "oldblob", metadata: null });
 assert.deepEqual(await getVault(vkv, "cd".repeat(16)), { blob: "oldblob", v: 0 });
 assert.deepEqual(await putVault(vkv, "cd".repeat(16), "new", 0), { ok: true, v: 1 });
+
+// --- access code + TTL (fetch handler, mock env) ---
+import worker from "./src/index.mjs";
+
+const akv = mockKV();
+const env = { SUBS: akv, ACCESS_CODE: "sesame", ALLOWED_ORIGIN: "*", VAPID_PRIVATE_JWK: "{}" };
+const req = (path, { method = "GET", body, code } = {}) =>
+  new Request(`https://relay.test${path}`, {
+    method,
+    ...(body ? { body: JSON.stringify(body) } : {}),
+    headers: {
+      "Content-Type": "application/json",
+      ...(code !== undefined ? { "x-cf-access": code } : {}),
+    },
+  });
+const subBody = { subscription: sub(9), slots: [540] };
+
+// /health and OPTIONS stay open
+assert.equal((await worker.fetch(req("/health"), env)).status, 200);
+assert.equal((await worker.fetch(req("/subscribe", { method: "OPTIONS" }), env)).status, 204);
+// everything else: 401 without or with a wrong code — including GET /vault and /unsubscribe
+assert.equal((await worker.fetch(req("/subscribe", { method: "POST", body: subBody }), env)).status, 401);
+assert.equal((await worker.fetch(req("/subscribe", { method: "POST", body: subBody, code: "wrong" }), env)).status, 401);
+assert.equal((await worker.fetch(req(`/vault?id=${"ab".repeat(16)}`, { code: "wrong" }), env)).status, 401);
+assert.equal((await worker.fetch(req("/unsubscribe", { method: "POST", body: { endpoint: sub(9).endpoint } }), env)).status, 401);
+// right code works, and the subscription lands with a 30-day TTL
+assert.equal((await worker.fetch(req("/subscribe", { method: "POST", body: subBody, code: "sesame" }), env)).status, 200);
+assert.equal([...akv.map.values()][0].opts.expirationTtl, 30 * 86400);
+// no ACCESS_CODE configured (self-host) → open
+const openEnv = { SUBS: mockKV(), ALLOWED_ORIGIN: "*" };
+assert.equal((await worker.fetch(req("/subscribe", { method: "POST", body: subBody }), openEnv)).status, 200);
+// CORS allows the header
+const preflight = await worker.fetch(req("/subscribe", { method: "OPTIONS" }), env);
+assert.ok(preflight.headers.get("Access-Control-Allow-Headers").includes("x-cf-access"));
 
 console.log("worker logic tests OK");
