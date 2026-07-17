@@ -5,13 +5,21 @@
 declare const self: ServiceWorkerGlobalScope;
 
 import { clientsClaim } from "workbox-core";
-import { cleanupOutdatedCaches, precacheAndRoute } from "workbox-precaching";
+import {
+  cleanupOutdatedCaches,
+  createHandlerBoundToURL,
+  precacheAndRoute,
+} from "workbox-precaching";
+import { NavigationRoute, registerRoute } from "workbox-routing";
 import { expandOneShots, type OneShotSpec } from "./engine/reminders";
 
 self.skipWaiting();
 clientsClaim();
 cleanupOutdatedCaches();
 precacheAndRoute(self.__WB_MANIFEST);
+// SPA deep links (/training, /bio, …): serve the precached shell for any
+// navigation, so hard reloads on a tab URL work even fully offline.
+registerRoute(new NavigationRoute(createHandlerBoundToURL("index.html")));
 
 // Kind-specific copy rendered ON-DEVICE (the relay only knows
 // generic/motivation/test). iOS shows "from cyber-fit" itself, so titles
