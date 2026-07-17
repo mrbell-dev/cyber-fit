@@ -16,6 +16,7 @@ import { DirectiveCodex } from "../components/DirectiveCodex.tsx";
 import { FieldManual } from "../components/FieldManual.tsx";
 import { NavLayoutEditor } from "../components/NavLayoutEditor.tsx";
 import { DevPanel } from "../components/DevPanel.tsx";
+import { AccessCodeField } from "../components/AccessCodeField.tsx";
 import { useSettings } from "../hooks.ts";
 
 const REPO_URL = "https://github.com/mrbell-dev/cyber-fit";
@@ -302,6 +303,8 @@ function VaultSync() {
         upload. the relay stores unreadable ciphertext under a random id. lose the
         passphrase, lose the vault — nobody can reset it, including us
       </p>
+      <p className="placeholder">// closed beta: the shared relay needs an access code</p>
+      <AccessCodeField />
       <div className="form-row">
         <input
           className="input"

@@ -6,6 +6,7 @@ import { saveSettings, setBioMetricPings, updateHabit } from "../../db/repo.ts";
 import { useSettings } from "../hooks.ts";
 import { disablePush, enablePush, pushActive, saveReminders, syncPush, testPush } from "../notify.ts";
 import { InfoSheet } from "./InfoSheet.tsx";
+import { AccessCodeField } from "./AccessCodeField.tsx";
 
 const WEEKDAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 
@@ -147,6 +148,9 @@ export function ReminderUplink() {
         // pushes are opt-in. the relay stores only an anonymous push address + time
         slots — your schedule, logs, and identity never leave this device
       </p>
+
+      <p className="placeholder">// closed beta: the shared relay needs an access code</p>
+      <AccessCodeField />
 
       <div className="form-row">
         <button className={active ? "btn ghost" : "btn"} onClick={toggle}>
