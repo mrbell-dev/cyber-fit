@@ -261,9 +261,16 @@ function VaultSync() {
     if (!relay.url || !/^[0-9a-f]{32}$/.test(id)) return setMsg("need a valid 32-char vault id");
     const res = await fetch(`${relay.url.replace(/\/$/, "")}/vault?id=${id}`).catch(() => null);
     if (!res?.ok) return setMsg("vault not found on relay");
+    let json: string;
     try {
       const { blob } = await res.json();
-      const json = await decryptVault(blob, pass);
+      json = await decryptVault(blob, pass);
+    } catch {
+      // Only the crypto layer means a bad passphrase — everything after this
+      // point is plaintext, so its failures must NOT be blamed on the user.
+      return setMsg("decryption failed — wrong passphrase (no recovery exists, by design)");
+    }
+    try {
       // Empty device → full restore. Anything local → compare-and-merge, so a
       // pull can never eat data logged here since the vault was written.
       const hasLocal = (await db.habits.count()) + (await db.gigs.count()) + (await db.waterLogs.count()) > 0;
@@ -275,8 +282,9 @@ function VaultSync() {
         setMsg("pulled + decrypted — everything restored");
       }
       await db.kv.put({ key: "vaultSync", value: { id, lastPush: Date.now() } });
-    } catch {
-      setMsg("decryption failed — wrong passphrase (no recovery exists, by design)");
+    } catch (e) {
+      // e.g. "Backup is from a newer app version — update the app first."
+      setMsg(e instanceof Error ? e.message.toLowerCase() : "vault contents couldn't be applied");
     }
   };
 

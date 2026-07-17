@@ -12,7 +12,7 @@ import { dayKeyFor } from "../src/engine/time.ts";
 
 // Must match EXPORT_VERSION in src/db/export.ts — drift is caught by
 // src/db/seed-demo.test.ts, which imports both and asserts equality.
-export const SEED_SCHEMA_VERSION = 10;
+export const SEED_SCHEMA_VERSION = 11;
 
 const DAY_START_HOUR = 3; // matches the app's settings default
 const DAYS = 21;
@@ -209,7 +209,7 @@ export function buildDemoExport(now = Date.now()) {
     tables: {
       habits, habitLogs, waterLogs, moodLogs, workoutLogs,
       readingItems, readingLogs, highlightLogs, bodyLogs, journalLogs,
-      gigs, bioMetrics: [restingHr], bioReadings, screenings, goals, goalLogs,
+      gigs, gigTemplates: [], bioMetrics: [restingHr], bioReadings, screenings, goals, goalLogs,
       tombstones: [], kv,
     },
   };

@@ -23,6 +23,7 @@ const MERGE_TABLES = [
   "bodyLogs",
   "journalLogs",
   "gigs",
+  "gigTemplates",
   "bioMetrics",
   "bioReadings",
   "screenings",

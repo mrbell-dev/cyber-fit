@@ -2039,3 +2039,19 @@ html.theme-ice {
   font-family: var(--font-mono);
   white-space: pre-wrap;
 }
+
+/* ---------- recurring gigs ---------- */
+.gig-recur-title {
+  margin: 10px 0 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.gig-text.dim { color: var(--text-dim); }
+.gig-cadence {
+  margin-left: 6px;
+  font-size: 12px;
+  color: var(--neon-green);
+}

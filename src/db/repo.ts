@@ -483,3 +483,41 @@ export async function getLayout(): Promise<LayoutConfig> {
   const row = await db.kv.get("layout");
   return ((row?.value as LayoutConfig | undefined) ?? defaultLayout());
 }
+
+// ---------- recurring gig templates ----------
+
+import { templatesDue } from "../engine/index.ts";
+
+export async function addGigTemplate(text: string, days: number[]): Promise<void> {
+  const trimmed = text.trim();
+  if (!trimmed || days.length === 0) return;
+  await db.gigTemplates.add({
+    id: crypto.randomUUID(),
+    text: trimmed,
+    days: [...days].sort((a, b) => a - b),
+    ts: Date.now(),
+  });
+}
+
+/** Stop future spawns; the template row stays (no-delete doctrine). */
+export async function retireGigTemplate(id: string): Promise<void> {
+  await db.gigTemplates.update(id, { retiredTs: Date.now() });
+}
+
+/** Materialize today's recurring gigs. Idempotent — safe on every board
+ *  mount; the engine's templatesDue skips anything already represented. */
+export async function spawnGigsFromTemplates(today: DayKey): Promise<void> {
+  const [templates, gigs] = await Promise.all([
+    db.gigTemplates.toArray(),
+    db.gigs.toArray(),
+  ]);
+  for (const t of templatesDue(templates, gigs, today)) {
+    await db.gigs.add({
+      id: crypto.randomUUID(),
+      text: t.text,
+      createdDay: today,
+      ts: Date.now(),
+      templateId: t.id,
+    });
+  }
+}

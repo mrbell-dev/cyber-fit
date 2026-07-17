@@ -169,6 +169,20 @@ export interface Gig {
   /** retired via the daily migration (dropped from the board without being
    *  completed) — kept for history, never deleted. */
   retiredDay?: DayKey;
+  /** set when this gig was spawned from a recurring template — the spawn
+   *  guard uses it to avoid putting the same job on the board twice. */
+  templateId?: string;
+}
+
+/** Recurring gig template — spawns a fresh gig row on matching local weekdays.
+ *  Retired templates stop spawning but keep their row (no-delete doctrine). */
+export interface GigTemplate {
+  id: string;
+  text: string;
+  /** local weekdays it spawns on (0-6, Sunday = 0) */
+  days: number[];
+  ts: number;
+  retiredTs?: number;
 }
 
 /** User-defined bio metric beyond weight (BP, resting HR, glucose…). */
