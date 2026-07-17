@@ -118,6 +118,7 @@ async function currentPingKind(): Promise<string> {
  *  firing even if the app stays closed past the pre-uploaded horizon. */
 type ResyncPayload = {
   url: string;
+  code?: string;
   slots: number[];
   motivationSlots: number[];
   specs: OneShotSpec[];
@@ -136,9 +137,12 @@ self.addEventListener("periodicsync", ((event: ExtendableEvent & { tag: string }
       const oneShotKinds: Record<number, string> = {};
       for (const s of shots) oneShotKinds[s.at] ??= s.kind;
       await writeKV("oneShotKinds", oneShotKinds);
-      await fetch(payload.url.replace(/\/$/, "") + "/register", {
+      await fetch(payload.url.replace(/\/$/, "") + "/subscribe", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(payload.code ? { "x-cf-access": payload.code } : {}),
+        },
         body: JSON.stringify({
           subscription: sub.toJSON(),
           slots: payload.slots,

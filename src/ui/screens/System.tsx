@@ -200,6 +200,8 @@ function VaultSync() {
   );
   const auto = useLiveQuery(vaultAutoRecord, []);
 
+  const hdr = (relay: { code: string }): Record<string, string> => (relay.code ? { "x-cf-access": relay.code } : {});
+
   /** Flip one auto-sync direction. First enable derives + stores the key —
    *  from the CURRENT blob's salt when one exists, so the stored key can read
    *  blobs other clients wrote by re-using that salt (the trainer does). */
@@ -219,7 +221,7 @@ function VaultSync() {
     const relay = await relayConfig();
     if (!relay.url) return setMsg("no relay configured");
     const id = sync?.id ?? randomVaultId();
-    const res = await fetch(`${relay.url.replace(/\/$/, "")}/vault?id=${id}`).catch(() => null);
+    const res = await fetch(`${relay.url.replace(/\/$/, "")}/vault?id=${id}`, { headers: hdr(relay) }).catch(() => null);
     let salt: Uint8Array | undefined;
     if (res?.ok) {
       const { blob } = await res.json();
@@ -247,9 +249,10 @@ function VaultSync() {
     const blob = await encryptVault(await exportJson(), pass);
     const res = await fetch(`${relay.url.replace(/\/$/, "")}/vault`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...hdr(relay) },
       body: JSON.stringify({ id, blob }),
     }).catch(() => null);
+    if (res?.status === 401) return setMsg("ACCESS DENIED — bad access code (enter the beta code above)");
     if (!res?.ok) return setMsg("relay unreachable — try again later");
     await db.kv.put({ key: "vaultSync", value: { id, lastPush: Date.now() } });
     setMsg(`pushed. vault id: ${id} — enter it + your passphrase on the other device`);
@@ -259,7 +262,8 @@ function VaultSync() {
     const relay = await relayConfig();
     const id = (pullId || sync?.id || "").trim();
     if (!relay.url || !/^[0-9a-f]{32}$/.test(id)) return setMsg("need a valid 32-char vault id");
-    const res = await fetch(`${relay.url.replace(/\/$/, "")}/vault?id=${id}`).catch(() => null);
+    const res = await fetch(`${relay.url.replace(/\/$/, "")}/vault?id=${id}`, { headers: hdr(relay) }).catch(() => null);
+    if (res?.status === 401) return setMsg("ACCESS DENIED — bad access code (enter the beta code above)");
     if (!res?.ok) return setMsg("vault not found on relay");
     let json: string;
     try {

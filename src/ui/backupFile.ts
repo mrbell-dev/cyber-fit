@@ -52,7 +52,9 @@ export async function autoVaultSync(): Promise<void> {
     for (let attempt = 0; attempt < 3; attempt++) {
       let baseVersion: number | undefined;
       if (auto.pull) {
-        const res = await fetch(`${base}/vault?id=${auto.id}`).catch(() => null);
+        const res = await fetch(`${base}/vault?id=${auto.id}`, {
+          headers: relay.code ? { "x-cf-access": relay.code } : {},
+        }).catch(() => null);
         if (res?.ok) {
           const { blob, v } = await res.json();
           baseVersion = typeof v === "number" ? v : undefined;
@@ -73,7 +75,7 @@ export async function autoVaultSync(): Promise<void> {
       const blob = await encryptWithKey(await exportJson(), auto.key, salt);
       const pushRes = await fetch(`${base}/vault`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...(relay.code ? { "x-cf-access": relay.code } : {}) },
         body: JSON.stringify({ id: auto.id, blob, ...(baseVersion !== undefined ? { baseVersion } : {}) }),
       }).catch(() => null);
       if (pushRes?.status !== 409) return; // landed (or offline — next sync retries)

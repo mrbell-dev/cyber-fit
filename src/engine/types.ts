@@ -296,6 +296,8 @@ export interface Settings {
   /** self-hosted push relay overrides (optional; empty = use build defaults) */
   relayUrl?: string;
   relayVapidKey?: string;
+  /** shared-relay access code (closed beta) — sent as x-cf-access on every relay call */
+  relayCode?: string;
   /** enabled fx augment ids (opt-in; motion fx also respect prefers-reduced-motion) */
   activeFx?: string[];
   weightUnit?: "lbs" | "kg";

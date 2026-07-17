@@ -29,14 +29,16 @@ export async function saveReminders(patch: Partial<Reminders>): Promise<Reminder
 export interface RelayConfig {
   url: string;
   vapidKey: string;
+  code: string;
 }
 
 /** Self-host settings win over the baked-in shared relay. */
 export async function relayConfig(): Promise<RelayConfig> {
-  const s = (await getSettings()) as { relayUrl?: string; relayVapidKey?: string };
+  const s = (await getSettings()) as { relayUrl?: string; relayVapidKey?: string; relayCode?: string };
   return {
     url: s.relayUrl || import.meta.env.VITE_RELAY_URL || "",
     vapidKey: s.relayVapidKey || import.meta.env.VITE_VAPID_PUBLIC_KEY || "",
+    code: s.relayCode || "",
   };
 }
 
@@ -102,16 +104,16 @@ async function currentSlots(): Promise<{ slots: number[]; motivationSlots: numbe
   return { ...slotBundleFor(reminders, tz, habits, metrics, goals), oneShots: shots.map((s) => s.at) };
 }
 
-async function postJson(url: string, path: string, body: unknown): Promise<boolean> {
+async function postJson(url: string, path: string, body: unknown, code = ""): Promise<{ ok: boolean; status: number }> {
   try {
     const res = await fetch(url.replace(/\/$/, "") + path, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...(code ? { "x-cf-access": code } : {}) },
       body: JSON.stringify(body),
     });
-    return res.ok;
+    return { ok: res.ok, status: res.status };
   } catch {
-    return false;
+    return { ok: false, status: 0 };
   }
 }
 
@@ -121,14 +123,15 @@ async function postJson(url: string, path: string, body: unknown): Promise<boole
  * horizon — re-posting stale absolute slots would let monthly pings run dry).
  */
 async function storeResyncPayload(
-  url: string,
+  relay: RelayConfig,
   bundle: { slots: number[]; motivationSlots: number[] },
 ): Promise<void> {
   const reminders = await getReminders();
   await db.kv.put({
     key: "pushResync",
     value: {
-      url,
+      url: relay.url,
+      code: relay.code,
       slots: bundle.slots,
       motivationSlots: bundle.motivationSlots,
       specs: await oneShotSpecs(reminders),
@@ -167,13 +170,12 @@ export async function enablePush(): Promise<{ ok: boolean; reason?: string }> {
     }));
 
   const bundle = await currentSlots();
-  const ok = await postJson(relay.url, "/subscribe", {
-    subscription: sub.toJSON(),
-    ...bundle,
-  });
-  await storeResyncPayload(relay.url, bundle);
+  const r = await postJson(relay.url, "/subscribe", { subscription: sub.toJSON(), ...bundle }, relay.code);
+  await storeResyncPayload(relay, bundle);
   await registerResync(reg);
-  return ok ? { ok: true } : { ok: false, reason: "Relay unreachable — reminders will retry on next app open." };
+  if (r.ok) return { ok: true };
+  if (r.status === 401) return { ok: false, reason: "ACCESS DENIED — bad access code. Enter the beta access code above and try again." };
+  return { ok: false, reason: "Relay unreachable — reminders will retry on next app open." };
 }
 
 /** Re-upload slots on app open (handles DST drift + schedule edits). */
@@ -186,8 +188,8 @@ export async function syncPush(): Promise<void> {
   const sub = await reg.pushManager.getSubscription();
   if (!sub) return;
   const bundle = await currentSlots();
-  await postJson(relay.url, "/subscribe", { subscription: sub.toJSON(), ...bundle });
-  await storeResyncPayload(relay.url, bundle);
+  await postJson(relay.url, "/subscribe", { subscription: sub.toJSON(), ...bundle }, relay.code);
+  await storeResyncPayload(relay, bundle);
   await registerResync(reg);
 }
 
@@ -197,7 +199,7 @@ export async function disablePush(): Promise<void> {
   const reg = await navigator.serviceWorker.ready;
   const sub = await reg.pushManager.getSubscription();
   if (!sub) return;
-  if (relay.url) await postJson(relay.url, "/unsubscribe", { endpoint: sub.endpoint });
+  if (relay.url) await postJson(relay.url, "/unsubscribe", { endpoint: sub.endpoint }, relay.code);
   await sub.unsubscribe();
 }
 
@@ -209,8 +211,9 @@ export async function testPush(): Promise<{ ok: boolean; reason?: string }> {
   const reg = await navigator.serviceWorker.ready;
   const sub = await reg.pushManager.getSubscription();
   if (!sub) return { ok: false, reason: "not subscribed — enable push first" };
-  const ok = await postJson(relay.url, "/test", { subscription: sub.toJSON() });
-  return ok ? { ok: true } : { ok: false, reason: "relay declined the test ping" };
+  const r = await postJson(relay.url, "/test", { subscription: sub.toJSON() }, relay.code);
+  if (r.ok) return { ok: true };
+  return { ok: false, reason: r.status === 401 ? "ACCESS DENIED — bad access code" : "relay declined the test ping" };
 }
 
 export async function pushActive(): Promise<boolean> {
