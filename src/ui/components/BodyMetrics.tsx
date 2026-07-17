@@ -83,6 +83,50 @@ export function WeightHistory({ logs }: { logs: BodyLog[] }) {
   );
 }
 
+function workoutLevel(n: number): 0 | 1 | 2 | 3 | 4 {
+  if (n <= 0) return 0;
+  return Math.min(n, 4) as 1 | 2 | 3 | 4;
+}
+
+/** GitHub-style workout heatmap — sessions per day, last 28 days. Hidden until
+ *  there's any workout history. */
+export function WorkoutGrid({ today }: { today: DayKey }) {
+  const workouts = useLiveQuery(() => db.workoutLogs.toArray(), []);
+  if (!workouts || workouts.length === 0) return null;
+
+  const countByDay = new Map<string, number>();
+  for (const w of workouts) countByDay.set(w.dayKey, (countByDay.get(w.dayKey) ?? 0) + 1);
+  const days = Array.from({ length: 28 }, (_, i) => addDays(today, i - 27));
+
+  return (
+    <div className="card">
+      <h2 className="card-title">Training Uptime — last 28 days</h2>
+      <div className="day-grid" role="img" aria-label="Workout sessions over the last 28 days">
+        {days.map((day) => {
+          const n = countByDay.get(day) ?? 0;
+          const lvl = workoutLevel(n);
+          return (
+            <span
+              key={day}
+              className={`day-dot${lvl ? ` l${lvl}` : ""}`}
+              title={`${day}: ${n} session${n === 1 ? "" : "s"}`}
+            />
+          );
+        })}
+      </div>
+      <div className="grid-legend" aria-hidden="true">
+        less
+        <span className="day-dot" />
+        <span className="day-dot l1" />
+        <span className="day-dot l2" />
+        <span className="day-dot l3" />
+        <span className="day-dot l4" />
+        more
+      </div>
+    </div>
+  );
+}
+
 /** Single-series weekly training volume — sessions per week, last 8 weeks. */
 export function VolumeChart({ today }: { today: DayKey }) {
   const workouts = useLiveQuery(() => db.workoutLogs.toArray(), []);

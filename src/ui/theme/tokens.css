@@ -648,6 +648,37 @@ button {
   border-bottom: none;
 }
 
+/* Workout history rows: name grows, date + quick-add stay in fixed columns. */
+.row-item .workout-row-btn {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row-item .off-day-tag {
+  flex-shrink: 0;
+  width: 10ch;
+  text-align: right;
+}
+
+/* Compact "+" (prefill) — override the full-size .btn.ghost look. */
+.btn.ghost.row-add {
+  flex-shrink: 0;
+  min-height: 32px;
+  height: 32px;
+  width: 32px;
+  min-width: 32px;
+  padding: 0;
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  line-height: 1;
+  color: var(--text-dim);
+}
+
 .row-actions {
   display: flex;
   gap: 12px;
@@ -2013,9 +2044,144 @@ html.theme-ice {
   background: rgba(0, 0, 0, 0.2);
 }
 
-.repeat-last {
-  margin-top: 10px;
+.workout-block {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 10px 4px;
+  margin-bottom: 10px;
+}
+
+/* Block header: title then ✎ on the left, dead space, type dropdown pinned
+   right at 25%, remove after. */
+.block-title {
+  flex: 0 1 auto;
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.block-title-input {
+  flex: 1;
+}
+.block-rename {
+  flex: 0 0 auto;
+  padding: 4px 6px;
+}
+/* Dead space before the dropdown, which sits right-justified at a quarter width. */
+.block-type {
+  margin-left: auto;
+  flex: 0 0 25%;
+  min-width: 0;
+}
+.block-remove {
+  flex: 0 0 auto;
+}
+
+/* Movement inside a block — a subtle left rail so grouping reads at a glance. */
+.move-block {
+  border-left: 2px solid var(--border);
+  padding-left: 8px;
+  margin-bottom: 8px;
+}
+.move-detail {
+  margin: 4px 0 6px 8px;
+}
+
+select.input {
+  cursor: pointer;
+  appearance: auto;
+}
+
+.log-workout {
   width: 100%;
+  margin-top: 4px;
+}
+
+/* Compact km/mi and lbs/kg pickers — fixed narrow, don't stretch the row. */
+.unit-mini {
+  flex: 0 0 76px;
+}
+.unit-select {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+/* Backdate picker — label sits above the native date input. */
+.date-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+/* Top bar: name (fills) + date (fixed 25%) side by side, labels above. */
+.name-date-row {
+  align-items: flex-end;
+}
+.name-field {
+  flex: 1 1 auto;
+}
+.date-col {
+  flex: 0 0 25%;
+  min-width: 96px;
+}
+/* Validation copy — yellow is text-safe on navy (magenta is accent-only). */
+.field-error {
+  margin: -4px 0 10px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--warn);
+}
+.date-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+/* Workout detail sheet: labeled meta + a small per-block table. */
+.detail-label {
+  color: var(--text);
+  font-weight: 600;
+}
+/* Detail-sheet meta lines: no left rail (unlike Feed's session notes).
+   Compound selector so it beats `.session-note`'s later border-left rule. */
+.session-note.detail-line {
+  border-left: none;
+  padding-left: 0;
+  margin-left: 0;
+}
+.block-detail {
+  margin-bottom: 8px;
+}
+.detail-actions {
+  margin-top: 12px;
+}
+.detail-table {
+  width: auto;
+  max-width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--border);
+  margin: 2px 0 6px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.detail-table td {
+  padding: 3px 10px;
+  border: 1px solid var(--border);
+  vertical-align: top;
+}
+.detail-table td:first-child {
+  color: var(--text-dim);
+  white-space: nowrap;
 }
 
 /* Crash kit gets a fuller scrim than a normal overlay — at the worst moment,

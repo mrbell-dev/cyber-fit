@@ -118,35 +118,79 @@ export interface WaterLog {
   ml: number;
 }
 
+export type WorkoutStyleId = "general" | "sets" | "cardio" | "amrap" | "emom" | "fortime" | "tabata";
+
+/** One movement/exercise inside a block, e.g. "Back squats" or "10 pull-ups". */
+export interface WorkoutMovement {
+  name?: string;
+  /** a single rep target — for metcon movements ("10 pull-ups" → reps 10). */
+  reps?: number;
+  /** reps×weight sets — ONLY for the "sets" block type. */
+  sets?: { reps?: number; weight?: number }[];
+  weightUnit?: "lbs" | "kg";
+}
+
+/** One block within a session: a homogeneous, typed group of movements. A
+ *  session can mix blocks (an AMRAP block AND a sets block). The block owns the
+ *  type + any block-level result (score/time/distance); movements live in
+ *  `movements`. Legacy flat fields (name/sets/…) are read-only compat, folded by
+ *  `workoutBlocks()`/`workoutParts()` for logs written before the block model. */
+export interface WorkoutPart {
+  /** block title, e.g. "Part A", "Metcon". Absent = untitled/single block. */
+  block?: string;
+  style: WorkoutStyleId;
+  /** block-level result, e.g. "12 rounds + 5 reps" (AMRAP), "14:32" (for time) */
+  score?: string;
+  durationMin?: number;
+  distance?: number;
+  distanceUnit?: "mi" | "km";
+  /** free-text detail for the block (mainly the "general" style). */
+  note?: string;
+  /** the block's movements (the block model). */
+  movements?: WorkoutMovement[];
+  // ---- legacy movement-level fields (pre-block-model): read-only compat ----
+  name?: string;
+  weightUnit?: "lbs" | "kg";
+  sets?: { reps?: number; weight?: number }[];
+}
+
 export interface WorkoutLog {
   id: string;
   dayKey: DayKey;
   ts: number;
-  /** fast path: just a name ("Lift", "5k walk") */
+  /** the session name ("Tuesday workout", "Wednesday class") */
   name: string;
-  /** workout format — plain sets, cardio, or conditioning styles with a score */
-  style?: "sets" | "cardio" | "amrap" | "emom" | "fortime" | "tabata";
-  /** style-dependent result, e.g. "12 rounds + 5 reps" (AMRAP), "14:32" (for time) */
+  /** how hard it hit, 1–5 (the effort gauge). Informational only — earns no XP
+   *  by design (gamifying effort self-report corrupts it). */
+  intensity?: 1 | 2 | 3 | 4 | 5;
+  /** the session's blocks. Read via `workoutParts()`, which synthesizes a
+   *  single block from the legacy flat fields below for pre-parts logs. */
+  parts?: WorkoutPart[];
+  note?: string;
+  // ---- legacy flat fields: read-only compat for logs written before `parts`.
+  //      New logs never populate these — see workoutParts(). ----
+  style?: WorkoutStyleId;
   score?: string;
   durationMin?: number;
-  distance?: number; // in the user's display unit (mi/km per settings)
-  note?: string;
+  distance?: number;
   exercises?: { name: string; sets?: { reps?: number; weight?: number }[] }[];
 }
 
-/** Which inputs each style shows — "time and distance only where relevant". */
+/** Which inputs each style shows — "time and distance only where relevant".
+ *  "general" is the default: a plain session with just an optional duration. */
 export const WORKOUT_STYLES: {
-  id: NonNullable<WorkoutLog["style"]>;
+  id: WorkoutStyleId;
   label: string;
   scoreHint: string;
-  fields: { sets?: boolean; score?: boolean; duration?: boolean; distance?: boolean };
+  fields: { sets?: boolean; score?: boolean; duration?: boolean; distance?: boolean; note?: boolean };
 }[] = [
+  { id: "general", label: "General", scoreHint: "", fields: { duration: true } },
   { id: "sets", label: "Sets × reps", scoreHint: "", fields: { sets: true } },
-  { id: "cardio", label: "Cardio", scoreHint: "optional pace/notes", fields: { score: true, duration: true, distance: true } },
-  { id: "amrap", label: "AMRAP", scoreHint: "rounds + reps, e.g. 12+5", fields: { score: true, duration: true } },
-  { id: "emom", label: "EMOM", scoreHint: "e.g. 20 min, all rounds held", fields: { score: true, duration: true } },
-  { id: "fortime", label: "For time", scoreHint: "e.g. 14:32", fields: { score: true, distance: true } },
-  { id: "tabata", label: "Tabata", scoreHint: "e.g. 8 rounds, low score 9", fields: { score: true, duration: true } },
+  { id: "cardio", label: "Cardio", scoreHint: "", fields: { duration: true, distance: true } },
+  { id: "amrap", label: "AMRAP", scoreHint: "", fields: { duration: true } },
+  { id: "emom", label: "EMOM", scoreHint: "", fields: { duration: true } },
+  { id: "fortime", label: "For time", scoreHint: "", fields: { distance: true } },
+  { id: "tabata", label: "Tabata", scoreHint: "", fields: { duration: true } },
 ];
 
 /** Free-form journal entry (the Highlight card's sibling mode). */
@@ -317,6 +361,10 @@ export interface Settings {
    *  a running delta is eating-disorder-adjacent; the trend chart covers the
    *  same information for those who want it. */
   showWeightDelta?: boolean;
+  /** starred workout *names* (lowercased) — favoriting means "this named
+   *  workout", past and future, not one log row. Logs stay untouched
+   *  (no-delete doctrine); unstarring is just a settings patch. */
+  favoriteWorkouts?: string[];
 }
 
 export function difficultyFactor(s: Settings): number {

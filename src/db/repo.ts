@@ -180,28 +180,58 @@ export async function logWater(ml: number, dayKey?: DayKey): Promise<WaterLog> {
 
 export async function logWorkout(input: {
   name: string;
-  style?: WorkoutLog["style"];
-  score?: string;
-  durationMin?: number;
-  distance?: number;
+  intensity?: WorkoutLog["intensity"];
+  parts?: WorkoutLog["parts"];
   note?: string;
-  exercises?: WorkoutLog["exercises"];
+  dayKey?: DayKey;
 }): Promise<WorkoutLog> {
   const entry: WorkoutLog = {
     id: crypto.randomUUID(),
-    dayKey: await currentDayKey(),
+    dayKey: input.dayKey ?? (await currentDayKey()),
     ts: Date.now(),
     name: input.name.trim(),
-    ...(input.style && input.style !== "sets" ? { style: input.style } : {}),
-    ...(input.score?.trim() ? { score: input.score.trim() } : {}),
-    ...(input.durationMin ? { durationMin: input.durationMin } : {}),
-    ...(input.distance ? { distance: input.distance } : {}),
+    ...(input.intensity ? { intensity: input.intensity } : {}),
+    ...(input.parts?.length ? { parts: input.parts } : {}),
     ...(input.note?.trim() ? { note: input.note.trim() } : {}),
-    ...(input.exercises?.length ? { exercises: input.exercises } : {}),
   };
   await db.workoutLogs.add(entry);
   await refreshPlayer();
   return entry;
+}
+
+/** Edit an existing workout log in place — whole-record replace (keeps id/ts,
+ *  drops any fields no longer present, incl. legacy flat ones), then re-folds
+ *  so a changed dayKey/intensity moves XP to the right day. */
+export async function updateWorkout(
+  id: string,
+  input: {
+    name: string;
+    dayKey: DayKey;
+    intensity?: WorkoutLog["intensity"];
+    parts?: WorkoutLog["parts"];
+    note?: string;
+  },
+): Promise<void> {
+  const existing = await db.workoutLogs.get(id);
+  if (!existing) return;
+  const entry: WorkoutLog = {
+    id: existing.id,
+    ts: existing.ts,
+    dayKey: input.dayKey,
+    name: input.name.trim(),
+    ...(input.intensity ? { intensity: input.intensity } : {}),
+    ...(input.parts?.length ? { parts: input.parts } : {}),
+    ...(input.note?.trim() ? { note: input.note.trim() } : {}),
+  };
+  await db.workoutLogs.put(entry);
+  await refreshPlayer();
+}
+
+/** Delete a single workout log (e.g. an accidental add from the + button). */
+export async function deleteWorkout(id: string): Promise<void> {
+  await db.workoutLogs.delete(id);
+  await tombstone("workoutLogs", id);
+  await refreshPlayer();
 }
 
 export async function addReadingItem(input: {

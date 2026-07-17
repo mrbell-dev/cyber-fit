@@ -263,6 +263,71 @@ Bugs/ergonomics first, features after (same ranking principle as v3).
       Optional nicety, unranked: show blob size + "expires after 120 days
       idle" in the Data Vault card.
 
+### TIER F — Training page redesign (Michael, 2026-07-17)
+
+- [x] **Training redesign.** Shipped: session-named workouts with mixed
+      **blocks** (`WorkoutLog.parts[]`, each a self-describing style —
+      general/sets/cardio/amrap/emom/fortime/tabata, so one session can hold an
+      AMRAP *and* an EMOM); style is now a **dropdown** per block (chips gone);
+      **General** is the default (name + optional duration + optional note);
+      per-block sets have per-row **remove**; an **effort gauge** (`intensity`
+      1–5, "Did it hurt?", reuses the Vitals bars, earns no XP by design);
+      repeat-last button removed; favorites prefill name+blocks (not
+      intensity/note) and stay in Recent; page split into stacked cards —
+      **Training Uptime** (GitHub-style 28-day workout heatmap) · **Load
+      Favorites** · **Physical Training** · **Recent Workouts** — and the ⓘ
+      Training-Volume sheet retired (heatmap replaced it). Engine: pure
+      `workoutParts()` helper (`engine/workouts.ts`, colocated test) folds
+      legacy flat logs into one block, so old history still renders; no schema
+      bump (fields non-indexed), export/rebuild untouched. PARITY.md updated.
+- [x] **Backdate + edit workouts (2026-07-17).** Physical Training card gained a
+      **Date** picker (native `<input type=date>`, `max=today`) so a session can
+      be logged against a prior day — `logWorkout` takes an optional `dayKey`;
+      the top bar is now Name (fills) + Date (25%), both labeled. Recent-log
+      detail sheet restructured: labeled meta (Date / Workout Name / Block Name /
+      Block Type / Effort / Note) + a per-block table of what was done, with
+      **Favorited · Edit this workout · Delete this log** on one action row at the
+      bottom. **Edit** loads the log back into the form *with* its intensity/note/
+      day (unlike favorite-prefill, which resets them) and flips the button to
+      **Update workout** (`updateWorkout` = whole-record `put`, keeps id/ts,
+      re-folds so a changed day/intensity moves XP). Empty-name now shows an
+      inline error instead of a dead greyed button. PARITY.md updated.
+- [x] **Blocks → typed containers of movements (2026-07-17).** Final model
+      (Michael settled it): **type on the BLOCK**, not the movement. A block row
+      is **[block name] [block-type ▾]**; the type makes the block homogeneous —
+      Sets / AMRAP / EMOM / For-time / Tabata / Cardio / General. Inside, **“+ add
+      workout to this block”** adds movements — EVERY type has a movement list
+      (autocompleted). **Only Sets blocks** give each movement reps×weight rows +
+      a **# of sets** dropdown; **metcon blocks** (AMRAP/EMOM/For-time/Tabata)
+      list movements with a single **reps** each; **Cardio/General** list movement
+      names + keep block-level distance/duration. Per-block **score/note inputs
+      were dropped** (2026-07-17) — the workout-level note at the bottom covers
+      free text; old logs still display any stored score/note. Hierarchy **Block
+      → Block Type → movements**. Storage: `WorkoutPart` is now a BLOCK — gained `movements[]`
+      (`WorkoutMovement` = name/reps/sets/weightUnit) plus block-level score/
+      duration/distance/note; legacy movement-level fields kept read-only. New
+      pure reader **`workoutBlocks()`** (`engine/workouts.ts`, +4 tests) folds
+      ALL prior shapes into blocks — current block-model parts, the interim
+      block-tagged movement-parts, pre-block movement-parts (each → its own
+      block), and legacy flat logs — so nothing in history breaks. `workoutParts()`
+      kept for that back-compat. No Dexie bump (fields non-indexed), export/
+      rebuild untouched. Default first block **General** keeps the 1–2-tap path.
+      PARITY.md updated.
+- [ ] **Reconfigurable Training-page layout.** Bring the home-screen layout
+      editor (`ui/layout.ts` / `setLayout`, the drag-reorder card config) to the
+      Training screen so its cards — Training Uptime · Load Favorites · Physical
+      Training · Recent Workouts — can be reordered/hidden per user preference,
+      same as the Today feed. Reuse the existing `LayoutConfig` machinery; don't
+      invent a second layout system.
+- [ ] **Local CAS (Content as a Service) for on-the-fly fixes/updates.** Want a
+      local content-as-a-service layer so content/records can be fixed or
+      updated on the fly (bad log, wrong XP, edit a workout, tweak copy/presets)
+      without the export→edit→import round-trip. Needs a scope pass: what
+      content is served (data records? copy/lexicon? presets?), and how it stays
+      offline/local-first with zero PII off-device. Must respect the
+      event-log-is-truth rule: data edits go through `repo.ts` + rebuild, never a
+      raw snapshot poke.
+
 ### TIER LT — flavor, reach, and the long game (carried forward)
 
 - [ ] **Desktop support (design item — captured 2026-07-14, needs a design
