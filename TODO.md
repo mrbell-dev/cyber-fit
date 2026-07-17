@@ -3,6 +3,21 @@
 Raw feature capture. Items graduate into PLAN.md's TIER LIST when they're
 scoped; nothing here is committed work yet.
 
+## Settings sync between devices (captured 2026-07-17, Michael)
+
+Vault sync now works for data (device add/pull/decrypt fixed), but app
+**settings are still per-device** — they aren't included in the encrypted
+export/merge, so a second device comes up with defaults instead of your
+configuration.
+
+- Decide which settings are syncable vs intentionally local (e.g. reminder
+  schedules, quiet hours, display prefs likely sync; anything
+  device-specific — notification permissions, install state — stays local).
+- Fold settings into the existing vault export/compare-and-merge path
+  (`EXPORT_VERSION` bump + migration) rather than inventing a second channel.
+- Define merge semantics for settings conflicts (last-writer-wins per key vs
+  per-settings-blob timestamp).
+
 ## Goals (captured 2026-07-08, Michael)
 
 A general goals system, distinct from directives/habits:
