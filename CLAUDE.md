@@ -1,9 +1,9 @@
 # CYBER//FIT — project guide
 
-Cyberpunk-themed, ADHD-first self-improvement PWA. Live at **https://cyberfit.dev**
-(playtest-gated), push relay at **https://relay.cyberfit.dev**. Everything is a
-Cloudflare Worker: the app is static assets behind `gate/index.mjs`, the relay is
-`worker/`. GitHub Actions is CI-only; deploys are `npm run deploy` (app) and
+Cyberpunk-themed, ADHD-first self-improvement PWA. Live and public at
+**https://cyberfit.dev**, push relay at **https://relay.cyberfit.dev** (relay
+requires the closed-beta access code). Everything is a Cloudflare Worker: the
+app is an assets-only Worker, the relay is `worker/`. GitHub Actions is CI-only; deploys are `npm run deploy` (app) and
 `npm run deploy:relay`. Repo: github.com/mrbell-dev/cyber-fit (MIT).
 
 **The work queue is the TIER LIST in `PLAN.md`** (S → A → B → C → LT), with
@@ -64,7 +64,6 @@ src/engine/   pure core: time, habits (schedules incl. nPerX rolling windows),
 src/db/       db.ts (Dexie v5) · repo.ts (single write path) · export.ts
 src/ui/       React: screens (Today/Log/Stats/System), components, theme/
               (tokens.css = Electric City + alt palettes; themes are CSS packs)
-gate/         TEMPORARY playtest password gate (delete + 2 wrangler.toml lines at launch)
 worker/       push relay: KV, @pushforge/builder, cron */15, week-minute slots,
               /subscribe /unsubscribe /test, motivation line pool
 scripts/      icons.mjs + Playwright checks: offline, persist, vault round-trip
@@ -81,8 +80,8 @@ scripts/      icons.mjs + Playwright checks: offline, persist, vault round-trip
 - `npm run check:offline` / `check:persist` / `check:vault` before shipping.
 - Worker: `cd worker && node test.mjs` (pure logic, mock KV).
 - Deploy: `npm run deploy` / `npm run deploy:relay` (wrangler is authed on this
-  machine). Secrets live in Cloudflare: GATE_PASSWORD, GATE_KEY (app worker),
-  VAPID_PRIVATE_JWK (relay). VAPID public key is baked in `.env.production`.
+  machine). Secrets live in Cloudflare: ACCESS_CODE + VAPID_PRIVATE_JWK (relay).
+  VAPID public key is baked in `.env.production`.
 - Commit per feature with a descriptive message; push to main (deploys nothing —
   CI tests only).
 
@@ -181,16 +180,15 @@ knob before its first real user.
   yearly reminders therefore cannot push — in-app nudges cover those cadences.
 - iOS: no `navigator.vibrate` (haptics are Android-only), no PWA background
   sync, push only for the installed A2HS app on 16.4+.
-- Secrets NEVER enter this (public) repo: GATE_PASSWORD/GATE_KEY/
-  VAPID_PRIVATE_JWK live as Cloudflare secrets (`npx wrangler secret put`,
-  run in the right directory). Rotating the gate code is one command; the
-  VAPID public key in `.env.production` is public by design.
+- Secrets NEVER enter this (public) repo: ACCESS_CODE/VAPID_PRIVATE_JWK live
+  as Cloudflare secrets (`npx wrangler secret put`, run in `worker/`).
+  Rotating the access code is one command; the VAPID public key in
+  `.env.production` is public by design.
 
 ## Known sharp edges
 
 - iOS push requires the installed (A2HS) app, 16.4+, user-gesture permission;
   subscriptions can drop — `syncPush()` re-uploads on every open. Never load-bearing.
-- The gate means every request invokes the worker (fine for beta; remove at launch).
 - Shell tool on this box is zsh-flavored — write multi-step verification as bash
   script files, not inline one-liners.
 - `addHabit` takes an explicit input shape — when adding Habit fields, update it
