@@ -1,9 +1,11 @@
-# CI: test + build on every push. Hosting is Cloudflare Workers static assets
-# (`npm run deploy`), not GitHub Pages.
+# CI + deploy. Every push/PR runs test + build. Pushes to main also deploy the
+# app and relay to Cloudflare Workers.
 #
-# To let CI deploy too: create a Cloudflare API token (Workers Scripts: Edit),
-# add repo secrets CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID, and uncomment
-# the deploy step.
+# Requires two repo secrets:
+#   CLOUDFLARE_API_TOKEN   — "Edit Cloudflare Workers" token
+#   CLOUDFLARE_ACCOUNT_ID  — 8786eafe23fbb3a55223d044f4efc0e9
+# Relay runtime secrets (ACCESS_CODE, VAPID_PRIVATE_JWK) live in Cloudflare and
+# are untouched by deploy.
 name: CI
 
 on:
@@ -26,8 +28,16 @@ jobs:
       - run: npm run build
       - run: cd worker && npm ci --omit=dev && node test.mjs
 
-      # - name: Deploy to Cloudflare
-      #   run: npx wrangler deploy
-      #   env:
-      #     CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      #     CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Deploy app
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Deploy relay
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: cd worker && npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
